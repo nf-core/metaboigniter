@@ -8,6 +8,8 @@
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/metaboigniter.svg)](https://hub.docker.com/r/nfcore/metaboigniter)
 
+
+
 ## Introduction
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
@@ -28,3 +30,6 @@ The nf-core/metaboigniter pipeline comes with documentation about the pipeline, 
 
 ## Credits
 nf-core/metaboigniter was originally written by Payam Emami.
+
+## IMPORTANT
+This workflow is not part of nf-core yet. We plan to to make it available as soon as possible.
