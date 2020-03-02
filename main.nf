@@ -190,7 +190,7 @@ if((params.type_of_ionization in (["neg","both"])))
         Channel
               .fromPath(params.phenotype_design_neg)
               .ifEmpty { exit 1, "params.phenotype_design_neg was empty - no input files supplied" }
-              .set { phenotype_design_neg;  phenotype_design_neg_csifingerid; phenotype_design_neg_cfmid; phenotype_design_neg_metfrag; phenotype_design_neg_library; phenotype_design_neg_noid}
+              .into { phenotype_design_neg;  phenotype_design_neg_csifingerid; phenotype_design_neg_cfmid; phenotype_design_neg_metfrag; phenotype_design_neg_library; phenotype_design_neg_noid}
   } else{
     exit 1, "params.phenotype_design_neg was not found or not defined as string! You need to set phenotype_design_neg in conf/parameters.config to the path to a file containing your experimental design for negative ionization"
   }
@@ -220,7 +220,7 @@ if(params.perform_identification==true)
   {
     if(params.containsKey('id_mzml_files_neg') && params.id_mzml_files_neg instanceof String){
           Channel
-                .fromPath(params.id_mzml_files_neg)
+                .fromPath(params.id_mzml_files_neg+"/*.mzML")
                 .ifEmpty { exit 1, "params.id_mzml_files_neg was empty - no input files supplied" }
                 .set { id_mzml_files_neg}
     } else{
@@ -235,19 +235,21 @@ if(params.perform_identification==true)
 
 if(params.perform_identification==true)
 {
-if(!params.containsKey('perform_identification_metfrag') &&
+if(
+  !params.containsKey('perform_identification_metfrag') &&
 !params.containsKey('perform_identification_csifingerid') &&
 !params.containsKey('perform_identification_cfmid') &&
 !params.containsKey('perform_identification_internal_library'))
 {
 exit 1, "None of the params.perform_identification_metfrag, params.perform_identification_csifingerid, params.perform_identification_cfmid and params.perform_identification_internal_library has been specified. You need to select at least one search engine in conf/parameters.config"
 }
-if(!params.perform_identification_metfrag instanceof Boolean ||
-   !params.perform_identification_csifingerid instanceof Boolean ||
-   !params.perform_identification_cfmid instanceof Boolean || !params.perform_identification_cfmid instanceof Boolean)
+
+if(!(params.perform_identification_metfrag instanceof Boolean) ||
+   !(params.perform_identification_csifingerid instanceof Boolean) ||
+   !(params.perform_identification_cfmid instanceof Boolean) || !(params.perform_identification_internal_library instanceof Boolean))
 {
 
-  exit 1, "The params.perform_identification_metfrag, params.perform_identification_csifingerid, params.perform_identification_cfmid and params.perform_identification_internal_library should be true of false. You need to select at least one search engine in conf/parameters.config"
+  exit 1, "The params.perform_identification_metfrag, params.perform_identification_csifingerid, params.perform_identification_cfmid and params.perform_identification_internal_library should be true or false. You need to select at least one search engine in conf/parameters.config"
 
 }
 if(params.perform_identification_metfrag==false &&
@@ -365,15 +367,19 @@ if(params.perform_identification==true && params.perform_identification_internal
 
 }
 
+println (params.quantification_openms_xcms_pos in (["openms","xcms"]))
 if(!params.containsKey('quantification_openms_xcms_pos') ||
-params.quantification_openms_xcms_pos in (["openms","xcms"]) || !params.quantification_openms_xcms_pos instanceof String)
+!(params.quantification_openms_xcms_pos in (["openms","xcms"])) ||
+!(params.quantification_openms_xcms_pos instanceof String))
 {
   exit 1, "quantification_openms_xcms_pos is missing or not defined as String! This should be either 'xcms' or 'openms' in conf/parameter.config"
 
 }
 
+
 if(!params.containsKey('quantification_openms_xcms_neg') ||
-params.quantification_openms_xcms_neg in (["openms","xcms"]) || !params.quantification_openms_xcms_neg instanceof String)
+!params.quantification_openms_xcms_neg in (["openms","xcms"]) ||
+ !(params.quantification_openms_xcms_neg instanceof String))
 {
   exit 1, "quantification_openms_xcms_neg is missing or not defined as String! This should be either 'xcms' or 'openms' in conf/parameter.config"
 
@@ -381,14 +387,14 @@ params.quantification_openms_xcms_neg in (["openms","xcms"]) || !params.quantifi
 
 
 if(!params.containsKey('quantification_openms_xcms_library_pos') ||
-params.quantification_openms_xcms_library_pos in (["openms","xcms"]) || !params.quantification_openms_xcms_library_pos instanceof String)
+!(params.quantification_openms_xcms_library_pos in (["openms","xcms"])) || !(params.quantification_openms_xcms_library_pos instanceof String))
 {
   exit 1, "quantification_openms_xcms_library_pos is missing or not defined as String! This should be either 'xcms' or 'openms' in conf/parameter.config"
 
 }
 
 if(!params.containsKey('quantification_openms_xcms_library_neg') ||
-params.quantification_openms_xcms_library_neg in (["openms","xcms"]) || !params.quantification_openms_xcms_library_neg instanceof String)
+!(params.quantification_openms_xcms_library_neg in (["openms","xcms"])) || !(params.quantification_openms_xcms_library_neg instanceof String))
 {
   exit 1, "quantification_openms_xcms_library_neg is missing or not defined as String! This should be either 'xcms' or 'openms' in conf/parameter.config"
 
@@ -396,7 +402,7 @@ params.quantification_openms_xcms_library_neg in (["openms","xcms"]) || !params.
 
 if(params.quantification_openms_xcms_pos=="openms")
 {
-  if(params.containsKey('featurefinder_ini_pos_openms') && params.featurefinder_ini_pos_openms instanceof String){
+  if(params.containsKey('featurefinder_ini_pos_openms') && (params.featurefinder_ini_pos_openms instanceof String)){
         Channel
               .fromPath(params.featurefinder_ini_pos_openms)
               .ifEmpty { exit 1, "params.featurefinder_ini_pos_openms was empty - no input files supplied" }
@@ -409,7 +415,7 @@ if(params.quantification_openms_xcms_pos=="openms")
 
 if(params.quantification_openms_xcms_neg=="openms")
 {
-  if(params.containsKey('featurefinder_ini_neg_openms') && params.featurefinder_ini_neg_openms instanceof String){
+  if(params.containsKey('featurefinder_ini_neg_openms') && (params.featurefinder_ini_neg_openms instanceof String)){
         Channel
               .fromPath(params.featurefinder_ini_neg_openms)
               .ifEmpty { exit 1, "params.featurefinder_ini_pos_openms was empty - no input files supplied" }
@@ -538,7 +544,7 @@ summary['Type of ionization'] =  params.type_of_ionization
 if(params.type_of_ionization in (["pos","both"]))
 {
 summary['Path to mzML quantification files (positive)'] = params.quant_mzml_files_pos
-if(perform_identification == true)
+if(params.perform_identification == true)
 {
   summary['Path to mzML identification files (positive)'] = params.id_mzml_files_pos
 }
@@ -548,7 +554,7 @@ if(perform_identification == true)
 if(params.type_of_ionization in (["neg","both"]))
 {
 summary['Path to mzML quantification files (negative)'] = params.quant_mzml_files_neg
-if(perform_identification == true)
+if(params.perform_identification == true)
 {
   summary['Path to mzML identification files (negative)'] = params.id_mzml_files_neg
 }
@@ -613,12 +619,10 @@ process get_software_versions {
     file "software_versions.csv"
 
     script:
-    // TODO nf-core: Get all tools to print their version number here
+    // TODO nf-core: Get all tools to print their version number here fastqc --version > v_fastqc.txt
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
-    fastqc --version > v_fastqc.txt
-    multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -641,7 +645,7 @@ if(params.type_of_ionization in (["pos","both"]))
    */
   if(params.need_centroiding==true)
   {
-    process process_peak_picker_pos_openms {
+    process process_peak_picker_pos_openms{
         tag "$name"
         publishDir "${params.outdir}/process_peak_picker_pos_openms", mode: 'copy'
         stageInMode 'copy'
@@ -711,7 +715,7 @@ if(params.type_of_ionization in (["pos","both"]))
      /*
       * STEP 2 - feature detection by xcms
       */
-     process process_masstrace_detection_pos_xcms{
+     process process_masstrace_detection_pos_xcms_centroided{
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: 'copy'
        stageInMode 'copy'
@@ -737,7 +741,7 @@ if(params.type_of_ionization in (["pos","both"]))
     /*
      * STEP 1 - feature detection by xcms
      */
-    process process_masstrace_detection_pos_xcms{
+    process process_masstrace_detection_pos_xcms_noncentroided {
       tag "$name"
       publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: 'copy'
       stageInMode 'copy'
@@ -767,7 +771,7 @@ if(params.type_of_ionization in (["pos","both"]))
     // container '${computations.docker_collect_rdata_pos_xcms}'
 
     input:
-    file rdata_files from collectFiles.collect()
+    file rdata_files from collect_rdata_pos_xcms.collect()
 
   output:
   file "collection_pos.rdata" into group_peaks_pos_N1_xcms
@@ -1143,7 +1147,7 @@ process  process_ms2_identification_pos_csifingerid{
 process  process_identification_aggregate_pos_csifingerid{
   tag "$name"
   publishDir "${params.outdir}/process_identification_aggregate_pos_csifingerid", mode: 'copy'
-  // container '${computations.docker_identification_aggregate_pos_csifingerid'
+  // container '${computations.docker_identification_aggregate_pos_csifingerid}'
 
   input:
   file identification_result from aggregateID_csv_pos_csifingerid.collect()
@@ -1511,7 +1515,7 @@ if(params.library_charactrized_pos==false){
       * STEP 32 - convert openms to xcms
       */
 
-     process process_openms_to_xcms_conversion {
+     process process_openms_to_xcms_conversion_library_pos_centroided {
          tag "$name"
          publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms", mode: 'copy'
          stageInMode 'copy'
@@ -1537,7 +1541,7 @@ if(params.library_charactrized_pos==false){
       * STEP 33 - feature detection using xcms
       */
 
-     process process_masstrace_detection_library_pos_xcms{
+     process process_masstrace_detection_library_pos_xcms_centroided{
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms", mode: 'copy'
        stageInMode 'copy'
@@ -1567,7 +1571,7 @@ if(params.library_charactrized_pos==false){
           */
 
 
-    process process_masstrace_detection_library_pos_xcms{
+    process process_masstrace_detection_library_pos_xcms_noncentroided{
       tag "$name"
       publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms", mode: 'copy'
       stageInMode 'copy'
@@ -1821,7 +1825,7 @@ zip::zip(zipfile="mappedtometfrag_pos.zip",files=list.files(pattern="txt"))
    * STEP 43 - do the search using library
    */
 
-  process  process_search_engine_library_pos_msnbase{
+  process  process_search_engine_library_pos_msnbase_nolibcharac{
     tag "$name"
     publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: 'copy'
     // container '${computations.docker_search_engine_library_pos_msnbase}'
@@ -1844,7 +1848,7 @@ zip::zip(zipfile="mappedtometfrag_pos.zip",files=list.files(pattern="txt"))
    * STEP 44 - do the search using library
    */
 
-  process  process_search_engine_library_pos_msnbase{
+  process  process_search_engine_library_pos_msnbase_libcharac{
     tag "$name"
     publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: 'copy'
     // container '${computations.docker_search_engine_library_pos_msnbase}'
@@ -2028,7 +2032,7 @@ if(params.type_of_ionization in (["neg","both"]))
      /*
       * STEP 51 - feature detection by xcms
       */
-     process process_masstrace_detection_neg_xcms{
+     process process_masstrace_detection_neg_xcms_centroided{
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: 'copy'
        stageInMode 'copy'
@@ -2054,7 +2058,7 @@ if(params.type_of_ionization in (["neg","both"]))
     /*
      * STEP 51 - feature detection by xcms
      */
-    process process_masstrace_detection_neg_xcms{
+    process process_masstrace_detection_neg_xcms_noncentroided{
       tag "$name"
       publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: 'copy'
       stageInMode 'copy'
@@ -2084,7 +2088,7 @@ if(params.type_of_ionization in (["neg","both"]))
     // container '${computations.docker_collect_rdata_neg_xcms}'
 
     input:
-    file rdata_files from collectFiles.collect()
+    file rdata_files from collect_rdata_neg_xcms.collect()
 
   output:
   file "collection_neg.rdata" into group_peaks_neg_N1_xcms
@@ -2829,7 +2833,7 @@ if(params.library_charactrized_neg==false){
      /*
       * STEP 81 - convert openms to xcms
       */
-     process process_openms_to_xcms_conversion {
+     process process_openms_to_xcms_conversion_centroided {
          tag "$name"
          publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms", mode: 'copy'
          stageInMode 'copy'
@@ -2854,7 +2858,7 @@ if(params.library_charactrized_neg==false){
      /*
       * STEP 82 - feature detection using xcms
       */
-     process process_masstrace_detection_library_neg_xcms{
+     process process_masstrace_detection_library_neg_xcms_noncentroided{
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms", mode: 'copy'
        stageInMode 'copy'
@@ -3131,7 +3135,7 @@ zip::zip(zipfile="mappedtometfrag_neg.zip",files=list.files(pattern="txt"))
    */
 
 
-  process  process_search_engine_library_neg_msnbase{
+  process  process_search_engine_library_neg_msnbase_nonlibcharac{
     tag "$name"
     publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: 'copy'
     // container '${computations.docker_search_engine_library_neg_msnbase}'
