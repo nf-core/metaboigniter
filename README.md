@@ -1,4 +1,4 @@
-# nf-core/metaboigniter
+# metaboigniter
 
 **Get your metabolomics analysis up and running**.
 
@@ -21,15 +21,15 @@ The nf-core/metaboigniter pipeline comes with documentation about the pipeline, 
 2. Pipeline configuration
     * [Local installation](https://nf-co.re/usage/local_installation)
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
 <!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
+MetaboIGNITER is a comprehensive pipeline of several independent tools used to pre-process liquid chromatography-mass spectrometry (LCMS) data.  We use Nextflow and nf-core to build and run the workflow but parts of this pipeline have also been implemented using Galaxy as part of [PhenoMeNal](https://github.com/phnmnl/) and [Pachyderm](https://github.com/pharmbio/LC-MS-Pachyderm).
 
 ## Credits
-nf-core/metaboigniter was originally written by Payam Emami.
+metaboigniter was originally written by Payam Emami.
 
 ## IMPORTANT
 This workflow is not part of nf-core yet. We plan to to make it available as soon as possible.

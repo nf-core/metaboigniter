@@ -18,11 +18,11 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/metaboigniter -profile docker
+    nextflow run MetaboIGNITER/metaboigniter -profile docker
 
     We highly recommend you edit the parameter file (conf/parameters.config) as the number of parameters is large. You can then run the workflow without specifying any parameters
 
-    Please do remember than if you would like to use OpenMS tools (PeakPickerHiRes or FeatureFinderMetabo) you need to edit the OpenMS parameters in the "conf" folder.
+    Please do remember than if you would like to use OpenMS tools (PeakPickerHiRes or FeatureFinderMetabo) you need to edit the OpenMS parameters in the "conf/params" folder.
 
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -34,6 +34,8 @@ def helpMessage() {
       --awsregion                   The AWS Region for your AWS Batch job to run on
     """.stripIndent()
 }
+
+
 
 /*
  * SET UP CONFIGURATION VARIABLES
@@ -286,7 +288,8 @@ if(params.perform_identification==true && params.perform_identification_internal
         exit 1, "params.library_charactrization_file_pos was not found or not defined as string! You need to set library_charactrization_file_pos in conf/parameters.config to the path to a file containing your charaztrized library"
       }
     }else{
-      if(!params.containsKey('quant_library_mzml_files_pos') || !(params.library_charactrized_pos instanceof String) ||
+
+      if(!params.containsKey('quant_library_mzml_files_pos') || !(params.library_charactrized_pos instanceof Boolean) ||
     !params.containsKey('id_library_mzml_files_pos') || !(params.id_library_mzml_files_pos instanceof String) ||
     !params.containsKey('library_description_pos') || !(params.library_description_pos instanceof String))
     {
@@ -294,12 +297,12 @@ if(params.perform_identification==true && params.perform_identification_internal
 
     }
     Channel
-          .fromPath(params.quant_library_mzml_files_pos+"/*.mzMl")
+          .fromPath(params.quant_library_mzml_files_pos+"/*.mzML")
           .ifEmpty { exit 1, "params.quant_library_mzml_files_pos was empty - no input files supplied" }
           .set { quant_library_mzml_files_pos}
 
     Channel
-          .fromPath(params.id_library_mzml_files_pos+"/*.mzMl")
+          .fromPath(params.id_library_mzml_files_pos+"/*.mzML")
           .ifEmpty { exit 1, "params.id_library_mzml_files_pos was empty - no input files supplied" }
           .set { id_library_mzml_files_pos}
 
@@ -328,32 +331,32 @@ if(params.perform_identification==true && params.perform_identification_internal
         Channel
               .fromPath(params.library_charactrization_file_neg)
               .ifEmpty { exit 1, "params.library_charactrization_file_neg was empty - no input files supplied" }
-              .set { library_charactrization_file_pos}
+              .set { library_charactrization_file_neg}
       }else{
         exit 1, "params.library_charactrization_file_neg was not found or not defined as string! You need to set library_charactrization_file_neg in conf/parameters.config to the path to a file containing your charaztrized library"
       }
     }else{
-      if(!params.containsKey('quant_library_mzml_files_neg') || !(params.library_charactrized_neg instanceof String) ||
+      if(!params.containsKey('quant_library_mzml_files_neg') || !(params.library_charactrized_neg instanceof Boolean) ||
     !params.containsKey('id_library_mzml_files_neg') || !(params.id_library_mzml_files_neg instanceof String) ||
     !params.containsKey('library_description_neg') || !(params.library_description_neg instanceof String))
     {
-      exit 1, "One of params.quant_library_mzml_files_neg,params.id_library_mzml_files_neg or param.library_description_neg was not found or not defined as string! You need to set them in conf/parameters.config!"
+      exit 1, "One of params.quant_library_mzml_files_neg, params.id_library_mzml_files_neg or param.library_description_neg was not found or not defined as string! You need to set them in conf/parameters.config!"
 
     }
     Channel
-          .fromPath(params.quant_library_mzml_files_neg+"/*.mzMl")
+          .fromPath(params.quant_library_mzml_files_neg+"/*.mzML")
           .ifEmpty { exit 1, "params.quant_library_mzml_files_neg was empty - no input files supplied" }
-          .set { quant_library_mzml_files_pos}
+          .set { quant_library_mzml_files_neg}
 
     Channel
-          .fromPath(params.id_library_mzml_files_neg+"/*.mzMl")
+          .fromPath(params.id_library_mzml_files_neg+"/*.mzML")
           .ifEmpty { exit 1, "params.id_library_mzml_files_neg was empty - no input files supplied" }
-          .set { id_library_mzml_files_pos}
+          .set { id_library_mzml_files_neg}
 
     Channel
-          .fromPath(params.library_description_pos)
+          .fromPath(params.library_description_neg)
           .ifEmpty { exit 1, "params.library_description_neg was empty - no input files supplied" }
-          .set { library_description_pos}
+          .set { library_description_neg}
 
 
     }
@@ -367,7 +370,6 @@ if(params.perform_identification==true && params.perform_identification_internal
 
 }
 
-println (params.quantification_openms_xcms_pos in (["openms","xcms"]))
 if(!params.containsKey('quantification_openms_xcms_pos') ||
 !(params.quantification_openms_xcms_pos in (["openms","xcms"])) ||
 !(params.quantification_openms_xcms_pos instanceof String))
@@ -756,7 +758,9 @@ if(params.type_of_ionization in (["pos","both"]))
 
       shell:
       '''
- /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms}
+      /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms}
+
+
       '''
     }
   }
@@ -843,7 +847,7 @@ if(params.type_of_ionization in (["pos","both"]))
     file rdata_files from group_peaks_pos_N2_xcms
 
   output:
-  file "groupN1_pos.rdata" into temp_unfiltered_channel_pos_1
+  file "groupN2_pos.rdata" into temp_unfiltered_channel_pos_1
 
     shell:
       '''
@@ -925,7 +929,7 @@ if(params.cv_filter_pos==true)
     file rdata_files from cvfilter_rdata_pos_xcms
 
   output:
-  file "groupN1_pos.rdata" into temp_unfiltered_channel_pos_4
+  file "cvFiltered_pos.rdata" into temp_unfiltered_channel_pos_4
 
     shell:
       '''
@@ -957,7 +961,7 @@ file "CameraAnnotatePeaks_pos.rdata" into group_rdata_pos_camera
 
   shell:
     '''
-	/usr/local/bin/xsAnnotate.r asd=asd  input=!{rdata_files} output=CameraAnnotatePeaks_pos.rdata
+	/usr/local/bin/xsAnnotate.r  input=!{rdata_files} output=CameraAnnotatePeaks_pos.rdata
 	'''
 }
 
@@ -1074,12 +1078,13 @@ if(params.perform_identification==true)
     file rdata_files_ms1 from mapmsmstocamera_rdata_pos_camera
 
   output:
-  file "MapMsms2Camera.rdata" into mapmsmstoparam_rdata_pos_msnbase
+  file "MapMsms2Camera_pos.rdata" into mapmsmstoparam_rdata_pos_msnbase
 
     script:
     def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
+    shell:
     """
-  	/usr/local/bin/mapMS2ToCamera.r inputCAMERA=${rdata_files_ms1} inputMS2=${input_args} output=MapMsms2Camera_pos.rdata ppm=!{params.ppm_mapmsmstocamera_pos_msnbase} RT=!{params.rt_mapmsmstocamera_pos_msnbase}
+  	/usr/local/bin/mapMS2ToCamera.r inputCAMERA=!{rdata_files_ms1} inputMS2=$input_args output=MapMsms2Camera_pos.rdata ppm=!{params.ppm_mapmsmstocamera_pos_msnbase} rt=!{params.rt_mapmsmstocamera_pos_msnbase}
   	"""
   }
 
@@ -1131,7 +1136,7 @@ process  process_ms2_identification_pos_csifingerid{
   file parameters from csifingerid_txt_pos_msnbase_flatten
 
    output:
-  file "${inrdata.baseName}.csv" into aggregateID_csv_pos_csifingerid
+  file "${parameters.baseName}.csv" into aggregateID_csv_pos_csifingerid
 
   shell:
     '''
@@ -1159,7 +1164,7 @@ file "aggregated_identification_csifingerid_pos.csv" into csifingerid_tsv_pos_pa
     '''
 	zip -r Csifingerid_pos.zip .
 	/usr/local/bin/aggregateMetfrag.r inputs=Csifingerid_pos.zip realNames=Csifingerid_pos.zip output=aggregated_identification_csifingerid_pos.csv filetype=zip outTable=T
-
+sed -i '/^$/d' aggregated_identification_csifingerid_pos.csv
 	'''
 }
 /*
@@ -1179,7 +1184,14 @@ file "pep_identification_csifingerid_pos.csv" into csifingerid_tsv_pos_output
 
 shell:
   '''
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_csifingerid_pos.csv
+  if [ -s !{identification_result} ]
+then
+/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_csifingerid_pos.csv readTable=T
+else
+touch pep_identification_csifingerid_pos.csv
+
+fi
+
 
 '''
 
@@ -1202,8 +1214,16 @@ output:
 file "*.txt" into csifingerid_pos_finished
   shell:
 '''
+if [ -s !{csifingerid_input_identification} ]
+then
 
 	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{csifingerid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_csifingerid.txt outputVariables=varsPOSout_pos_csifingerid.txt outputMetaData=metadataPOSout_pos_csifingerid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+
+else
+
+	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_csifingerid.txt outputVariables=varsPOSout_pos_csifingerid.txt outputMetaData=metadataPOSout_pos_csifingerid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+
+fi
 	'''
 }
 
@@ -1250,11 +1270,11 @@ process  process_ms2_identification_pos_metfrag{
 
 
    output:
-  file "${inrdata.baseName}.csv" into aggregateID_csv_pos_metfrag
+  file "${parameters.baseName}.csv" into aggregateID_csv_pos_metfrag
 
   shell:
     '''
-    touch !{inrdata.baseName}.csv
+    touch !{parameters.baseName}.csv
 
    bash /usr/local/bin/run_metfrag.sh -p $PWD/!{parameters} -f $PWD/!{parameters.baseName}.csv -l "$PWD/!{metfrag_database}" -s "OfflineMetFusionScore"
 
@@ -1278,8 +1298,9 @@ file "aggregated_identification_metfrag_pos.csv" into metfrag_tsv_pos_passatutto
 
   shell:
     '''
-	zip -r Csifingerid_pos.zip .
+	zip -r metfrag_pos.zip .
 	/usr/local/bin/aggregateMetfrag.r inputs=metfrag_pos.zip realNames=metfrag_pos.zip output=aggregated_identification_metfrag_pos.csv filetype=zip outTable=T
+  sed -i '/^$/d' aggregated_identification_metfrag_pos.csv
 
 	'''
 }
@@ -1300,7 +1321,15 @@ file "pep_identification_metfrag_pos.csv" into metfrag_tsv_pos_output
 
 shell:
   '''
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=FragmenterScore output=pep_identification_metfrag_pos.csv
+
+  if [ -s !{identification_result} ]
+then
+/usr/local/bin/metfragPEP.r input=!{identification_result} score=FragmenterScore output=pep_identification_metfrag_pos.csv readTable=T
+else
+touch pep_identification_metfrag_pos.csv
+
+fi
+
 
 '''
 
@@ -1326,8 +1355,17 @@ output:
 file "*.txt" into metfrag_pos_finished
   shell:
 '''
-	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{metfrag_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=FragmenterScore impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_metfrag.txt outputVariables=varsPOSout_pos_metfrag.txt outputMetaData=metadataPOSout_pos_metfrag.txt Ifnormalize=!{params.normalize_output_pos_camera}
+if [ -s !{metfrag_input_identification} ]
+then
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{metfrag_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=FragmenterScore impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_metfrag.txt outputVariables=varsPOSout_pos_metfrag.txt outputMetaData=metadataPOSout_pos_metfrag.txt Ifnormalize=!{params.normalize_output_pos_camera}
+
+else
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=FragmenterScore impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_metfrag.txt outputVariables=varsPOSout_pos_metfrag.txt outputMetaData=metadataPOSout_pos_metfrag.txt Ifnormalize=!{params.normalize_output_pos_camera}
+
+
+fi
 	'''
+
 }
 
 }
@@ -1349,8 +1387,7 @@ if(params.containsKey('database_csv_files_pos_cfmid') && params.database_csv_fil
   exit 1, "params.database_csv_files_pos_cfmid was not found or not defined as string! You need to set database_csv_files_pos_cfmid in conf/parameters.config to the path to a csv file containing your database"
 }
 
-cfmid_txt_pos_msnbase_flatten=cfmid_txt_pos_msnbase.flatten()
-
+cfmid_txt_pos_msnbase_flatten=cfmidin_txt_pos_msnbase.flatten()
 /*
  * STEP 26 - do search using cfmid
  */
@@ -1364,14 +1401,14 @@ process  process_ms2_identification_pos_cfmid{
   each file(cfmid_database) from database_csv_files_pos_cfmid
 
    output:
-  file "${inrdata.baseName}.csv" into aggregateID_csv_pos_cfmid
+  file "${parameters.baseName}.csv" into aggregateID_csv_pos_cfmid
 
 
   shell:
     '''
-    touch !{inrdata.baseName}.csv
+    touch !{parameters.baseName}.csv
 
-    /usr/local/bin/cfmid.r input=!{parameters} realName=!{parameters} databaseFile=!{cfmid_database}  output=!{inrdata.baseName}.csv candidate_id=!{params.candidate_id_identification_pos_cfmid} candidate_inchi_smiles=!{params.candidate_inchi_smiles_identification_pos_cfmid} candidate_mass=!{params.candidate_mass_identification_pos_cfmid} databaseNameColumn=!{params.database_name_column_identification_pos_cfmid} databaseInChIColumn=!{params.database_inchI_column_identification_pos_cfmid} scoreType=Jaccard
+    /usr/local/bin/cfmid.r input=$PWD/!{parameters} realName=!{parameters} databaseFile=$PWD/!{cfmid_database}  output=$PWD/!{parameters.baseName}.csv candidate_id=!{params.candidate_id_identification_pos_cfmid} candidate_inchi_smiles=!{params.candidate_inchi_smiles_identification_pos_cfmid} candidate_mass=!{params.candidate_mass_identification_pos_cfmid} databaseNameColumn=!{params.database_name_column_identification_pos_cfmid} databaseInChIColumn=!{params.database_inchI_column_identification_pos_cfmid} scoreType=Jaccard
 
 	'''
 }
@@ -1393,9 +1430,9 @@ file "aggregated_identification_cfmid_pos.csv" into cfmid_tsv_pos_passatutto
 
   shell:
     '''
-	zip -r Csifingerid_pos.zip .
-	/usr/local/bin/aggregatecfmid.r inputs=cfmid_pos.zip realNames=cfmid_pos.zip output=aggregated_identification_cfmid_pos.csv filetype=zip outTable=T
-
+	zip -r cfmid_pos.zip .
+	/usr/local/bin/aggregateMetfrag.r inputs=cfmid_pos.zip realNames=cfmid_pos.zip output=aggregated_identification_cfmid_pos.csv filetype=zip outTable=T
+sed -i '/^$/d' aggregated_identification_cfmid_pos.csv
 	'''
 }
 
@@ -1417,8 +1454,14 @@ file "pep_identification_cfmid_pos.csv" into cfmid_tsv_pos_output
 
 shell:
   '''
-/usr/local/bin/cfmidPEP.r input=!{identification_result} score=Jaccard_Score output=pep_identification_cfmid_pos.csv
 
+if [ -s !{identification_result} ]
+then
+/usr/local/bin/metfragPEP.r input=!{identification_result} score=Jaccard_Score output=pep_identification_cfmid_pos.csv readTable=T
+else
+touch pep_identification_cfmid_pos.csv
+
+fi
 '''
 
 }
@@ -1443,7 +1486,16 @@ output:
 file "*.txt" into cfmid_pos_finished
   shell:
 '''
-	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{cfmid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_cfmid.txt outputVariables=varsPOSout_pos_cfmid.txt outputMetaData=metadataPOSout_pos_cfmid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+
+if [ -s !{cfmid_input_identification} ]
+then
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{cfmid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_cfmid.txt outputVariables=varsPOSout_pos_cfmid.txt outputMetaData=metadataPOSout_pos_cfmid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+
+else
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_cfmid.txt outputVariables=varsPOSout_pos_cfmid.txt outputMetaData=metadataPOSout_pos_cfmid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+
+
+fi
 	'''
 }
 
@@ -1523,14 +1575,14 @@ if(params.library_charactrized_pos==false){
 
          input:
          file mzMLFile from openms_to_xcms_conversion
-         each file(phenotype_file) from phenotype_design_library_pos
+         //each file(phenotype_file) from phenotype_design_library_pos
 
          output:
          file "${mzMLFile.baseName}.featureXML" into annotation_rdata_library_pos_camera
 
          shell:
          '''
-          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_library_pos} sampleClass=!{params.sampleclass_quant_library_pos_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
+          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata sampleClass=library changeNameTO=!{mzMLFile.baseName}.mzML
 
          '''
      }
@@ -1549,14 +1601,14 @@ if(params.library_charactrized_pos==false){
 
        input:
        file mzMLFile from masstrace_detection_process_library_pos
-       each file(phenotype_file) from phenotype_design_library_pos
+  //     each file(phenotype_file) from phenotype_design_library_pos
 
        output:
        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
        shell:
        '''
-  /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_library_pos} sampleClass=!{params.sampleclass_quant_library_pos_xcms}
+  /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=library
        '''
      }
 
@@ -1579,14 +1631,14 @@ if(params.library_charactrized_pos==false){
 
       input:
       file mzMLFile from quant_library_mzml_files_pos
-      each file(phenotype_file) from phenotype_design_library_pos
+//      each file(phenotype_file) from phenotype_design_library_pos
 
       output:
       file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
       shell:
       '''
-  /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_library_pos} sampleClass=!{params.sampleclass_quant_library_pos_xcms}
+  /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=library
       '''
     }
   }
@@ -1608,11 +1660,11 @@ if(params.library_charactrized_pos==false){
     file rdata_files from annotation_rdata_library_pos_camera
 
   output:
-  file "CameraAnnotatePeaks_library_pos.rdata" into group_rdata_library_pos_camera
+  file "${rdata_files.baseName}.rdata" into group_rdata_library_pos_camera
 
     shell:
       '''
-  	/usr/local/bin/xsAnnotate.r asd=asd  input=!{rdata_files} output=CameraAnnotatePeaks_library_pos.rdata
+  	/usr/local/bin/xsAnnotate.r  input=!{rdata_files} output=!{rdata_files.baseName}.rdata
   	'''
   }
 
@@ -1630,11 +1682,11 @@ if(params.library_charactrized_pos==false){
     file rdata_files from group_rdata_library_pos_camera
 
   output:
-  file "CameraGroup_library_pos.rdata" into findaddcuts_rdata_library_pos_camera
+  file "${rdata_files.baseName}.rdata" into findaddcuts_rdata_library_pos_camera
 
     shell:
       '''
-  	/usr/local/bin/groupFWHM.r input=!{rdata_files} output=CameraGroup_library_pos.rdata sigma=!{params.sigma_group_library_pos_camera} perfwhm=!{params.perfwhm_group_library_pos_camera} intval=!{params.intval_group_library_pos_camera}
+  	/usr/local/bin/groupFWHM.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata sigma=!{params.sigma_group_library_pos_camera} perfwhm=!{params.perfwhm_group_library_pos_camera} intval=!{params.intval_group_library_pos_camera}
   	'''
   }
 
@@ -1652,11 +1704,11 @@ if(params.library_charactrized_pos==false){
     file rdata_files from findaddcuts_rdata_library_pos_camera
 
   output:
-  file "CameraFindAdducts_library_pos.rdata" into findisotopes_rdata_library_pos_camera
+  file "${rdata_files.baseName}.rdata" into findisotopes_rdata_library_pos_camera
 
     shell:
       '''
-  	/usr/local/bin/findAdducts.r input=!{rdata_files} output=CameraFindAdducts_library_pos.rdata ppm=!{params.ppm_findaddcuts_library_pos_camera} polarity=!{params.polarity_findaddcuts_library_pos_camera}
+  	/usr/local/bin/findAdducts.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata ppm=!{params.ppm_findaddcuts_library_pos_camera} polarity=!{params.polarity_findaddcuts_library_pos_camera}
   	'''
   }
 
@@ -1674,11 +1726,11 @@ if(params.library_charactrized_pos==false){
     file rdata_files from findisotopes_rdata_library_pos_camera
 
   output:
-  file "CameraFindIsotopes_library_pos.rdata" into mapmsmstocamera_rdata_library_pos_camera,mapmsmstoparam_rdata_library_pos_camera_tmp, prepareoutput_rdata_library_pos_camera_cfmid
+  file "${rdata_files.baseName}.rdata" into mapmsmstocamera_rdata_library_pos_camera,mapmsmstoparam_rdata_library_pos_camera_tmp, prepareoutput_rdata_library_pos_camera_cfmid
 
     shell:
       '''
-  	/usr/local/bin/findIsotopes.r input=!{rdata_files} output=CameraFindIsotopes_library_pos.rdata maxcharge=!{params.maxcharge_findisotopes_library_pos_camera}
+  	/usr/local/bin/findIsotopes.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata maxcharge=!{params.maxcharge_findisotopes_library_pos_camera}
   	'''
   }
 
@@ -1698,11 +1750,11 @@ if(params.library_charactrized_pos==false){
     file mzMLFile from id_library_mzml_files_pos
 
   output:
-  file "${mzMLFile.baseName}.rdata" into mapmsmstocamera_rdata_library_pos_msnbase
+  file "${mzMLFile.baseName}_ReadMsmsLibrary.rdata" into mapmsmstocamera_rdata_library_pos_msnbase
 
     shell:
     '''
-    /usr/local/bin/readMS2MSnBase.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata inputname=!{mzMLFile.baseName}
+    /usr/local/bin/readMS2MSnBase.r input=!{mzMLFile} output=!{mzMLFile.baseName}_ReadMsmsLibrary.rdata inputname=!{mzMLFile.baseName}
     '''
   }
 
@@ -1710,6 +1762,12 @@ if(params.library_charactrized_pos==false){
     /*
      * STEP 39 - map ions to mass traces in the library
      */
+
+     mapmsmstocamera_rdata_library_pos_camera.map { file -> tuple(file.baseName, file) }.set { ch1mapmsmsLibrary_pos }
+
+        mapmsmstocamera_rdata_library_pos_msnbase.map { file -> tuple(file.baseName.replaceAll(/_ReadMsmsLibrary/,""), file) }.set { ch2mapmsmsLibrary_pos }
+
+mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsmsLibrary_pos,by:0)
 
 
   process  process_mapmsms_tocamera_library_pos_msnbase{
@@ -1719,21 +1777,23 @@ if(params.library_charactrized_pos==false){
     // container '${computations.docker_mapmsms_tocamera_library_pos_msnbase}'
 
     input:
-    file rdata_files_ms2 from mapmsmstocamera_rdata_library_pos_msnbase.collect()
-    file rdata_files_ms1 from mapmsmstocamera_rdata_library_pos_camera
+    set val(name), file(rdata_files_ms1), file(rdata_files_ms2) from mapmsmstocamera_rdata_library_pos_camerams2
+    //file rdata_files_ms2 from mapmsmstocamera_rdata_library_pos_msnbase.collect()
+    //file rdata_files_ms1 from mapmsmstocamera_rdata_library_pos_camera
 
   output:
-  file "MapMsms2Camera.rdata" into createlibrary_rdata_library_pos_msnbase_tmp
+  file "${rdata_files_ms1.baseName}_MapMsms2Camera_library_pos.rdata" into createlibrary_rdata_library_pos_msnbase_tmp
 
-    script:
-    def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
+  //  script:
+    //def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
+    shell:
     """
-    /usr/local/bin/mapMS2ToCamera.r inputCAMERA=${rdata_files_ms1} inputMS2=${input_args} output=MapMsms2Camera_library_pos.rdata ppm=!{params.ppm_mapmsmstocamera_library_pos_msnbase} RT=!{params.rt_mapmsmstocamera_library_pos_msnbase}
+    /usr/local/bin/mapMS2ToCamera.r inputCAMERA=!{rdata_files_ms1} inputMS2=!{rdata_files_ms2} output=!{rdata_files_ms1.baseName}_MapMsms2Camera_library_pos.rdata ppm=!{params.ppm_mapmsmstocamera_library_pos_msnbase} rt=!{params.rt_mapmsmstocamera_library_pos_msnbase}
     """
   }
 
   mapmsmstoparam_rdata_library_pos_camera_tmp.map { file -> tuple(file.baseName, file) }.set { ch1CreateLibrary }
-  createlibrary_rdata_library_pos_msnbase_tmp.map { file -> tuple(file.baseName.replaceAll(/_MapMsms2CameraLibrary/,""), file) }.set { ch2CreateLibrary }
+  createlibrary_rdata_library_pos_msnbase_tmp.map { file -> tuple(file.baseName.replaceAll(/_MapMsms2Camera_library_pos/,""), file) }.set { ch2CreateLibrary }
 
   msmsandquant_rdata_library_pos_camera=ch1CreateLibrary.join(ch2CreateLibrary,by:0)
 
@@ -1758,7 +1818,7 @@ if(params.library_charactrized_pos==false){
     shell:
       '''
   	mkdir out
-  	/usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_pos_msnbase}   compundID=!{params.compund_id_preparelibrary_pos_msnbase}   compoundName=!{params.compound_name_preparelibrary_pos_msnbase}  mzCol=!{params.mz_col_preparelibrary_pos_msnbase} whichmz=!{which_mz_preparelibrary_pos_msnbase}
+  	/usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_pos_msnbase}   compundID=!{params.compund_id_preparelibrary_pos_msnbase}   compoundName=!{params.compound_name_preparelibrary_pos_msnbase}  mzCol=!{params.mz_col_preparelibrary_pos_msnbase} whichmz=!{params.which_mz_preparelibrary_pos_msnbase}
 
   	'''
   }
@@ -1837,10 +1897,12 @@ zip::zip(zipfile="mappedtometfrag_pos.zip",files=list.files(pattern="txt"))
   output:
   file "aggregated_identification_library_pos.csv" into library_tsv_pos_passatutto
 
-    script:
-    """
-    /usr/local/bin/librarySearchEngine.r -l ${libraryFile} -i ${parameters} -out aggregated_identification_library_pos.csv -th "-1" -im pos -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_pos_msnbase}
-    """
+    shell:
+    '''
+    /usr/local/bin/librarySearchEngine.r -l !{libraryFile} -i !{parameters} -out aggregated_identification_library_pos.csv -th "-1" -im pos -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_pos_msnbase}
+sed -i '/^$/d' aggregated_identification_library_pos.csv
+
+    '''
   }
 }else{
 
@@ -1860,10 +1922,13 @@ zip::zip(zipfile="mappedtometfrag_pos.zip",files=list.files(pattern="txt"))
   output:
   file "aggregated_identification_library_pos.csv" into library_tsv_pos_passatutto
 
-    script:
-    """
-    /usr/local/bin/librarySearchEngine.r -l ${libraryFile} -i ${parameters} -out aggregated_identification_library_pos.csv -th "-1" -im pos -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_pos_msnbase}
-    """
+    shell:
+    '''
+    /usr/local/bin/librarySearchEngine.r -l !{libraryFile} -i !{parameters} -out aggregated_identification_library_pos.csv -th "-1" -im pos -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_pos_msnbase}
+
+    sed -i '/^$/d' aggregated_identification_library_pos.csv
+
+    '''
   }
 
 }
@@ -1885,7 +1950,13 @@ file "pep_identification_library_pos.csv" into library_tsv_pos_output
 
 shell:
   '''
-/usr/local/bin/cfmidPEP.r input=!{identification_result} score=score output=pep_identification_library_pos.csv
+
+if [ -s !{identification_result} ]
+then
+/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_library_pos.csv readTable=T
+else
+touch pep_identification_library_pos.csv
+fi
 
 '''
 
@@ -1906,14 +1977,22 @@ process  process_output_quantid_pos_camera_library{
   input:
   file phenotype_file from phenotype_design_pos_library
   file camera_input_quant from prepareoutput_rdata_pos_camera_library
-  file cfmid_input_identification from library_tsv_pos_output
+  file library_input_identification from library_tsv_pos_output
 
 output:
 file "*.txt" into library_pos_finished
   shell:
 '''
-	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{cfmid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_cfmid.txt outputVariables=varsPOSout_pos_cfmid.txt outputMetaData=metadataPOSout_pos_cfmid.txt Ifnormalize=!{params.normalize_output_pos_camera}
-	'''
+if [ -s !{library_input_identification} ]
+then
+	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{library_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_library.txt outputVariables=varsPOSout_pos_library.txt outputMetaData=metadataPOSout_pos_library.txt Ifnormalize=!{params.normalize_output_pos_camera}
+  else
+  /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_library.txt outputVariables=varsPOSout_pos_library.txt outputMetaData=metadataPOSout_pos_library.txt Ifnormalize=!{params.normalize_output_pos_camera}
+
+  fi
+
+
+  '''
 }
 
 }
@@ -2163,7 +2242,7 @@ if(params.type_of_ionization in (["neg","both"]))
     file rdata_files from group_peaks_neg_N2_xcms
 
   output:
-  file "groupN1_neg.rdata" into temp_unfiltered_channel_neg_1
+  file "groupN2_neg.rdata" into temp_unfiltered_channel_neg_1
 
     shell:
       '''
@@ -2248,7 +2327,7 @@ if(params.cv_filter_neg==true)
     file rdata_files from cvfilter_rdata_neg_xcms
 
   output:
-  file "groupN1_neg.rdata" into temp_unfiltered_channel_neg_4
+  file "cvFiltered_neg.rdata" into temp_unfiltered_channel_neg_4
 
     shell:
       '''
@@ -2279,7 +2358,7 @@ file "CameraAnnotatePeaks_neg.rdata" into group_rdata_neg_camera
 
   shell:
     '''
-	/usr/local/bin/xsAnnotate.r asd=asd  input=!{rdata_files} output=CameraAnnotatePeaks_neg.rdata
+	/usr/local/bin/xsAnnotate.r input=!{rdata_files} output=CameraAnnotatePeaks_neg.rdata
 	'''
 }
 
@@ -2396,12 +2475,15 @@ if(params.perform_identification==true)
     file rdata_files_ms1 from mapmsmstocamera_rdata_neg_camera
 
   output:
-  file "MapMsms2Camera.rdata" into mapmsmstoparam_rdata_neg_msnbase
+  file "MapMsms2Camera_neg.rdata" into mapmsmstoparam_rdata_neg_msnbase
 
-    script:
+  script:
     def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
+
+   shell:
     """
-  	/usr/local/bin/mapMS2ToCamera.r inputCAMERA=${rdata_files_ms1} inputMS2=${input_args} output=MapMsms2Camera_neg.rdata ppm=!{params.ppm_mapmsmstocamera_neg_msnbase} RT=!{params.rt_mapmsmstocamera_neg_msnbase}
+  	/usr/local/bin/mapMS2ToCamera.r inputCAMERA=!{rdata_files_ms1} inputMS2=$input_args output=MapMsms2Camera_neg.rdata ppm=!{params.ppm_mapmsmstocamera_neg_msnbase} rt=!{params.rt_mapmsmstocamera_neg_msnbase}
+
   	"""
   }
 
@@ -2433,13 +2515,14 @@ if(params.perform_identification==true)
 /*
 * we need to decide which search engine to select
 * each search engine will have its own path for quantification at this stage.
-* todo: implement joint search engine score so that we will have only path to quantification.
+* todo: implement joint search engine score so that we will have only one path to quantification.
 */
-
 
 if(params.perform_identification_csifingerid==true)
 {
+
 csifingerid_txt_neg_msnbase_flatten=csifingerid_txt_neg_msnbase.flatten()
+
 /*
  * STEP 67 - do search using CSIFingerID
  */
@@ -2452,14 +2535,16 @@ process  process_ms2_identification_neg_csifingerid{
   file parameters from csifingerid_txt_neg_msnbase_flatten
 
    output:
-  file "${inrdata.baseName}.csv" into aggregateID_csv_neg_csifingerid
+  file "${parameters.baseName}.csv" into aggregateID_csv_neg_csifingerid
 
   shell:
     '''
-	touch !{parameters.baseName}.csv
-	/usr/local/bin/fingerID.r input=$PWD/!{parameters} database=!{params.database_csifingerid_neg_csifingerid} tryOffline=T output=$PWD/!{parameters.baseName}.csv
+     touch !{parameters.baseName}.csv
+
+  	/usr/local/bin/fingerID.r input=$PWD/!{parameters} database=!{params.database_csifingerid_neg_csifingerid} tryOffline=T output=$PWD/!{parameters.baseName}.csv
 
 	'''
+
 }
 
 /*
@@ -2480,6 +2565,7 @@ file "aggregated_identification_csifingerid_neg.csv" into csifingerid_tsv_neg_pa
     '''
 	zip -r Csifingerid_neg.zip .
 	/usr/local/bin/aggregateMetfrag.r inputs=Csifingerid_neg.zip realNames=Csifingerid_neg.zip output=aggregated_identification_csifingerid_neg.csv filetype=zip outTable=T
+  sed -i '/^$/d' aggregated_identification_csifingerid_neg.csv
 
 	'''
 }
@@ -2501,7 +2587,14 @@ file "pep_identification_csifingerid_neg.csv" into csifingerid_tsv_neg_output
 
 shell:
   '''
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_csifingerid_neg.csv
+  if [ -s !{identification_result} ]
+then
+/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_csifingerid_neg.csv readTable=T
+else
+touch pep_identification_csifingerid_neg.csv
+
+fi
+
 
 '''
 
@@ -2526,8 +2619,16 @@ output:
 file "*.txt" into csifingerid_neg_finished
   shell:
 '''
+if [ -s !{csifingerid_input_identification} ]
+then
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{csifingerid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_csifingerid.txt outputVariables=varsNEGout_neg_csifingerid.txt outputMetaData=metadataNEGout_neg_csifingerid.txt Ifnormalize=!{params.normalize_output_neg_camera}
 
-	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{csifingerid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_csifingerid.txt outputVariables=varsNEGout_neg_csifingerid.txt outputMetaData=metadataNEGout_neg_csifingerid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+else
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_csifingerid.txt outputVariables=varsNEGout_neg_csifingerid.txt outputMetaData=metadataNEGout_neg_csifingerid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+
+
+fi
+
 	'''
 }
 
@@ -2573,11 +2674,11 @@ process  process_ms2_identification_neg_metfrag{
 
 
    output:
-  file "${inrdata.baseName}.csv" into aggregateID_csv_neg_metfrag
+  file "${parameters.baseName}.csv" into aggregateID_csv_neg_metfrag
 
   shell:
     '''
-    touch !{inrdata.baseName}.csv
+    touch !{parameters.baseName}.csv
 
    bash /usr/local/bin/run_metfrag.sh -p $PWD/!{parameters} -f $PWD/!{parameters.baseName}.csv -l "$PWD/!{metfrag_database}" -s "OfflineMetFusionScore"
 
@@ -2599,7 +2700,7 @@ file "aggregated_identification_metfrag_neg.csv" into metfrag_tsv_neg_passatutto
 
   shell:
     '''
-	zip -r Csifingerid_neg.zip .
+	zip -r metfrag_neg.zip .
 	/usr/local/bin/aggregateMetfrag.r inputs=metfrag_neg.zip realNames=metfrag_neg.zip output=aggregated_identification_metfrag_neg.csv filetype=zip outTable=T
 
 	'''
@@ -2621,7 +2722,14 @@ file "pep_identification_metfrag_neg.csv" into metfrag_tsv_neg_output
 
 shell:
   '''
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=FragmenterScore output=pep_identification_metfrag_neg.csv
+  if [ -s !{identification_result} ]
+then
+/usr/local/bin/metfragPEP.r input=!{identification_result} score=FragmenterScore output=pep_identification_metfrag_neg.csv readTable=T
+
+else
+touch pep_identification_metfrag_neg.csv
+
+fi
 
 '''
 
@@ -2646,7 +2754,15 @@ output:
 file "*.txt" into metfrag_neg_finished
   shell:
 '''
-	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{metfrag_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=FragmenterScore impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_metfrag.txt outputVariables=varsNEGout_neg_metfrag.txt outputMetaData=metadataNEGout_neg_metfrag.txt Ifnormalize=!{params.normalize_output_neg_camera}
+if [ -s !{metfrag_input_identification} ]
+then
+
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{metfrag_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=FragmenterScore impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_metfrag.txt outputVariables=varsNEGout_neg_metfrag.txt outputMetaData=metadataNEGout_neg_metfrag.txt Ifnormalize=!{params.normalize_output_neg_camera}
+
+else
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=FragmenterScore impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_metfrag.txt outputVariables=varsNEGout_neg_metfrag.txt outputMetaData=metadataNEGout_neg_metfrag.txt Ifnormalize=!{params.normalize_output_neg_camera}
+
+fi
 	'''
 }
 
@@ -2667,7 +2783,7 @@ if(params.containsKey('database_csv_files_neg_cfmid') && params.database_csv_fil
   exit 1, "params.database_csv_files_neg_cfmid was not found or not defined as string! You need to set database_csv_files_neg_cfmid in conf/parameters.config to the path to a csv file containing your database"
 }
 
-cfmid_txt_neg_msnbase_flatten=cfmid_txt_neg_msnbase.flatten()
+cfmid_txt_neg_msnbase_flatten=cfmidin_txt_neg_msnbase.flatten()
 
 /*
  * STEP 75 - do search using cfmid
@@ -2683,14 +2799,14 @@ process  process_ms2_identification_neg_cfmid{
   each file(cfmid_database) from database_csv_files_neg_cfmid
 
    output:
-  file "${inrdata.baseName}.csv" into aggregateID_csv_neg_cfmid
+  file "${parameters.baseName}.csv" into aggregateID_csv_neg_cfmid
 
 
   shell:
     '''
-    touch !{inrdata.baseName}.csv
+    touch !{parameters.baseName}.csv
 
-    /usr/local/bin/cfmid.r input=!{parameters} realName=!{parameters} databaseFile=!{cfmid_database}  output=!{inrdata.baseName}.csv candidate_id=!{params.candidate_id_identification_neg_cfmid} candidate_inchi_smiles=!{params.candidate_inchi_smiles_identification_neg_cfmid} candidate_mass=!{params.candidate_mass_identification_neg_cfmid} databaseNameColumn=!{params.database_name_column_identification_neg_cfmid} databaseInChIColumn=!{params.database_inchI_column_identification_neg_cfmid} scoreType=Jaccard
+    /usr/local/bin/cfmid.r input=$PWD/!{parameters} realName=!{parameters} databaseFile=$PWD/!{cfmid_database}  output=$PWD/!{parameters.baseName}.csv candidate_id=!{params.candidate_id_identification_neg_cfmid} candidate_inchi_smiles=!{params.candidate_inchi_smiles_identification_neg_cfmid} candidate_mass=!{params.candidate_mass_identification_neg_cfmid} databaseNameColumn=!{params.database_name_column_identification_neg_cfmid} databaseInChIColumn=!{params.database_inchI_column_identification_neg_cfmid} scoreType=Jaccard
 
 	'''
 }
@@ -2712,8 +2828,8 @@ file "aggregated_identification_cfmid_neg.csv" into cfmid_tsv_neg_passatutto
 
   shell:
     '''
-	zip -r Csifingerid_neg.zip .
-	/usr/local/bin/aggregatecfmid.r inputs=cfmid_neg.zip realNames=cfmid_neg.zip output=aggregated_identification_cfmid_neg.csv filetype=zip outTable=T
+	zip -r cfmid_neg.zip .
+	/usr/local/bin/aggregateMetfrag.r inputs=cfmid_neg.zip realNames=cfmid_neg.zip output=aggregated_identification_cfmid_neg.csv filetype=zip outTable=T
 
 	'''
 }
@@ -2737,7 +2853,15 @@ file "pep_identification_cfmid_neg.csv" into cfmid_tsv_neg_output
 
 shell:
   '''
-/usr/local/bin/cfmidPEP.r input=!{identification_result} score=Jaccard_Score output=pep_identification_cfmid_neg.csv
+  if [ -s !{identification_result} ]
+then
+/usr/local/bin/metfragPEP.r input=!{identification_result} score=Jaccard_Score output=pep_identification_cfmid_neg.csv readTable=T
+
+else
+touch pep_identification_cfmid_neg.csv
+fi
+
+
 
 '''
 
@@ -2762,7 +2886,15 @@ output:
 file "*.txt" into cfmid_neg_finished
   shell:
 '''
-	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{cfmid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_cfmid.txt outputVariables=varsNEGout_neg_cfmid.txt outputMetaData=metadataNEGout_neg_cfmid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+if [ -s !{cfmid_input_identification} ]
+then
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{cfmid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_cfmid.txt outputVariables=varsNEGout_neg_cfmid.txt outputMetaData=metadataNEGout_neg_cfmid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+
+else
+/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_cfmid.txt outputVariables=varsNEGout_neg_cfmid.txt outputMetaData=metadataNEGout_neg_cfmid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+
+
+fi
 	'''
 }
 
@@ -2841,14 +2973,14 @@ if(params.library_charactrized_neg==false){
 
          input:
          file mzMLFile from openms_to_xcms_conversion
-         each file(phenotype_file) from phenotype_design_library_neg
+      //   each file(phenotype_file) from phenotype_design_library_neg
 
          output:
          file "${mzMLFile.baseName}.featureXML" into annotation_rdata_library_neg_camera
 
          shell:
          '''
-          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=negative output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_library_neg} sampleClass=!{params.sampleclass_quant_library_neg_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
+          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=negative output=!{mzMLFile.baseName}.rdata sampleClass=library changeNameTO=!{mzMLFile.baseName}.mzML
 
          '''
      }
@@ -2866,14 +2998,14 @@ if(params.library_charactrized_neg==false){
 
        input:
        file mzMLFile from masstrace_detection_process_library_neg
-       each file(phenotype_file) from phenotype_design_library_neg
+    //   each file(phenotype_file) from phenotype_design_library_neg
 
        output:
        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
        shell:
        '''
-  /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_library_neg} sampleClass=!{params.sampleclass_quant_library_neg_xcms}
+  /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=library
        '''
      }
 
@@ -2895,14 +3027,14 @@ if(params.library_charactrized_neg==false){
 
       input:
       file mzMLFile from quant_library_mzml_files_neg
-      each file(phenotype_file) from phenotype_design_library_neg
+    //  each file(phenotype_file) from phenotype_design_library_neg
 
       output:
       file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
       shell:
       '''
-  /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_library_neg} sampleClass=!{params.sampleclass_quant_library_neg_xcms}
+  /usr/local/bin/findPeaks.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=library
       '''
     }
   }
@@ -2922,11 +3054,11 @@ if(params.library_charactrized_neg==false){
     file rdata_files from annotation_rdata_library_neg_camera
 
   output:
-  file "CameraAnnotatePeaks_library_neg.rdata" into group_rdata_library_neg_camera
+  file "${rdata_files.baseName}.rdata" into group_rdata_library_neg_camera
 
     shell:
       '''
-  	/usr/local/bin/xsAnnotate.r asd=asd  input=!{rdata_files} output=CameraAnnotatePeaks_library_neg.rdata
+  	/usr/local/bin/xsAnnotate.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata
   	'''
   }
   /*
@@ -2944,11 +3076,11 @@ if(params.library_charactrized_neg==false){
     file rdata_files from group_rdata_library_neg_camera
 
   output:
-  file "CameraGroup_library_neg.rdata" into findaddcuts_rdata_library_neg_camera
+  file "${rdata_files.baseName}.rdata" into findaddcuts_rdata_library_neg_camera
 
     shell:
       '''
-  	/usr/local/bin/groupFWHM.r input=!{rdata_files} output=CameraGroup_library_neg.rdata sigma=!{params.sigma_group_library_neg_camera} perfwhm=!{params.perfwhm_group_library_neg_camera} intval=!{params.intval_group_library_neg_camera}
+  	/usr/local/bin/groupFWHM.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata sigma=!{params.sigma_group_library_neg_camera} perfwhm=!{params.perfwhm_group_library_neg_camera} intval=!{params.intval_group_library_neg_camera}
   	'''
   }
 
@@ -2968,11 +3100,11 @@ if(params.library_charactrized_neg==false){
     file rdata_files from findaddcuts_rdata_library_neg_camera
 
   output:
-  file "CameraFindAdducts_library_neg.rdata" into findisotopes_rdata_library_neg_camera
+  file "${rdata_files.baseName}.rdata" into findisotopes_rdata_library_neg_camera
 
     shell:
       '''
-  	/usr/local/bin/findAdducts.r input=!{rdata_files} output=CameraFindAdducts_library_neg.rdata ppm=!{params.ppm_findaddcuts_library_neg_camera} polarity=!{params.polarity_findaddcuts_library_neg_camera}
+  	/usr/local/bin/findAdducts.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata ppm=!{params.ppm_findaddcuts_library_neg_camera} polarity=!{params.polarity_findaddcuts_library_neg_camera}
   	'''
   }
   /*
@@ -2988,11 +3120,11 @@ if(params.library_charactrized_neg==false){
     file rdata_files from findisotopes_rdata_library_neg_camera
 
   output:
-  file "CameraFindIsotopes_library_neg.rdata" into mapmsmstocamera_rdata_library_neg_camera,mapmsmstoparam_rdata_library_neg_camera_tmp, prepareoutput_rdata_library_neg_camera_cfmid
+  file "${rdata_files.baseName}.rdata" into mapmsmstocamera_rdata_library_neg_camera,mapmsmstoparam_rdata_library_neg_camera_tmp, prepareoutput_rdata_library_neg_camera_cfmid
 
     shell:
       '''
-  	/usr/local/bin/findIsotopes.r input=!{rdata_files} output=CameraFindIsotopes_library_neg.rdata maxcharge=!{params.maxcharge_findisotopes_library_neg_camera}
+  	/usr/local/bin/findIsotopes.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata maxcharge=!{params.maxcharge_findisotopes_library_neg_camera}
   	'''
   }
 
@@ -3012,11 +3144,11 @@ if(params.library_charactrized_neg==false){
     file mzMLFile from id_library_mzml_files_neg
 
   output:
-  file "${mzMLFile.baseName}.rdata" into mapmsmstocamera_rdata_library_neg_msnbase
+  file "${mzMLFile.baseName}_ReadMsmsLibrary.rdata" into mapmsmstocamera_rdata_library_neg_msnbase
 
     shell:
     '''
-    /usr/local/bin/readMS2MSnBase.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata inputname=!{mzMLFile.baseName}
+    /usr/local/bin/readMS2MSnBase.r input=!{mzMLFile} output=!{mzMLFile.baseName}_ReadMsmsLibrary.rdata inputname=!{mzMLFile.baseName}
     '''
   }
 
@@ -3024,6 +3156,11 @@ if(params.library_charactrized_neg==false){
    * STEP 89 - map ions to mass traces in the library
    */
 
+   mapmsmstocamera_rdata_library_neg_camera.map { file -> tuple(file.baseName, file) }.set { ch1mapmsmsLibrary_neg }
+
+   mapmsmstocamera_rdata_library_neg_msnbase.map { file -> tuple(file.baseName.replaceAll(/_ReadMsmsLibrary/,""), file) }.set { ch2mapmsmsLibrary_neg }
+
+   mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsmsLibrary_neg,by:0)
   process  process_mapmsms_tocamera_library_neg_msnbase{
     tag "$name"
     publishDir "${params.outdir}/process_mapmsms_tocamera_library_neg_msnbase", mode: 'copy'
@@ -3031,29 +3168,33 @@ if(params.library_charactrized_neg==false){
     // container '${computations.docker_mapmsms_tocamera_library_neg_msnbase}'
 
     input:
-    file rdata_files_ms2 from mapmsmstocamera_rdata_library_neg_msnbase.collect()
-    file rdata_files_ms1 from mapmsmstocamera_rdata_library_neg_camera
+    set val(name), file(rdata_files_ms1), file(rdata_files_ms2) from mapmsmstocamera_rdata_library_neg_camerams2
+//    file rdata_files_ms2 from mapmsmstocamera_rdata_library_neg_msnbase.collect()
+//    file rdata_files_ms1 from mapmsmstocamera_rdata_library_neg_camera
 
   output:
-  file "MapMsms2Camera.rdata" into createlibrary_rdata_library_neg_msnbase_tmp
+  file "${rdata_files_ms1.baseName}_MapMsms2Camera_library_neg.rdata" into createlibrary_rdata_library_neg_msnbase_tmp
+//  file "MapMsms2Camera_library_neg.rdata" into createlibrary_rdata_library_neg_msnbase_tmp
 
-    script:
-    def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
+//    script:
+//    def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
+    shell:
     """
-    /usr/local/bin/mapMS2ToCamera.r inputCAMERA=${rdata_files_ms1} inputMS2=${input_args} output=MapMsms2Camera_library_neg.rdata ppm=!{params.ppm_mapmsmstocamera_library_neg_msnbase} RT=!{params.rt_mapmsmstocamera_library_neg_msnbase}
+    /usr/local/bin/mapMS2ToCamera.r inputCAMERA=!{rdata_files_ms1} inputMS2=!{rdata_files_ms2} output=!{rdata_files_ms1.baseName}_MapMsms2Camera_library_neg.rdata ppm=!{params.ppm_mapmsmstocamera_library_neg_msnbase} rt=!{params.rt_mapmsmstocamera_library_neg_msnbase}
     """
   }
 
-  mapmsmstoparam_rdata_library_neg_camera_tmp.map { file -> tuple(file.baseName, file) }.set { ch1CreateLibrary }
-  createlibrary_rdata_library_neg_msnbase_tmp.map { file -> tuple(file.baseName.replaceAll(/_MapMsms2CameraLibrary/,""), file) }.set { ch2CreateLibrary }
-
-  msmsandquant_rdata_library_neg_camera=ch1CreateLibrary.join(ch2CreateLibrary,by:0)
 
   /*
    * STEP 90 - charaztrize the library
    */
 
-  process  process_create_library_neg_msnbase{
+// join the MS2 and quantification channels
+     mapmsmstoparam_rdata_library_neg_camera_tmp.map { file -> tuple(file.baseName, file) }.set { ch1CreateLibrary }
+     createlibrary_rdata_library_neg_msnbase_tmp.map { file -> tuple(file.baseName.replaceAll(/_MapMsms2Camera_library_neg/,""), file) }.set { ch2CreateLibrary }
+
+     msmsandquant_rdata_library_neg_camera=ch1CreateLibrary.join(ch2CreateLibrary,by:0)
+  process  process_create_library_neg_msnbase {
     tag "$name"
     publishDir "${params.outdir}/process_create_library_neg_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -3068,8 +3209,9 @@ if(params.library_charactrized_neg==false){
 
     shell:
       '''
+
   	mkdir out
-  	/usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_neg_msnbase}   compundID=!{params.compund_id_preparelibrary_neg_msnbase}   compoundName=!{params.compound_name_preparelibrary_neg_msnbase}  mzCol=!{params.mz_col_preparelibrary_neg_msnbase} whichmz=!{which_mz_preparelibrary_neg_msnbase}
+  	/usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_neg_msnbase}   compundID=!{params.compund_id_preparelibrary_neg_msnbase}   compoundName=!{params.compound_name_preparelibrary_neg_msnbase}  mzCol=!{params.mz_col_preparelibrary_neg_msnbase} whichmz=!{params.which_mz_preparelibrary_neg_msnbase}
 
   	'''
   }
@@ -3147,10 +3289,11 @@ zip::zip(zipfile="mappedtometfrag_neg.zip",files=list.files(pattern="txt"))
   output:
   file "aggregated_identification_library_neg.csv" into library_tsv_neg_passatutto
 
-    script:
-    """
-    /usr/local/bin/librarySearchEngine.r -l ${libraryFile} -i ${parameters} -out aggregated_identification_library_neg.csv -th "-1" -im neg -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_neg_msnbase}
-    """
+    shell:
+    '''
+    /usr/local/bin/librarySearchEngine.r -l !{libraryFile} -i !{parameters} -out aggregated_identification_library_neg.csv -th "-1" -im neg -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_neg_msnbase}
+sed -i '/^$/d' aggregated_identification_library_neg.csv
+    '''
   }
 }else{
 
@@ -3170,10 +3313,14 @@ zip::zip(zipfile="mappedtometfrag_neg.zip",files=list.files(pattern="txt"))
   output:
   file "aggregated_identification_library_neg.csv" into library_tsv_neg_passatutto
 
-    script:
-    """
-    /usr/local/bin/librarySearchEngine.r -l ${libraryFile} -i ${parameters} -out aggregated_identification_library_neg.csv -th "-1" -im neg -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_neg_msnbase}
-    """
+    shell:
+    '''
+
+  /usr/local/bin/librarySearchEngine.r -l !{libraryFile} -i !{parameters} -out aggregated_identification_library_neg.csv -th "-1" -im neg -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_neg_msnbase}
+
+  sed -i '/^$/d' aggregated_identification_library_neg.csv
+
+    '''
   }
 
 }
@@ -3194,8 +3341,12 @@ file "pep_identification_library_neg.csv" into library_tsv_neg_output
 
 shell:
   '''
-/usr/local/bin/cfmidPEP.r input=!{identification_result} score=score output=pep_identification_library_neg.csv
-
+  if [ -s !{identification_result} ]
+  then
+/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_library_neg.csv readTable=T
+else
+touch pep_identification_library_neg.csv
+fi
 '''
 
 }
@@ -3214,14 +3365,21 @@ process  process_output_quantid_neg_camera_library{
   input:
   file phenotype_file from phenotype_design_neg_library
   file camera_input_quant from prepareoutput_rdata_neg_camera_library
-  file cfmid_input_identification from library_tsv_neg_output
+  file library_input_identification from library_tsv_neg_output
 
 output:
 file "*.txt" into library_neg_finished
   shell:
 '''
-	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{cfmid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_cfmid.txt outputVariables=varsNEGout_neg_cfmid.txt outputMetaData=metadataNEGout_neg_cfmid.txt Ifnormalize=!{params.normalize_output_neg_camera}
-	'''
+if [ -s !{library_input_identification} ]
+then
+	/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{library_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_library.txt outputVariables=varsNEGout_neg_library.txt outputMetaData=metadataNEGout_neg_library.txt Ifnormalize=!{params.normalize_output_neg_camera}
+  else
+
+  /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_library.txt outputVariables=varsNEGout_neg_library.txt outputMetaData=metadataNEGout_neg_library.txt Ifnormalize=!{params.normalize_output_neg_camera}
+
+  fi
+  '''
 }
 
 }
@@ -3287,20 +3445,7 @@ workflow.onComplete {
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
-    // TODO nf-core: If not using MultiQC, strip out this code (including params.maxMultiqcEmailFileSize)
-    // On success try attach the multiqc report
-    def mqc_report = null
-    try {
-        if (workflow.success) {
-            mqc_report = multiqc_report.getVal()
-            if (mqc_report.getClass() == ArrayList){
-                log.warn "[nf-core/metaboigniter] Found multiple reports from process 'multiqc', will use only one"
-                mqc_report = mqc_report[0]
-            }
-        }
-    } catch (all) {
-        log.warn "[nf-core/metaboigniter] Could not attach MultiQC report to summary email"
-    }
+
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
@@ -3314,7 +3459,7 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()

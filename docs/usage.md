@@ -11,7 +11,7 @@
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
   * [`-profile`](#-profile)
-  * [ metabolomics specific parameters](#parameters-file)
+  * [ metabolomics specific parameters (**how to run the workflow**)](#parameters-file)
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -104,6 +104,8 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 
 ### `parameters file`
 We highly recommend that you use the parameter file located in conf/parameters.config. Since the number of parameters is large, it's going to be a fairly complex bash command to run the workflow. Nevertheless, the parameters can always be passed to the workflow as argument using two dashes "--".
+
+**Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
 
 ## Job resources
 ### Automatic resubmission

@@ -1,0 +1,4 @@
+[submodule "test-datasets"]
+	path = test-datasets
+	url = https://github.com/MetaboIGNITER/test-datasets.git
+	branch = master
