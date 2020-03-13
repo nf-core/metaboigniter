@@ -156,7 +156,7 @@ if((params.type_of_ionization in (["pos","both"])))
 /*
  * Create a channel for quantification (negative MS1) input files
  */
-if((params.type_of_ionization in (["pos","both"])))
+if((params.type_of_ionization in (["neg","both"])))
 {
   if(params.containsKey('quant_mzml_files_neg') && params.quant_mzml_files_neg instanceof String){
         Channel
