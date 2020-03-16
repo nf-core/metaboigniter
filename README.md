@@ -1,4 +1,5 @@
-# metaboigniter
+# MetaboIGNITER
+
 
 **Get your metabolomics analysis up and running**.
 
@@ -28,8 +29,21 @@ The nf-core/metaboigniter pipeline comes with documentation about the pipeline, 
 <!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
 MetaboIGNITER is a comprehensive pipeline of several independent tools used to pre-process liquid chromatography-mass spectrometry (LCMS) data.  We use Nextflow and nf-core to build and run the workflow but parts of this pipeline have also been implemented using Galaxy as part of [PhenoMeNal](https://github.com/phnmnl/) and [Pachyderm](https://github.com/pharmbio/LC-MS-Pachyderm).
 
+The complete pipeline will go through the following steps:
+
+<img src="assets/flowchart.png">
+
 ## Credits
-metaboigniter was originally written by Payam Emami.
+MetaboIGNITER was originally written by Payam Emami.
+
+This works has been done with collaboration with several groups.
+
+<a href="https://www.nbis.se/">
+<img src="assets/NBIS.svg" width="100" height="100">&nbsp;&nbsp;&nbsp;</a>
+<a href="https://elixir-europe.org/"><img src="assets/elixir.png" width="100" height="100">&nbsp;&nbsp;&nbsp;</a><a href="http://www.caramba.clinic/">
+<img src="assets/caramba.png" width="120" height="100">&nbsp;&nbsp;&nbsp;</a><a href="https://phenomenal-h2020.eu/home/">
+<img src="assets/PhenoMeNal_logo.png" width="330" height="100">&nbsp;&nbsp;&nbsp;</a>
+
 
 ## IMPORTANT
 This workflow is not part of nf-core yet. We plan to to make it available as soon as possible.
