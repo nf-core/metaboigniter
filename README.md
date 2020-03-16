@@ -40,7 +40,7 @@ This works has been done with collaboration with several groups.
 
 <a href="https://www.nbis.se/">
 <img src="assets/NBIS.svg" width="100" height="100">&nbsp;&nbsp;&nbsp;</a>
-<a href="https://elixir-europe.org/"><img src="assets/elixir.png" width="100" height="100">&nbsp;&nbsp;&nbsp;</a><a href="http://www.caramba.clinic/">
+<a href="https://elixir-europe.org/"><img src="assets/_cWXo-vA.jpeg" width="100" height="100">&nbsp;&nbsp;&nbsp;</a><a href="http://www.caramba.clinic/">
 <img src="assets/caramba.png" width="120" height="100">&nbsp;&nbsp;&nbsp;</a><a href="https://phenomenal-h2020.eu/home/">
 <img src="assets/PhenoMeNal_logo.png" width="330" height="100">&nbsp;&nbsp;&nbsp;</a>
 
