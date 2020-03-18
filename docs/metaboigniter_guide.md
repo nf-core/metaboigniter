@@ -193,8 +193,8 @@ Please be aware that setting need_centroiding=true will do centroiding on all of
 If you want non-defualt values, to control the parameters centroiding you can edit *openms_peak_picker_ini_pos.ini* and *openms_peak_picker_ini_neg.ini* files located under *metaboigniter/conf/metaboigniter_params/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_PeakPickerHiRes.html).
 
 ### Mass Trace Detection (quantification)
-MetaboIGNITER can perform quantification either using XCMS (default) or OpenMS (experimental).
-This behaviour is controlled using two parameters for positive and negative ionization:
+MetaboIGNITER can perform quantification either using XCMS (default) or OpenMS (experimental). ** We only support OpenMS 2.4.0 at this stage **
+This behavior is controlled using two parameters for positive and negative ionization:
 
 set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in positive ionization:
 
@@ -205,7 +205,7 @@ set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) fo
     quantification_openms_xcms_neg="xcms"
 
 #### Quantification using OpenMS
-If you choose to perform the quantification using OpenMS, you should consider changing the parameters for OpenMS only. You can edit *openms_feature_finder_metabo_ini_pos.ini* and *openms_feature_finder_metabo_ini_neg.ini* files located under *metaboigniter/conf/metaboigniter_params/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FeatureFinderMetabo.html).
+If you choose to perform the quantification using OpenMS, you should consider changing the parameters for OpenMS only. You can edit *openms_feature_finder_metabo_ini_pos.ini* and *openms_feature_finder_metabo_ini_neg.ini* files located under *metaboigniter/conf/metaboigniter_params/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FeatureFinderMetabo.html). **When tuning the OpenMS parameters make sure that "report_convex_hulls" is set to true**
 
 #### Quantification using XCMS
 This is the default behavior of the workflow. You need to set the following parameters:

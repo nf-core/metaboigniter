@@ -672,9 +672,9 @@ if(params.type_of_ionization in (["pos","both"]))
        */
    if(params.quantification_openms_xcms_pos=="openms")
    {
-     process process_masstrace_detection_pos_openms {
+     process process_masstrace_detection_pos_openms_centroided {
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_pos_openms", mode: 'copy'
+         publishDir "${params.outdir}/process_masstrace_detection_pos_openms_centroided", mode: 'copy'
          stageInMode 'copy'
          // container '${computations.docker_masstrace_detection_pos_openms}'
 
@@ -693,9 +693,9 @@ if(params.type_of_ionization in (["pos","both"]))
      /*
       * STEP 2.5 - convert openms to xcms
       */
-     process process_openms_to_xcms_conversion_pos {
+     process process_openms_to_xcms_conversion_pos_centroided {
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_pos_openms", mode: 'copy'
+         publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_centroided", mode: 'copy'
          stageInMode 'copy'
          // container '${computations.docker_openms_to_xcms_conversion}'
 
@@ -704,7 +704,7 @@ if(params.type_of_ionization in (["pos","both"]))
          each file(phenotype_file) from phenotype_design_pos
 
          output:
-         file "${mzMLFile.baseName}.featureXML" into collect_rdata_pos_xcms
+         file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
 
          shell:
          '''
@@ -740,29 +740,78 @@ if(params.type_of_ionization in (["pos","both"]))
 
 
   }else{
+
     /*
-     * STEP 1 - feature detection by xcms
+     * STEP 2 - feature detection by openms if selected by the user
      */
-    process process_masstrace_detection_pos_xcms_noncentroided {
-      tag "$name"
-      publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: 'copy'
-      stageInMode 'copy'
-      // container '${computations.docker_masstrace_detection_pos_xcms}'
+ if(params.quantification_openms_xcms_pos=="openms")
+ {
+   process process_masstrace_detection_pos_openms_noncentroided {
+       tag "$name"
+       publishDir "${params.outdir}/process_masstrace_detection_pos_openms_noncentroided", mode: 'copy'
+       stageInMode 'copy'
+       // container '${computations.docker_masstrace_detection_pos_openms}'
 
-      input:
-      file mzMLFile from quant_mzml_files_pos
-      each file(phenotype_file) from phenotype_design_pos
+       input:
+       file mzMLFile from quant_mzml_files_pos
+       each file(setting_file) from featurefinder_ini_pos_openms
 
-      output:
-      file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
+       output:
+       file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_pos_noncentroided
 
-      shell:
-      '''
-      /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms}
+       shell:
+       '''
+       FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
+       '''
+   }
+   /*
+    * STEP 2.5 - convert openms to xcms
+    */
+   process process_openms_to_xcms_conversion_pos_noncentroided {
+       tag "$name"
+       publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_noncentroided", mode: 'copy'
+       stageInMode 'copy'
+       // container '${computations.docker_openms_to_xcms_conversion}'
 
+       input:
+       file mzMLFile from openms_to_xcms_conversion_pos_noncentroided
+       each file(phenotype_file) from phenotype_design_pos
 
-      '''
-    }
+       output:
+       file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
+
+       shell:
+       '''
+        /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
+
+       '''
+   }
+
+ }else{
+   /*
+    * STEP 2 - feature detection by xcms
+    */
+   process process_masstrace_detection_pos_xcms_noncentroided{
+     tag "$name"
+     publishDir "${params.outdir}/process_masstrace_detection_pos_xcms_noncentroided", mode: 'copy'
+     stageInMode 'copy'
+     // container '${computations.docker_masstrace_detection_pos_xcms}'
+
+     input:
+     file mzMLFile from quant_mzml_files_pos
+     each file(phenotype_file) from phenotype_design_pos
+
+     output:
+     file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
+
+     shell:
+     '''
+/usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms}
+     '''
+   }
+
+ }
+
   }
 
   /*
@@ -1520,9 +1569,9 @@ if(params.library_charactrized_pos==false){
      * STEP 30 - peakpicking for library
      */
 
-    process process_peak_picker_library_pos_openms {
+    process process_peak_picker_library_pos_openms_centroided {
         tag "$name"
-        publishDir "${params.outdir}/process_peak_picker_library_pos_openms", mode: 'copy'
+        publishDir "${params.outdir}/process_peak_picker_library_pos_openms_centroided", mode: 'copy'
         stageInMode 'copy'
         // container '${computations.docker_peak_picker_library_pos_openms}'
 
@@ -1544,9 +1593,9 @@ if(params.library_charactrized_pos==false){
      /*
       * STEP 31 - feature detection for the library by openms
       */
-     process process_masstrace_detection_library_pos_openms {
+     process process_masstrace_detection_library_pos_openms_centroided {
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms", mode: 'copy'
+         publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_centroided", mode: 'copy'
          stageInMode 'copy'
          // container '${computations.docker_masstrace_detection_library_pos_openms}'
 
@@ -1569,7 +1618,7 @@ if(params.library_charactrized_pos==false){
 
      process process_openms_to_xcms_conversion_library_pos_centroided {
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms", mode: 'copy'
+         publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_centroided", mode: 'copy'
          stageInMode 'copy'
          // container '${computations.docker_openms_to_xcms_conversion}'
 
@@ -1578,7 +1627,7 @@ if(params.library_charactrized_pos==false){
          //each file(phenotype_file) from phenotype_design_library_pos
 
          output:
-         file "${mzMLFile.baseName}.featureXML" into annotation_rdata_library_pos_camera
+         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
          shell:
          '''
@@ -1595,7 +1644,7 @@ if(params.library_charactrized_pos==false){
 
      process process_masstrace_detection_library_pos_xcms_centroided{
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms", mode: 'copy'
+       publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_centroided", mode: 'copy'
        stageInMode 'copy'
        // container '${computations.docker_masstrace_detection_library_pos_xcms}'
 
@@ -1618,29 +1667,81 @@ if(params.library_charactrized_pos==false){
   }else{
 
 
-         /*
-          * STEP 34 - feature detection using xcms without peak picking
-          */
+    if(params.quantification_openms_xcms_library_pos=="openms")
+    {
+      /*
+       * STEP 31 - feature detection for the library by openms
+       */
+      process process_masstrace_detection_library_pos_openms_noncentroided {
+          tag "$name"
+          publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_noncentroided", mode: 'copy'
+          stageInMode 'copy'
+          // container '${computations.docker_masstrace_detection_library_pos_openms}'
 
+          input:
+          file mzMLFile from quant_library_mzml_files_pos
+          each file(setting_file) from featurefinder_ini_library_pos_openms
 
-    process process_masstrace_detection_library_pos_xcms_noncentroided{
-      tag "$name"
-      publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms", mode: 'copy'
-      stageInMode 'copy'
-      // container '${computations.docker_masstrace_detection_library_pos_xcms}'
+          output:
+          file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_library_pos_noncentroided
 
-      input:
-      file mzMLFile from quant_library_mzml_files_pos
-//      each file(phenotype_file) from phenotype_design_library_pos
+          shell:
+          '''
+          FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
+          '''
+      }
 
-      output:
-      file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
+      /*
+       * STEP 32 - convert openms to xcms
+       */
 
-      shell:
-      '''
-  /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=library
-      '''
+      process process_openms_to_xcms_conversion_library_pos_noncentroided {
+          tag "$name"
+          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_noncentroided", mode: 'copy'
+          stageInMode 'copy'
+          // container '${computations.docker_openms_to_xcms_conversion}'
+
+          input:
+          file mzMLFile from openms_to_xcms_conversion_library_pos_noncentroided
+          //each file(phenotype_file) from phenotype_design_library_pos
+
+          output:
+          file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
+
+          shell:
+          '''
+           /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata sampleClass=library changeNameTO=!{mzMLFile.baseName}.mzML
+
+          '''
+      }
+
+    }else{
+
+      /*
+       * STEP 33 - feature detection using xcms
+       */
+
+      process process_masstrace_detection_library_pos_xcms_noncentroided{
+        tag "$name"
+        publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_noncentroided", mode: 'copy'
+        stageInMode 'copy'
+        // container '${computations.docker_masstrace_detection_library_pos_xcms}'
+
+        input:
+        file mzMLFile from quant_library_mzml_files_pos
+   //     each file(phenotype_file) from phenotype_design_library_pos
+
+        output:
+        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
+
+        shell:
+        '''
+   /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=library
+        '''
+      }
+
     }
+
   }
 
 
@@ -2066,9 +2167,9 @@ if(params.type_of_ionization in (["neg","both"]))
      */
    if(params.quantification_openms_xcms_neg=="openms")
    {
-     process process_masstrace_detection_neg_openms {
+     process process_masstrace_detection_neg_openms_centroided {
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_neg_openms", mode: 'copy'
+         publishDir "${params.outdir}/process_masstrace_detection_neg_openms_centroided", mode: 'copy'
          stageInMode 'copy'
          // container '${computations.docker_masstrace_detection_neg_openms}'
 
@@ -2087,9 +2188,9 @@ if(params.type_of_ionization in (["neg","both"]))
      /*
       * STEP 50 - convert openms to xcms
       */
-     process process_openms_to_xcms_conversion_neg {
+     process process_openms_to_xcms_conversion_neg_centroided {
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_neg_openms", mode: 'copy'
+         publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_centroided", mode: 'copy'
          stageInMode 'copy'
          // container '${computations.docker_openms_to_xcms_conversion}'
 
@@ -2098,7 +2199,7 @@ if(params.type_of_ionization in (["neg","both"]))
          each file(phenotype_file) from phenotype_design_neg
 
          output:
-         file "${mzMLFile.baseName}.featureXML" into collect_rdata_neg_xcms
+         file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
 
          shell:
          '''
@@ -2113,7 +2214,7 @@ if(params.type_of_ionization in (["neg","both"]))
       */
      process process_masstrace_detection_neg_xcms_centroided{
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: 'copy'
+       publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_centroided", mode: 'copy'
        stageInMode 'copy'
        // container '${computations.docker_masstrace_detection_neg_xcms}'
 
@@ -2134,28 +2235,76 @@ if(params.type_of_ionization in (["neg","both"]))
 
 
   }else{
-    /*
-     * STEP 51 - feature detection by xcms
-     */
-    process process_masstrace_detection_neg_xcms_noncentroided{
-      tag "$name"
-      publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: 'copy'
-      stageInMode 'copy'
-      // container '${computations.docker_masstrace_detection_neg_xcms}'
 
-      input:
-      file mzMLFile from quant_mzml_files_neg
-      each file(phenotype_file) from phenotype_design_neg
 
-      output:
-      file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
+    if(params.quantification_openms_xcms_neg=="openms")
+    {
+      process process_masstrace_detection_neg_openms_noncentroided {
+          tag "$name"
+          publishDir "${params.outdir}/process_masstrace_detection_neg_openms_noncentroided", mode: 'copy'
+          stageInMode 'copy'
+          // container '${computations.docker_masstrace_detection_neg_openms}'
 
-      shell:
-      '''
+          input:
+          file mzMLFile from quant_mzml_files_neg
+          each file(setting_file) from featurefinder_ini_neg_openms
 
- /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_neg_xcms} noise=!{params.noise_quant_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms}
-      '''
+          output:
+          file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_neg_noncentroided
+
+          shell:
+          '''
+          FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
+          '''
+      }
+      /*
+       * STEP 50 - convert openms to xcms
+       */
+      process process_openms_to_xcms_conversion_neg_noncentroided {
+          tag "$name"
+          publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_noncentroided", mode: 'copy'
+          stageInMode 'copy'
+          // container '${computations.docker_openms_to_xcms_conversion}'
+
+          input:
+          file mzMLFile from openms_to_xcms_conversion_neg_noncentroided
+          each file(phenotype_file) from phenotype_design_neg
+
+          output:
+          file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
+
+          shell:
+          '''
+           /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=negative output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
+
+          '''
+      }
+
+    }else{
+      /*
+       * STEP 51 - feature detection by xcms
+       */
+      process process_masstrace_detection_neg_xcms_noncentroided{
+        tag "$name"
+        publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_noncentroided", mode: 'copy'
+        stageInMode 'copy'
+        // container '${computations.docker_masstrace_detection_neg_xcms}'
+
+        input:
+        file mzMLFile from quant_mzml_files_neg
+        each file(phenotype_file) from phenotype_design_neg
+
+        output:
+        file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
+
+        shell:
+        '''
+   /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_neg_xcms} noise=!{params.noise_quant_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms}
+        '''
+      }
+
     }
+
   }
   /*
    * STEP 52 - collect xcms objects into a hyper object
@@ -2944,9 +3093,9 @@ if(params.library_charactrized_neg==false){
      /*
       * STEP 80 - feature detection for the library by openms
       */
-     process process_masstrace_detection_library_neg_openms {
+     process process_masstrace_detection_library_neg_openms_centroided {
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms", mode: 'copy'
+         publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_centroided", mode: 'copy'
          stageInMode 'copy'
          // container '${computations.docker_masstrace_detection_library_neg_openms}'
 
@@ -2966,9 +3115,9 @@ if(params.library_charactrized_neg==false){
      /*
       * STEP 81 - convert openms to xcms
       */
-     process process_openms_to_xcms_conversion_centroided {
+     process process_openms_to_xcms_conversion_library_centroided {
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms", mode: 'copy'
+         publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_centroided", mode: 'copy'
          stageInMode 'copy'
          // container '${computations.docker_openms_to_xcms_conversion}'
 
@@ -2977,7 +3126,7 @@ if(params.library_charactrized_neg==false){
       //   each file(phenotype_file) from phenotype_design_library_neg
 
          output:
-         file "${mzMLFile.baseName}.featureXML" into annotation_rdata_library_neg_camera
+         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
          shell:
          '''
@@ -2991,9 +3140,9 @@ if(params.library_charactrized_neg==false){
      /*
       * STEP 82 - feature detection using xcms
       */
-     process process_masstrace_detection_library_neg_xcms_noncentroided{
+     process process_masstrace_detection_library_neg_xcms_centroided{
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms", mode: 'copy'
+       publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_centroided", mode: 'copy'
        stageInMode 'copy'
        // container '${computations.docker_masstrace_detection_library_neg_xcms}'
 
@@ -3016,28 +3165,81 @@ if(params.library_charactrized_neg==false){
   }else{
 
 
-             /*
-              * STEP 83 - feature detection using xcms without peak picking
-              */
+       if(params.quantification_openms_xcms_library_neg=="openms")
+       {
+         /*
+          * STEP 80 - feature detection for the library by openms
+          */
+         process process_masstrace_detection_library_neg_openms_noncentroided {
+             tag "$name"
+             publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_noncentroided", mode: 'copy'
+             stageInMode 'copy'
+             // container '${computations.docker_masstrace_detection_library_neg_openms}'
 
-    process process_masstrace_detection_library_neg_xcms{
-      tag "$name"
-      publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms", mode: 'copy'
-      stageInMode 'copy'
-      // container '${computations.docker_masstrace_detection_library_neg_xcms}'
+             input:
+             file mzMLFile from quant_library_mzml_files_neg
+             each file(setting_file) from featurefinder_ini_library_neg_openms
 
-      input:
-      file mzMLFile from quant_library_mzml_files_neg
-    //  each file(phenotype_file) from phenotype_design_library_neg
+             output:
+             file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_library_noncentroided
 
-      output:
-      file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
+             shell:
+             '''
+             FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
+             '''
+         }
 
-      shell:
-      '''
-  /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=library
-      '''
-    }
+         /*
+          * STEP 81 - convert openms to xcms
+          */
+         process process_openms_to_xcms_conversion_library_noncentroided {
+             tag "$name"
+             publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_noncentroided", mode: 'copy'
+             stageInMode 'copy'
+             // container '${computations.docker_openms_to_xcms_conversion}'
+
+             input:
+             file mzMLFile from openms_to_xcms_conversion_library_noncentroided
+          //   each file(phenotype_file) from phenotype_design_library_neg
+
+             output:
+             file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
+
+             shell:
+             '''
+              /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=negative output=!{mzMLFile.baseName}.rdata sampleClass=library changeNameTO=!{mzMLFile.baseName}.mzML
+
+             '''
+         }
+
+       }else{
+
+
+
+         /*
+          * STEP 82 - feature detection using xcms
+          */
+         process process_masstrace_detection_library_neg_xcms_noncentroided{
+           tag "$name"
+           publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_noncentroided", mode: 'copy'
+           stageInMode 'copy'
+           // container '${computations.docker_masstrace_detection_library_neg_xcms}'
+
+           input:
+           file mzMLFile from quant_library_mzml_files_neg
+        //   each file(phenotype_file) from phenotype_design_library_neg
+
+           output:
+           file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
+
+           shell:
+           '''
+      /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=library
+           '''
+         }
+
+       }
+
   }
 
   /*
