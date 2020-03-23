@@ -4,11 +4,12 @@ name: nf-core CI
 on: [push, pull_request]
 
 
-before_script:
-  - git submodule sync --recursive
-  - git submodule update --init --recursive
-
 jobs:
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
   test:
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
