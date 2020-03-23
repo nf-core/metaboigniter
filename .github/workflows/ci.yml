@@ -1,9 +1,7 @@
 name: nf-core CI
 # This workflow is triggered on pushes and PRs to the repository.
 # It runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
-before_script:
-  - git submodule sync --recursive
-  - git submodule update --init --recursive
+
 
 on: [push, pull_request]
 
@@ -28,6 +26,9 @@ jobs:
         run: |
           docker pull metaboigniter/metaboigniter:dev
           docker tag metaboigniter/metaboigniter:dev metaboigniter/metaboigniter:dev
+      - name: Pull submodule
+        run: |
+          git pull --recurse-submodules
       - name: Run pipeline with test data
         run: |
           # TODO nf-core: You can customise CI pipeline run tests as required
