@@ -1,10 +1,10 @@
-# MetaboIGNITER
+# ![nf-core/metaboigniter](docs/images/nf-core-metaboigniter_logo.png)
 
 
 **Get your metabolomics analysis up and running**.
 
 [![Build Status](https://travis-ci.com/MetaboIGNITER/metaboigniter.svg?branch=master)](https://travis-ci.com/MetaboIGNITER/metaboigniter)
-[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/cloud/automated/metaboigniter/metaboigniter)](https://hub.docker.com/r/metaboigniter/metaboigniter)

@@ -7,3 +7,4 @@ channels:
   - defaults
 dependencies:
   # TODO nf-core: Add required software dependencies here
+  - r-base=3.6.1
