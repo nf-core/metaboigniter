@@ -1,16 +1,15 @@
 name: nf-core CI
 # This workflow is triggered on pushes and PRs to the repository.
 # It runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
+before_script:
+  - git submodule sync --recursive
+  - git submodule update --init --recursive
+
 on: [push, pull_request]
 
 
 jobs:
   test:
-    variables:
-      GIT_SUBMODULE_STRATEGY: recursive
-    before_script:
-      - git submodule sync --recursive
-      - git submodule update --init --recursive
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
