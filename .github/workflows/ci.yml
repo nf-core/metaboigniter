@@ -5,12 +5,12 @@ on: [push, pull_request]
 
 
 jobs:
-  variables:
-    GIT_SUBMODULE_STRATEGY: recursive
-  before_script:
-    - git submodule sync --recursive
-    - git submodule update --init --recursive
   test:
+    variables:
+      GIT_SUBMODULE_STRATEGY: recursive
+    before_script:
+      - git submodule sync --recursive
+      - git submodule update --init --recursive
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
