@@ -28,6 +28,7 @@ jobs:
           docker tag metaboigniter/metaboigniter:dev metaboigniter/metaboigniter:dev
       - name: Pull submodule
         run: |
+          git submodule update --init --recursive
           git pull --recurse-submodules
       - name: Run pipeline with test data
         run: |
