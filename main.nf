@@ -143,9 +143,9 @@ if(params.containsKey('need_centroiding') && params.need_centroiding instanceof 
  */
 if((params.type_of_ionization in (["pos","both"])))
 {
-  if(params.containsKey('quant_mzml_files_pos') && params.quant_mzml_files_pos instanceof String){
+  if(params.containsKey('quant_mzml_files_pos') && (params.quant_mzml_files_pos instanceof String || params.quant_mzml_files_pos instanceof java.util.ArrayList)){
         Channel
-              .fromPath(params.quant_mzml_files_pos+"/*.mzML")
+              .fromPath(params.quant_mzml_files_pos)
               .ifEmpty { exit 1, "params.quant_mzml_files_pos was empty - no input files supplied" }
               .set { quant_mzml_files_pos}
   } else{
@@ -158,9 +158,9 @@ if((params.type_of_ionization in (["pos","both"])))
  */
 if((params.type_of_ionization in (["neg","both"])))
 {
-  if(params.containsKey('quant_mzml_files_neg') && params.quant_mzml_files_neg instanceof String){
+  if(params.containsKey('quant_mzml_files_neg') && (params.quant_mzml_files_neg instanceof String || params.quant_mzml_files_neg instanceof java.util.ArrayList)){
         Channel
-              .fromPath(params.quant_mzml_files_neg+"/*.mzML")
+              .fromPath(params.quant_mzml_files_neg)
               .ifEmpty { exit 1, "params.quant_mzml_files_neg was empty - no input files supplied" }
               .set { quant_mzml_files_neg}
   } else{
@@ -205,9 +205,9 @@ if(params.perform_identification==true)
 {
   if((params.type_of_ionization in (["pos","both"])))
   {
-    if(params.containsKey('id_mzml_files_pos') && params.id_mzml_files_pos instanceof String){
+    if(params.containsKey('id_mzml_files_pos') && (params.id_mzml_files_pos instanceof String || params.id_mzml_files_pos instanceof java.util.ArrayList)){
           Channel
-                .fromPath(params.id_mzml_files_pos+"/*.mzML")
+                .fromPath(params.id_mzml_files_pos)
                 .ifEmpty { exit 1, "params.id_mzml_files_pos was empty - no input files supplied" }
                 .set { id_mzml_files_pos}
     } else{
@@ -220,9 +220,9 @@ if(params.perform_identification==true)
    */
   if((params.type_of_ionization in (["neg","both"])))
   {
-    if(params.containsKey('id_mzml_files_neg') && params.id_mzml_files_neg instanceof String){
+    if(params.containsKey('id_mzml_files_neg') && (params.id_mzml_files_neg instanceof String || params.id_mzml_files_neg instanceof java.util.ArrayList)){
           Channel
-                .fromPath(params.id_mzml_files_neg+"/*.mzML")
+                .fromPath(params.id_mzml_files_neg)
                 .ifEmpty { exit 1, "params.id_mzml_files_neg was empty - no input files supplied" }
                 .set { id_mzml_files_neg}
     } else{
@@ -289,20 +289,21 @@ if(params.perform_identification==true && params.perform_identification_internal
       }
     }else{
 
-      if(!params.containsKey('quant_library_mzml_files_pos') || !(params.library_charactrized_pos instanceof Boolean) ||
-    !params.containsKey('id_library_mzml_files_pos') || !(params.id_library_mzml_files_pos instanceof String) ||
+      if(!params.containsKey('quant_library_mzml_files_pos') || (!(params.quant_library_mzml_files_pos instanceof String) || !(params.quant_library_mzml_files_pos instanceof java.util.ArrayList)) ||
+      !(params.library_charactrized_pos instanceof Boolean) ||
+    !params.containsKey('id_library_mzml_files_pos') || (!(params.id_library_mzml_files_pos instanceof String) || !(params.id_library_mzml_files_pos instanceof java.util.ArrayList)) ||
     !params.containsKey('library_description_pos') || !(params.library_description_pos instanceof String))
     {
       exit 1, "One of params.quant_library_mzml_files_pos,params.id_library_mzml_files_pos or param.library_description_pos was not found or not defined as string! You need to set them in conf/parameters.config!"
 
     }
     Channel
-          .fromPath(params.quant_library_mzml_files_pos+"/*.mzML")
+          .fromPath(params.quant_library_mzml_files_pos)
           .ifEmpty { exit 1, "params.quant_library_mzml_files_pos was empty - no input files supplied" }
           .set { quant_library_mzml_files_pos}
 
     Channel
-          .fromPath(params.id_library_mzml_files_pos+"/*.mzML")
+          .fromPath(params.id_library_mzml_files_pos)
           .ifEmpty { exit 1, "params.id_library_mzml_files_pos was empty - no input files supplied" }
           .set { id_library_mzml_files_pos}
 
@@ -336,20 +337,21 @@ if(params.perform_identification==true && params.perform_identification_internal
         exit 1, "params.library_charactrization_file_neg was not found or not defined as string! You need to set library_charactrization_file_neg in conf/parameters.config to the path to a file containing your charaztrized library"
       }
     }else{
-      if(!params.containsKey('quant_library_mzml_files_neg') || !(params.library_charactrized_neg instanceof Boolean) ||
-    !params.containsKey('id_library_mzml_files_neg') || !(params.id_library_mzml_files_neg instanceof String) ||
+      if(!params.containsKey('quant_library_mzml_files_neg') || (!(params.quant_library_mzml_files_neg instanceof String) || !(params.quant_library_mzml_files_neg instanceof java.util.ArrayList)) ||
+      !(params.library_charactrized_neg instanceof Boolean) ||
+    !params.containsKey('id_library_mzml_files_neg') || (!(params.id_library_mzml_files_neg instanceof String) || !(params.id_library_mzml_files_neg instanceof java.util.ArrayList)) ||
     !params.containsKey('library_description_neg') || !(params.library_description_neg instanceof String))
     {
       exit 1, "One of params.quant_library_mzml_files_neg, params.id_library_mzml_files_neg or param.library_description_neg was not found or not defined as string! You need to set them in conf/parameters.config!"
 
     }
     Channel
-          .fromPath(params.quant_library_mzml_files_neg+"/*.mzML")
+          .fromPath(params.quant_library_mzml_files_neg)
           .ifEmpty { exit 1, "params.quant_library_mzml_files_neg was empty - no input files supplied" }
           .set { quant_library_mzml_files_neg}
 
     Channel
-          .fromPath(params.id_library_mzml_files_neg+"/*.mzML")
+          .fromPath(params.id_library_mzml_files_neg)
           .ifEmpty { exit 1, "params.id_library_mzml_files_neg was empty - no input files supplied" }
           .set { id_library_mzml_files_neg}
 
@@ -648,6 +650,7 @@ if(params.type_of_ionization in (["pos","both"]))
   if(params.need_centroiding==true)
   {
     process process_peak_picker_pos_openms{
+        label 'openms'
         tag "$name"
         publishDir "${params.outdir}/process_peak_picker_pos_openms", mode: 'copy'
         stageInMode 'copy'
@@ -673,6 +676,7 @@ if(params.type_of_ionization in (["pos","both"]))
    if(params.quantification_openms_xcms_pos=="openms")
    {
      process process_masstrace_detection_pos_openms_centroided {
+        label 'openms'
          tag "$name"
          publishDir "${params.outdir}/process_masstrace_detection_pos_openms_centroided", mode: 'copy'
          stageInMode 'copy'
@@ -694,6 +698,7 @@ if(params.type_of_ionization in (["pos","both"]))
       * STEP 2.5 - convert openms to xcms
       */
      process process_openms_to_xcms_conversion_pos_centroided {
+         label 'xcmsconvert'
          tag "$name"
          publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_centroided", mode: 'copy'
          stageInMode 'copy'
@@ -718,6 +723,7 @@ if(params.type_of_ionization in (["pos","both"]))
       * STEP 2 - feature detection by xcms
       */
      process process_masstrace_detection_pos_xcms_centroided{
+       label 'xcms'
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: 'copy'
        stageInMode 'copy'
@@ -747,6 +753,7 @@ if(params.type_of_ionization in (["pos","both"]))
  if(params.quantification_openms_xcms_pos=="openms")
  {
    process process_masstrace_detection_pos_openms_noncentroided {
+       label 'openms'
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_pos_openms_noncentroided", mode: 'copy'
        stageInMode 'copy'
@@ -768,6 +775,7 @@ if(params.type_of_ionization in (["pos","both"]))
     * STEP 2.5 - convert openms to xcms
     */
    process process_openms_to_xcms_conversion_pos_noncentroided {
+       label 'xcmsconvert'
        tag "$name"
        publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_noncentroided", mode: 'copy'
        stageInMode 'copy'
@@ -792,6 +800,7 @@ if(params.type_of_ionization in (["pos","both"]))
     * STEP 2 - feature detection by xcms
     */
    process process_masstrace_detection_pos_xcms_noncentroided{
+     label 'xcms'
      tag "$name"
      publishDir "${params.outdir}/process_masstrace_detection_pos_xcms_noncentroided", mode: 'copy'
      stageInMode 'copy'
@@ -818,6 +827,7 @@ if(params.type_of_ionization in (["pos","both"]))
    * STEP 3 - collect xcms objects into a hyper object
    */
   process  process_collect_rdata_pos_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_collect_rdata_pos_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -842,6 +852,7 @@ if(params.type_of_ionization in (["pos","both"]))
    * STEP 4 - link the mass traces across the samples
    */
   process  process_group_peaks_pos_N1_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_group_peaks_pos_N1_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -863,6 +874,7 @@ if(params.type_of_ionization in (["pos","both"]))
    * STEP 5 - do RT correction
    */
   process  process_align_peaks_pos_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_align_peaks_pos_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -887,6 +899,7 @@ if(params.type_of_ionization in (["pos","both"]))
    * STEP 6 - do another round of grouping
    */
   process  process_group_peaks_pos_N2_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_group_peaks_pos_N2_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -913,6 +926,7 @@ if(params.blank_filter_pos)
   blankfilter_rdata_pos_xcms=temp_unfiltered_channel_pos_1
 
   process  process_blank_filter_pos_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_blank_filter_pos_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -941,6 +955,7 @@ if(params.dilution_filter_pos==true)
 {
   dilutionfilter_rdata_pos_xcms=temp_unfiltered_channel_pos_2
   process  process_dilution_filter_pos_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_dilution_filter_pos_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -969,6 +984,7 @@ if(params.cv_filter_pos==true)
 {
   cvfilter_rdata_pos_xcms=temp_unfiltered_channel_pos_3
   process  process_cv_filter_pos_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_cv_filter_pos_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -997,6 +1013,7 @@ annotation_rdata_pos_camera=temp_unfiltered_channel_pos_4
 
 
 process  process_annotate_peaks_pos_camera{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_annotate_peaks_pos_camera", mode: 'copy'
   stageInMode 'copy'
@@ -1019,6 +1036,7 @@ file "CameraAnnotatePeaks_pos.rdata" into group_rdata_pos_camera
  */
 
 process  process_group_peaks_pos_camera{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_group_peaks_pos_camera", mode: 'copy'
   stageInMode 'copy'
@@ -1041,6 +1059,7 @@ file "CameraGroup_pos.rdata" into findaddcuts_rdata_pos_camera
  */
 
 process  process_find_addcuts_pos_camera{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_find_addcuts_pos_camera", mode: 'copy'
   stageInMode 'copy'
@@ -1063,6 +1082,7 @@ file "CameraFindAdducts_pos.rdata" into findisotopes_rdata_pos_camera
  */
 
 process  process_find_isotopes_pos_camera{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_find_isotopes_pos_camera", mode: 'copy'
   stageInMode 'copy'
@@ -1095,6 +1115,7 @@ if(params.perform_identification==true)
    */
 
   process  process_read_MS2_pos_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_read_MS2_pos_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -1117,6 +1138,7 @@ if(params.perform_identification==true)
    */
 
   process  process_mapmsms_tocamera_pos_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_mapmsms_tocamera_pos_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -1142,6 +1164,7 @@ if(params.perform_identification==true)
    */
 
   process  process_mapmsms_toparam_pos_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_mapmsms_toparam_pos_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -1177,6 +1200,7 @@ csifingerid_txt_pos_msnbase_flatten=csifingerid_txt_pos_msnbase.flatten()
    */
 
 process  process_ms2_identification_pos_csifingerid{
+  label 'csifingerid'
   tag "$name"
   publishDir "${params.outdir}/process_ms2_identification_pos_csifingerid", mode: 'copy'
   // container '${computations.docker_ms2_identification_pos_csifingerid}'
@@ -1199,6 +1223,7 @@ process  process_ms2_identification_pos_csifingerid{
  */
 
 process  process_identification_aggregate_pos_csifingerid{
+  label 'msnbase'
   tag "$name"
   publishDir "${params.outdir}/process_identification_aggregate_pos_csifingerid", mode: 'copy'
   // container '${computations.docker_identification_aggregate_pos_csifingerid}'
@@ -1221,6 +1246,7 @@ sed -i '/^$/d' aggregated_identification_csifingerid_pos.csv
  */
 
 process process_pepcalculation_csifingerid_pos_passatutto{
+  label 'passatutto'
   tag "$name"
   publishDir "${params.outdir}/process_pepcalculation_csifingerid_pos_passatutto", mode: 'copy'
   // container '${computations.docker_pepcalculation_csifingerid_pos_passatutto'
@@ -1249,6 +1275,7 @@ fi
  * STEP 21 - output the results
  */
 process  process_output_quantid_pos_camera_csifingerid{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_output_quantid_pos_camera_csifingerid", mode: 'copy'
   stageInMode 'copy'
@@ -1309,6 +1336,7 @@ metfrag_txt_pos_msnbase_flatten=metfrag_txt_pos_msnbase.flatten()
  */
 
 process  process_ms2_identification_pos_metfrag{
+  label 'metfrag'
   tag "$name"
   publishDir "${params.outdir}/process_ms2_identification_pos_metfrag", mode: 'copy'
   // container '${computations.docker_ms2_identification_pos_metfrag}'
@@ -1335,6 +1363,7 @@ process  process_ms2_identification_pos_metfrag{
  */
 
 process  process_identification_aggregate_pos_metfrag{
+  label 'msnbase'
   tag "$name"
   publishDir "${params.outdir}/process_identification_aggregate_pos_metfrag", mode: 'copy'
   // container '${computations.docker_identification_aggregate_pos_metfrag'
@@ -1358,6 +1387,7 @@ file "aggregated_identification_metfrag_pos.csv" into metfrag_tsv_pos_passatutto
  * STEP 24 - calculate pep from metfrag results
  */
 process process_pepcalculation_metfrag_pos_passatutto{
+  label 'passatutto'
   tag "$name"
   publishDir "${params.outdir}/process_pepcalculation_metfrag_pos_passatutto", mode: 'copy'
   // container '${computations.docker_pepcalculation_metfrag_pos_passatutto'
@@ -1390,6 +1420,7 @@ fi
  */
 
 process  process_output_quantid_pos_camera_metfrag{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_output_quantid_pos_camera_metfrag", mode: 'copy'
   stageInMode 'copy'
@@ -1441,6 +1472,7 @@ cfmid_txt_pos_msnbase_flatten=cfmidin_txt_pos_msnbase.flatten()
  * STEP 26 - do search using cfmid
  */
 process  process_ms2_identification_pos_cfmid{
+  label 'cfmid'
   tag "$name"
   publishDir "${params.outdir}/process_ms2_identification_pos_cfmid", mode: 'copy'
   // container '${computations.docker_ms2_identification_pos_cfmid}'
@@ -1467,6 +1499,7 @@ process  process_ms2_identification_pos_cfmid{
  */
 
 process  process_identification_aggregate_pos_cfmid{
+  label 'msnbase'
   tag "$name"
   publishDir "${params.outdir}/process_identification_aggregate_pos_cfmid", mode: 'copy'
   // container '${computations.docker_identification_aggregate_pos_cfmid'
@@ -1491,6 +1524,7 @@ sed -i '/^$/d' aggregated_identification_cfmid_pos.csv
 
 
 process process_pepcalculation_cfmid_pos_passatutto{
+  label 'passatutto'
   tag "$name"
   publishDir "${params.outdir}/process_pepcalculation_cfmid_pos_passatutto", mode: 'copy'
   // container '${computations.docker_pepcalculation_cfmid_pos_passatutto'
@@ -1521,6 +1555,7 @@ fi
 
 
 process  process_output_quantid_pos_camera_cfmid{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_output_quantid_pos_camera_cfmid", mode: 'copy'
   stageInMode 'copy'
@@ -1570,6 +1605,7 @@ if(params.library_charactrized_pos==false){
      */
 
     process process_peak_picker_library_pos_openms_centroided {
+      label 'openms'
         tag "$name"
         publishDir "${params.outdir}/process_peak_picker_library_pos_openms_centroided", mode: 'copy'
         stageInMode 'copy'
@@ -1594,6 +1630,7 @@ if(params.library_charactrized_pos==false){
       * STEP 31 - feature detection for the library by openms
       */
      process process_masstrace_detection_library_pos_openms_centroided {
+       label 'openms'
          tag "$name"
          publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_centroided", mode: 'copy'
          stageInMode 'copy'
@@ -1617,6 +1654,7 @@ if(params.library_charactrized_pos==false){
       */
 
      process process_openms_to_xcms_conversion_library_pos_centroided {
+       label 'xcmsconvert'
          tag "$name"
          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_centroided", mode: 'copy'
          stageInMode 'copy'
@@ -1643,6 +1681,7 @@ if(params.library_charactrized_pos==false){
       */
 
      process process_masstrace_detection_library_pos_xcms_centroided{
+       label 'xcms'
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_centroided", mode: 'copy'
        stageInMode 'copy'
@@ -1673,6 +1712,7 @@ if(params.library_charactrized_pos==false){
        * STEP 31 - feature detection for the library by openms
        */
       process process_masstrace_detection_library_pos_openms_noncentroided {
+        label 'openms'
           tag "$name"
           publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_noncentroided", mode: 'copy'
           stageInMode 'copy'
@@ -1696,6 +1736,7 @@ if(params.library_charactrized_pos==false){
        */
 
       process process_openms_to_xcms_conversion_library_pos_noncentroided {
+        label 'xcmsconvert'
           tag "$name"
           publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_noncentroided", mode: 'copy'
           stageInMode 'copy'
@@ -1722,6 +1763,7 @@ if(params.library_charactrized_pos==false){
        */
 
       process process_masstrace_detection_library_pos_xcms_noncentroided{
+        label 'xcms'
         tag "$name"
         publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_noncentroided", mode: 'copy'
         stageInMode 'copy'
@@ -1752,6 +1794,7 @@ if(params.library_charactrized_pos==false){
 
 
   process  process_annotate_peaks_library_pos_camera{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_annotate_peaks_library_pos_camera", mode: 'copy'
     stageInMode 'copy'
@@ -1774,6 +1817,7 @@ if(params.library_charactrized_pos==false){
    */
 
   process  process_group_peaks_library_pos_camera{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_group_peaks_library_pos_camera", mode: 'copy'
     stageInMode 'copy'
@@ -1796,6 +1840,7 @@ if(params.library_charactrized_pos==false){
    */
 
   process  process_find_addcuts_library_pos_camera{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_find_addcuts_library_pos_camera", mode: 'copy'
     stageInMode 'copy'
@@ -1818,6 +1863,7 @@ if(params.library_charactrized_pos==false){
    */
 
   process  process_find_isotopes_library_pos_camera{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_find_isotopes_library_pos_camera", mode: 'copy'
     stageInMode 'copy'
@@ -1842,6 +1888,7 @@ if(params.library_charactrized_pos==false){
    */
 
   process  process_read_MS2_library_pos_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_read_MS2_library_pos_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -1872,6 +1919,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 
 
   process  process_mapmsms_tocamera_library_pos_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_mapmsms_tocamera_library_pos_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -1904,6 +1952,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 
 
   process  process_create_library_pos_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_create_library_pos_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -1930,6 +1979,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 
 
   process  process_collect_library_pos_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_collect_library_pos_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -1954,6 +2004,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
    */
 
 process process_remove_adducts_library_pos_msnbase{
+  label 'msnbase'
   tag "$name"
   publishDir "${params.outdir}/process_remove_adducts_library_pos_msnbase", mode: 'copy'
   stageInMode 'copy'
@@ -1987,6 +2038,7 @@ zip::zip(zipfile="mappedtometfrag_pos.zip",files=list.files(pattern="txt"))
    */
 
   process  process_search_engine_library_pos_msnbase_nolibcharac{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: 'copy'
     // container '${computations.docker_search_engine_library_pos_msnbase}'
@@ -2012,6 +2064,7 @@ sed -i '/^$/d' aggregated_identification_library_pos.csv
    */
 
   process  process_search_engine_library_pos_msnbase_libcharac{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: 'copy'
     // container '${computations.docker_search_engine_library_pos_msnbase}'
@@ -2039,6 +2092,7 @@ sed -i '/^$/d' aggregated_identification_library_pos.csv
  */
 
 process process_pepcalculation_library_pos_passatutto{
+  label 'passatutto'
   tag "$name"
   publishDir "${params.outdir}/process_pepcalculation_library_pos_passatutto", mode: 'copy'
   // container '${computations.library_pepcalculation_library_pos_passatutto'
@@ -2070,6 +2124,7 @@ fi
 
 
 process  process_output_quantid_pos_camera_library{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_output_quantid_pos_camera_library", mode: 'copy'
   stageInMode 'copy'
@@ -2104,6 +2159,7 @@ then
    * STEP 47 - output the results for no identification
    */
   process  process_output_quantid_pos_camera_noid{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_output_quantid_pos_camera_noid", mode: 'copy'
     stageInMode 'copy'
@@ -2144,6 +2200,7 @@ if(params.type_of_ionization in (["neg","both"]))
   if(params.need_centroiding==true)
   {
     process process_peak_picker_neg_openms {
+      label 'openms'
         tag "$name"
         publishDir "${params.outdir}/process_peak_picker_neg_openms", mode: 'copy'
         stageInMode 'copy'
@@ -2168,6 +2225,7 @@ if(params.type_of_ionization in (["neg","both"]))
    if(params.quantification_openms_xcms_neg=="openms")
    {
      process process_masstrace_detection_neg_openms_centroided {
+       label 'openms'
          tag "$name"
          publishDir "${params.outdir}/process_masstrace_detection_neg_openms_centroided", mode: 'copy'
          stageInMode 'copy'
@@ -2189,6 +2247,7 @@ if(params.type_of_ionization in (["neg","both"]))
       * STEP 50 - convert openms to xcms
       */
      process process_openms_to_xcms_conversion_neg_centroided {
+       label 'xcmsconvert'
          tag "$name"
          publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_centroided", mode: 'copy'
          stageInMode 'copy'
@@ -2213,6 +2272,7 @@ if(params.type_of_ionization in (["neg","both"]))
       * STEP 51 - feature detection by xcms
       */
      process process_masstrace_detection_neg_xcms_centroided{
+       label 'xcms'
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_centroided", mode: 'copy'
        stageInMode 'copy'
@@ -2240,6 +2300,7 @@ if(params.type_of_ionization in (["neg","both"]))
     if(params.quantification_openms_xcms_neg=="openms")
     {
       process process_masstrace_detection_neg_openms_noncentroided {
+        label 'openms'
           tag "$name"
           publishDir "${params.outdir}/process_masstrace_detection_neg_openms_noncentroided", mode: 'copy'
           stageInMode 'copy'
@@ -2261,6 +2322,7 @@ if(params.type_of_ionization in (["neg","both"]))
        * STEP 50 - convert openms to xcms
        */
       process process_openms_to_xcms_conversion_neg_noncentroided {
+        label 'xcmsconvert'
           tag "$name"
           publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_noncentroided", mode: 'copy'
           stageInMode 'copy'
@@ -2285,6 +2347,7 @@ if(params.type_of_ionization in (["neg","both"]))
        * STEP 51 - feature detection by xcms
        */
       process process_masstrace_detection_neg_xcms_noncentroided{
+        label 'xcms'
         tag "$name"
         publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_noncentroided", mode: 'copy'
         stageInMode 'copy'
@@ -2311,6 +2374,7 @@ if(params.type_of_ionization in (["neg","both"]))
    */
 
   process  process_collect_rdata_neg_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_collect_rdata_neg_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -2335,6 +2399,7 @@ if(params.type_of_ionization in (["neg","both"]))
    * STEP 53 - link the mass traces across the samples
    */
   process  process_group_peaks_neg_N1_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_group_peaks_neg_N1_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -2359,6 +2424,7 @@ if(params.type_of_ionization in (["neg","both"]))
       * STEP 54 - do RT correction
       */
   process  process_align_peaks_neg_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_align_peaks_neg_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -2383,6 +2449,7 @@ if(params.type_of_ionization in (["neg","both"]))
     * STEP 55 - do another round of grouping
     */
   process  process_group_peaks_neg_N2_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_group_peaks_neg_N2_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -2410,6 +2477,7 @@ if(params.blank_filter_neg)
   blankfilter_rdata_neg_xcms=temp_unfiltered_channel_neg_1
 
   process  process_blank_filter_neg_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_blank_filter_neg_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -2439,6 +2507,7 @@ if(params.dilution_filter_neg==true)
 {
   dilutionfilter_rdata_neg_xcms=temp_unfiltered_channel_neg_2
   process  process_dilution_filter_neg_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_dilution_filter_neg_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -2468,6 +2537,7 @@ if(params.cv_filter_neg==true)
 {
   cvfilter_rdata_neg_xcms=temp_unfiltered_channel_neg_3
   process  process_cv_filter_neg_xcms{
+    label 'xcms'
     tag "$name"
     publishDir "${params.outdir}/process_cv_filter_neg_xcms", mode: 'copy'
     stageInMode 'copy'
@@ -2495,6 +2565,7 @@ annotation_rdata_neg_camera=temp_unfiltered_channel_neg_4
  */
 
 process  process_annotate_peaks_neg_camera{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_annotate_peaks_neg_camera", mode: 'copy'
   stageInMode 'copy'
@@ -2518,6 +2589,7 @@ file "CameraAnnotatePeaks_neg.rdata" into group_rdata_neg_camera
  */
 
 process  process_group_peaks_neg_camera{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_group_peaks_neg_camera", mode: 'copy'
   stageInMode 'copy'
@@ -2539,6 +2611,7 @@ file "CameraGroup_neg.rdata" into findaddcuts_rdata_neg_camera
  */
 
 process  process_find_addcuts_neg_camera{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_find_addcuts_neg_camera", mode: 'copy'
   stageInMode 'copy'
@@ -2561,6 +2634,7 @@ file "CameraFindAdducts_neg.rdata" into findisotopes_rdata_neg_camera
  */
 
 process  process_find_isotopes_neg_camera{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_find_isotopes_neg_camera", mode: 'copy'
   stageInMode 'copy'
@@ -2594,6 +2668,7 @@ if(params.perform_identification==true)
      */
 
   process  process_read_MS2_neg_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_read_MS2_neg_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -2615,6 +2690,7 @@ if(params.perform_identification==true)
    * STEP 64 - map MS2 ions to camera features
    */
   process  process_mapmsms_tocamera_neg_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_mapmsms_tocamera_neg_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -2642,6 +2718,7 @@ if(params.perform_identification==true)
      * STEP 65 - convert MS2 ions to parameters for search
      */
   process  process_mapmsms_toparam_neg_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_mapmsms_toparam_neg_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -2677,6 +2754,7 @@ csifingerid_txt_neg_msnbase_flatten=csifingerid_txt_neg_msnbase.flatten()
  * STEP 67 - do search using CSIFingerID
  */
 process  process_ms2_identification_neg_csifingerid{
+  label 'csifingerid'
   tag "$name"
   publishDir "${params.outdir}/process_ms2_identification_neg_csifingerid", mode: 'copy'
   // container '${computations.docker_ms2_identification_neg_csifingerid}'
@@ -2701,6 +2779,7 @@ process  process_ms2_identification_neg_csifingerid{
  * STEP 68 - aggregate ids from CSI
  */
 process  process_identification_aggregate_neg_csifingerid{
+  label 'msnbase'
   tag "$name"
   publishDir "${params.outdir}/process_identification_aggregate_neg_csifingerid", mode: 'copy'
   // container '${computations.docker_identification_aggregate_neg_csifingerid'
@@ -2725,6 +2804,7 @@ file "aggregated_identification_csifingerid_neg.csv" into csifingerid_tsv_neg_pa
  */
 
 process process_pepcalculation_csifingerid_neg_passatutto{
+  label 'passatutto'
   tag "$name"
   publishDir "${params.outdir}/process_pepcalculation_csifingerid_neg_passatutto", mode: 'copy'
   // container '${computations.docker_pepcalculation_csifingerid_neg_passatutto'
@@ -2755,6 +2835,7 @@ fi
  */
 
 process  process_output_quantid_neg_camera_csifingerid{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_output_quantid_neg_camera_csifingerid", mode: 'copy'
   stageInMode 'copy'
@@ -2814,6 +2895,7 @@ metfrag_txt_neg_msnbase_flatten=metfrag_txt_neg_msnbase.flatten()
  */
 
 process  process_ms2_identification_neg_metfrag{
+  label 'metfrag'
   tag "$name"
   publishDir "${params.outdir}/process_ms2_identification_neg_metfrag", mode: 'copy'
   // container '${computations.docker_ms2_identification_neg_metfrag}'
@@ -2838,6 +2920,7 @@ process  process_ms2_identification_neg_metfrag{
  * STEP 72 - aggregate metfrag results
  */
 process  process_identification_aggregate_neg_metfrag{
+  label 'msnbase'
   tag "$name"
   publishDir "${params.outdir}/process_identification_aggregate_neg_metfrag", mode: 'copy'
   // container '${computations.docker_identification_aggregate_neg_metfrag'
@@ -2860,6 +2943,7 @@ file "aggregated_identification_metfrag_neg.csv" into metfrag_tsv_neg_passatutto
  * STEP 73 - calculate pep from metfrag results
  */
 process process_pepcalculation_metfrag_neg_passatutto{
+  label 'passatutto'
   tag "$name"
   publishDir "${params.outdir}/process_pepcalculation_metfrag_neg_passatutto", mode: 'copy'
   // container '${computations.docker_pepcalculation_metfrag_neg_passatutto'
@@ -2890,6 +2974,7 @@ fi
  */
 
 process  process_output_quantid_neg_camera_metfrag{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_output_quantid_neg_camera_metfrag", mode: 'copy'
   stageInMode 'copy'
@@ -2940,6 +3025,7 @@ cfmid_txt_neg_msnbase_flatten=cfmidin_txt_neg_msnbase.flatten()
  */
 
 process  process_ms2_identification_neg_cfmid{
+  label 'cfmid'
   tag "$name"
   publishDir "${params.outdir}/process_ms2_identification_neg_cfmid", mode: 'copy'
   // container '${computations.docker_ms2_identification_neg_cfmid}'
@@ -2966,6 +3052,7 @@ process  process_ms2_identification_neg_cfmid{
  */
 
 process  process_identification_aggregate_neg_cfmid{
+  label 'msnbase'
   tag "$name"
   publishDir "${params.outdir}/process_identification_aggregate_neg_cfmid", mode: 'copy'
   // container '${computations.docker_identification_aggregate_neg_cfmid'
@@ -2991,6 +3078,7 @@ file "aggregated_identification_cfmid_neg.csv" into cfmid_tsv_neg_passatutto
 
 
 process process_pepcalculation_cfmid_neg_passatutto{
+  label 'passatutto'
   tag "$name"
   publishDir "${params.outdir}/process_pepcalculation_cfmid_neg_passatutto", mode: 'copy'
   // container '${computations.docker_pepcalculation_cfmid_neg_passatutto'
@@ -3022,6 +3110,7 @@ fi
  */
 
 process  process_output_quantid_neg_camera_cfmid{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_output_quantid_neg_camera_cfmid", mode: 'copy'
   stageInMode 'copy'
@@ -3069,6 +3158,7 @@ if(params.library_charactrized_neg==false){
      * STEP 79 - peakpicking for library
      */
     process process_peak_picker_library_neg_openms {
+      label 'openms'
         tag "$name"
         publishDir "${params.outdir}/process_peak_picker_library_neg_openms", mode: 'copy'
         stageInMode 'copy'
@@ -3094,6 +3184,7 @@ if(params.library_charactrized_neg==false){
       * STEP 80 - feature detection for the library by openms
       */
      process process_masstrace_detection_library_neg_openms_centroided {
+       label 'openms'
          tag "$name"
          publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_centroided", mode: 'copy'
          stageInMode 'copy'
@@ -3116,6 +3207,7 @@ if(params.library_charactrized_neg==false){
       * STEP 81 - convert openms to xcms
       */
      process process_openms_to_xcms_conversion_library_centroided {
+       label 'xcmsconvert'
          tag "$name"
          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_centroided", mode: 'copy'
          stageInMode 'copy'
@@ -3141,6 +3233,7 @@ if(params.library_charactrized_neg==false){
       * STEP 82 - feature detection using xcms
       */
      process process_masstrace_detection_library_neg_xcms_centroided{
+       label 'xcms'
        tag "$name"
        publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_centroided", mode: 'copy'
        stageInMode 'copy'
@@ -3171,6 +3264,7 @@ if(params.library_charactrized_neg==false){
           * STEP 80 - feature detection for the library by openms
           */
          process process_masstrace_detection_library_neg_openms_noncentroided {
+           label 'openms'
              tag "$name"
              publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_noncentroided", mode: 'copy'
              stageInMode 'copy'
@@ -3193,6 +3287,7 @@ if(params.library_charactrized_neg==false){
           * STEP 81 - convert openms to xcms
           */
          process process_openms_to_xcms_conversion_library_noncentroided {
+           label 'xcmsconvert'
              tag "$name"
              publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_noncentroided", mode: 'copy'
              stageInMode 'copy'
@@ -3220,6 +3315,7 @@ if(params.library_charactrized_neg==false){
           * STEP 82 - feature detection using xcms
           */
          process process_masstrace_detection_library_neg_xcms_noncentroided{
+           label 'xcms'
            tag "$name"
            publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_noncentroided", mode: 'copy'
            stageInMode 'copy'
@@ -3248,6 +3344,7 @@ if(params.library_charactrized_neg==false){
 
 
   process  process_annotate_peaks_library_neg_camera{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_annotate_peaks_library_neg_camera", mode: 'copy'
     stageInMode 'copy'
@@ -3270,6 +3367,7 @@ if(params.library_charactrized_neg==false){
 
 
   process  process_group_peaks_library_neg_camera{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_group_peaks_library_neg_camera", mode: 'copy'
     stageInMode 'copy'
@@ -3294,6 +3392,7 @@ if(params.library_charactrized_neg==false){
 
 
   process  process_find_addcuts_library_neg_camera{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_find_addcuts_library_neg_camera", mode: 'copy'
     stageInMode 'copy'
@@ -3314,6 +3413,7 @@ if(params.library_charactrized_neg==false){
    * STEP 87 - find isotopes for the library
    */
   process  process_find_isotopes_library_neg_camera{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_find_isotopes_library_neg_camera", mode: 'copy'
     stageInMode 'copy'
@@ -3338,6 +3438,7 @@ if(params.library_charactrized_neg==false){
    */
 
   process  process_read_MS2_library_neg_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_read_MS2_library_neg_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -3365,6 +3466,7 @@ if(params.library_charactrized_neg==false){
 
    mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsmsLibrary_neg,by:0)
   process  process_mapmsms_tocamera_library_neg_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_mapmsms_tocamera_library_neg_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -3398,6 +3500,7 @@ if(params.library_charactrized_neg==false){
 
      msmsandquant_rdata_library_neg_camera=ch1CreateLibrary.join(ch2CreateLibrary,by:0)
   process  process_create_library_neg_msnbase {
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_create_library_neg_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -3423,6 +3526,7 @@ if(params.library_charactrized_neg==false){
    * STEP 91 - collect the library files
    */
   process  process_collect_library_neg_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_collect_library_neg_msnbase", mode: 'copy'
     stageInMode 'copy'
@@ -3447,6 +3551,7 @@ if(params.library_charactrized_neg==false){
 
 
 process process_remove_adducts_library_neg_msnbase{
+  label 'msnbase'
   tag "$name"
   publishDir "${params.outdir}/process_remove_adducts_library_neg_msnbase", mode: 'copy'
   stageInMode 'copy'
@@ -3481,6 +3586,7 @@ zip::zip(zipfile="mappedtometfrag_neg.zip",files=list.files(pattern="txt"))
 
 
   process  process_search_engine_library_neg_msnbase_nonlibcharac{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: 'copy'
     // container '${computations.docker_search_engine_library_neg_msnbase}'
@@ -3505,6 +3611,7 @@ sed -i '/^$/d' aggregated_identification_library_neg.csv
    */
 
   process  process_search_engine_library_neg_msnbase{
+    label 'msnbase'
     tag "$name"
     publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: 'copy'
     // container '${computations.docker_search_engine_library_neg_msnbase}'
@@ -3532,6 +3639,7 @@ sed -i '/^$/d' aggregated_identification_library_neg.csv
  */
 
 process process_pepcalculation_library_neg_passatutto{
+  label 'passatutto'
   tag "$name"
   publishDir "${params.outdir}/process_pepcalculation_library_neg_passatutto", mode: 'copy'
   // container '${computations.library_pepcalculation_library_neg_passatutto'
@@ -3560,6 +3668,7 @@ fi
 
 
 process  process_output_quantid_neg_camera_library{
+  label 'camera'
   tag "$name"
   publishDir "${params.outdir}/process_output_quantid_neg_camera_library", mode: 'copy'
   stageInMode 'copy'
@@ -3594,6 +3703,7 @@ then
    */
 
   process  process_output_quantid_neg_camera_noid{
+    label 'camera'
     tag "$name"
     publishDir "${params.outdir}/process_output_quantid_neg_camera_noid", mode: 'copy'
     stageInMode 'copy'

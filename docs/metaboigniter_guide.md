@@ -61,7 +61,7 @@ If you want to run singularity, replace docker with singularity. The main workfl
 
 ## Set the parameters
 
-Currently all the parameters of the workflow can be set using a setting file which is located in ***"metaboigniter/conf/metaboigniter_params/parameters.config"***. You can use regular text editors to edit this file. Depending on the type of the analysis you wish to run, some parameters can be left unchanged. Please follow the tutorial.
+Currently all the parameters of the workflow can be set using a setting file which is located in ***"metaboigniter/conf/parameters.config"***. You can use regular text editors to edit this file. Depending on the type of the analysis you wish to run, some parameters can be left unchanged. Please follow the tutorial.
 
 **When setting parameters, add the values within the double quotations ("") if the parameters (equal sign) is followed by double quotation Otherwise just set the value in front of the equal sign. For example:**
 
@@ -124,18 +124,17 @@ If you only have MS1 data and you wish to perform quantification, you should fir
     │   └── X8_Rep1.mzML
 
 When you are ready with your folder structure you will need to set the parameters needed:
-Path to a folder containing mzML files used for doing quantification (MS1 data in positive ionization method)
+a glob path to a folder containing mzML files used for doing quantification (MS1 data in positive ionization method)
 
     quant_mzml_files_pos =""
 
-Path to a folder containing mzML files used for doing quantification (MS1 data in negative ionization method)
+a glob path to a folder containing mzML files used for doing quantification (MS1 data in negative ionization method)
 
     quant_mzml_files_neg=""
 
-**You must have the absolute path to the folder and set it between the quotations**
 for example:
 
-    quant_mzml_files_pos ="/User/XXX/myfiles/pos_quant_data"
+    quant_mzml_files_pos ="/User/XXX/myfiles/pos_quant_data/*mzML"
 
 ## Make phenotype file
 
@@ -198,7 +197,7 @@ We recommend inputting already centroided files. You can achieve this at the con
 
 Please be aware that setting need_centroiding=true will do centroiding on all of your data including both ionization, identification etc.
 
-If you want non-defualt values, to control the parameters centroiding you can edit *openms_peak_picker_ini_pos.ini* and *openms_peak_picker_ini_neg.ini* files located under *metaboigniter/conf/metaboigniter_params/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_PeakPickerHiRes.html).
+If you want non-defualt values, to control the parameters centroiding you can edit *openms_peak_picker_ini_pos.ini* and *openms_peak_picker_ini_neg.ini* files located under *metaboigniter/assets/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_PeakPickerHiRes.html).
 
 ### Mass Trace Detection (quantification)
 
@@ -215,7 +214,7 @@ set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) fo
 
 #### Quantification using OpenMS
 
-If you choose to perform the quantification using OpenMS, you should consider changing the parameters for OpenMS only. You can edit *openms_feature_finder_metabo_ini_pos.ini* and *openms_feature_finder_metabo_ini_neg.ini* files located under *metaboigniter/conf/metaboigniter_params/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FeatureFinderMetabo.html). **When tuning the OpenMS parameters make sure that "report_convex_hulls" is set to true**
+If you choose to perform the quantification using OpenMS, you should consider changing the parameters for OpenMS only. You can edit *openms_feature_finder_metabo_ini_pos.ini* and *openms_feature_finder_metabo_ini_neg.ini* files located under *metaboigniter/assets/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FeatureFinderMetabo.html). **When tuning the OpenMS parameters make sure that "report_convex_hulls" is set to true**
 
 #### Quantification using XCMS
 
@@ -544,15 +543,18 @@ This basically follows the same design as the MS1 data preparation. You need to 
     ├── phenotype_positive.csv
 
 When you are ready with the folder structure you will need to set the parameters needed:
-Path to a folder containing mzML files used for doing identification (MS2 data in positive ionization method)
+A glob path to a folder containing mzML files used for doing identification (MS2 data in positive ionization method)
 
     id_mzml_files_pos =""
 
-Path to a folder containing mzML files used for doing identification (MS2 data in negative ionization method)
+A glob path to a folder containing mzML files used for doing identification (MS2 data in negative ionization method)
 
     id_mzml_files_neg=""
 
-**You must have the absolute path to the folder and set it between the quotations**
+for example:
+
+        quant_mzml_files_pos ="/User/XXX/myfiles/id_mzml_files_pos/*mzML"
+
 If you quantification files also includes MS2 data, you can set *id_mzml_files_pos* and *id_mzml_files_neg* to the path of MS1 data (of course to respective ionization modes)
 
 #### Select your search engine
@@ -737,17 +739,17 @@ The directory structure will be similar to those describe above. You will need t
     ├── phenotype_positive.csv
 
 Now set the folder paths to the library files.
-Path to a folder containing library mzML files used for doing adduct calculation. If you don't have separate quantification data for the library, set this to path of the library file:
+a glob path to a folder containing library mzML files used for doing adduct calculation. If you don't have separate quantification data for the library, set this to path of the library file:
 
     quant_library_mzml_files_pos=""
     quant_library_mzml_files_neg=""
 
-Path to a folder containing mzML files (for library) used for doing identification (as described above):
+a glob path to a folder containing mzML files (for library) used for doing identification (as described above):
 
     id_library_mzml_files_pos=""
     id_library_mzml_files_neg=""
 
-For example, considering the structure above, we can set *quant_library_mzml_files_pos* and *id_library_mzml_files_pos* to "mydata/mzML_POS_Lib" and *quant_library_mzml_files_neg* and *id_library_mzml_files_neg* to "mydata/mzML_NEG_Lib".
+For example, considering the structure above, we can set *quant_library_mzml_files_pos* and *id_library_mzml_files_pos* to "mydata/mzML_POS_Lib/*.mzML" and *quant_library_mzml_files_neg* and *id_library_mzml_files_neg* to "mydata/mzML_NEG_Lib/*.mzML".
 
 #### Create your library description files
 
@@ -812,8 +814,8 @@ Please set the parameters needed for finding the mass traces for the library. Th
 
 Please edit the following files (separate for positive and negative):
 
-    conf/metaboigniter_params/openms/openms_peak_picker_lib_ini_pos.ini
-    conf/metaboigniter_params/openms/openms_peak_picker_lib_ini_neg.ini
+    assets/openms/openms_peak_picker_lib_ini_pos.ini
+    assets/openms/openms_peak_picker_lib_ini_neg.ini
 
 you will have to set whether you do the quantification using either OpenMS (set to openms) or XCMS (set to xcms) (**for library**):
 
@@ -822,8 +824,8 @@ you will have to set whether you do the quantification using either OpenMS (set 
 
 If OpenMS selected, please edit the following files for doing mass trace detection for library:
 
-    conf/metaboigniter_params/openms/openms_feature_finder_metabo_lib_ini_pos.ini
-    conf/metaboigniter_params/openms/openms_feature_finder_metabo_lib_ini_neg.ini
+    assets/openms/openms_feature_finder_metabo_lib_ini_pos.ini
+    assets/openms/openms_feature_finder_metabo_lib_ini_neg.ini
 
 If you have selected to do quantification using XCMS, you need to tune the following parameters (See the corresponding sections in the quantification above):
 
