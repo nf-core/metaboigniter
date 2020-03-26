@@ -899,8 +899,6 @@ rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass t
     rt_mapmsmstocamera_library_pos_msnbase="5"
     rt_mapmsmstocamera_library_neg_msnbase="5"
 
-
-
 if you already have your library characterize e.g the results of *process_collect_library_pos_msnbase* and *process_collect_library_neg_msnbase*. You can set the following parameters to true and also set the absolute paths to the the characterization file:
 
 If you have already characterized your library, set this to true and specify the path for library_charactrization_file_pos/neg:
