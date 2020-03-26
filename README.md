@@ -62,7 +62,7 @@ MetaboIGNITER is a comprehensive pipeline of several independent tools used to p
 
 ## Credits
 
-MetaboIGNITER was originally written by Payam Emami.
+MetaboIGNITER was originally written by Payam Emami. This work has been supported by ELIXIR and PhenoMeNal. 
 
 ## Contributions and Support
 
