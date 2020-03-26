@@ -2,16 +2,21 @@
 
 **Get your metabolomics analysis up and running**.
 
-[![GitHub Actions CI Status](https://github.com/metaboigniter/metaboigniter/workflows/nf-core%20CI/badge.svg)](https://github.com/metaboigniter/metaboigniter/actions)
-[![GitHub Actions Linting Status](https://github.com/metaboigniter/metaboigniter/workflows/nf-core%20linting/badge.svg)](https://github.com/metaboigniter/metaboigniter/actions)
+[![GitHub Actions CI Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
+[![GitHub Actions Linting Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
-[![Docker](https://img.shields.io/docker/cloud/automated/metaboigniter/metaboigniter)](https://hub.docker.com/r/metaboigniter/metaboigniter)
+[![Docker](https://img.shields.io/docker/automated/nfcore/metaboigniter.svg)](https://hub.docker.com/r/nfcore/metaboigniter)
+
 
 [![Gitter chat](https://badges.gitter.im/MetaboIGNITER/gitter.png)](https://gitter.im/MetaboIGNITER/community)
 
 ## Introduction
+
+**metaboigniter** is bioinformatics pipeline for pre-processing of mass spectrometry-based metabolomics data.
+It can be used to perform quantification and identification based on MS1 and MS2 data.
+The backbone of pipeline is based on XCMS, OpenMS, CAMERA, MSnbase, MetFrag, CSIFingerID, CFM-ID, and several other customized tools to noise filtering, quantification and identification both for library and in-silico identification. **Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
@@ -78,7 +83,3 @@ You can cite the `nf-core` publication as follows:
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).  
 > ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
-
-## IMPORTANT
-
-This workflow is not part of nf-core yet. We plan to to make it available as soon as possible.

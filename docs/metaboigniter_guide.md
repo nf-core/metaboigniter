@@ -85,7 +85,7 @@ This will prevent the workflow to perform the identification. So you will not ne
 
 ## Organize you mzML files
 
-If you only have MS1 data and you wish to perform quantification, you should first organize your mzML files into a folder structure. An example of such structure can be seen [here](https://github.com/MetaboIGNITER/test-datasets). You don't have to follow the folder tree in the example. You just have to make sure that mzML files from different ionization are placed in different folders. If you only have one ionization mode (positive or negative), just put all the files in a single folder. If you have both, then create two folders, one for each of the ionization modes. For example if you want to follow our example, we create to folders called mzML_NEG_Quant and mzML_POS_Quant. Then the correponding files will be placed in each directory.
+If you only have MS1 data and you wish to perform quantification, you should first organize your mzML files into a folder structure. An example of such structure can be seen [here](https://github.com/nf-core/test-datasets/tree/metaboigniter). You don't have to follow the folder tree in the example. You just have to make sure that mzML files from different ionization are placed in different folders. If you only have one ionization mode (positive or negative), just put all the files in a single folder. If you have both, then create two folders, one for each of the ionization modes. For example if you want to follow our example, we create to folders called mzML_NEG_Quant and mzML_POS_Quant. Then the correponding files will be placed in each directory.
 
     Mydata
     ├── mzML_NEG_Quant
@@ -158,7 +158,7 @@ The first column of this table must show the raw data file name (for example sam
 
 Please take your time and design the phenotype file so that you don't have to change it later. Pretty much all the steps of the workflow will depend on the correct designing of this file.
 
-We included two examples of phenotype file in the [test data](https://github.com/MetaboIGNITER/test-datasets). The files are called *phenotype_positive.csv* and *phenotype_negative.csv*. The example design, includes six biological samples, three blank samples (e.g, only the buffer were run), dilution samples (D1, D2 etc), in which a different dilution of samples have been run. QC samples that are the same replicate that was repeatedly run throughout the MS experiment.
+We included two examples of phenotype file in the [test data](https://github.com/nf-core/test-datasets/tree/metaboigniter). The files are called *phenotype_positive.csv* and *phenotype_negative.csv*. The example design, includes six biological samples, three blank samples (e.g, only the buffer were run), dilution samples (D1, D2 etc), in which a different dilution of samples have been run. QC samples that are the same replicate that was repeatedly run throughout the MS experiment.
 
 After fixing the phenotype files, please set the following parameters
 
@@ -618,7 +618,7 @@ Filter spectra by a minimum number of fragment peaks:
 
 #### MetFrag parameter
 
-We only need one parameter if the global parameters have been set properly. This is the database file. An example of such database can be found [here](https://github.com/MetaboIGNITER/test-datasets/blob/d2bc5c484fa292af686ac197f35955ba73083934/hmdb_2017-07-23.csv). You can either use the example for HMDB (2017) or generate your own using [MetChem](https://github.com/c-ruttkies/container-metchemdata). Please contact us if you need to generate this file.
+We only need one parameter if the global parameters have been set properly. This is the database file. An example of such database can be found [here](https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/hmdb_2017-07-23.csv). You can either use the example for HMDB (2017) or generate your own using [MetChem](https://github.com/c-ruttkies/container-metchemdata). Please contact us if you need to generate this file.
 
 Absolute path to the generated database file:
 
@@ -753,7 +753,7 @@ For example, considering the structure above, we can set *quant_library_mzml_fil
 
 #### Create your library description files
 
-You need to fix for each of the ionization mode, a separate library description file. An example of such file is provided [here](https://github.com/MetaboIGNITER/test-datasets/blob/d2bc5c484fa292af686ac197f35955ba73083934/library_charac_pos.csv). This file must contain the following information in a comma separate file:
+You need to fix for each of the ionization mode, a separate library description file. An example of such file is provided [here](https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/library_charac_pos.csv). This file must contain the following information in a comma separate file:
 
 - Name of the mzML file containing the compound
 

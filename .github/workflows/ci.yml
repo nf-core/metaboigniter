@@ -24,8 +24,8 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Pull docker image
         run: |
-          docker pull metaboigniter/metaboigniter:dev
-          docker tag metaboigniter/metaboigniter:dev metaboigniter/metaboigniter:dev
+          docker pull nfcore/metaboigniter:dev
+          docker tag nfcore/metaboigniter:dev nfcore/metaboigniter:dev
       - name: Run pipeline with test data
         run: |
           # TODO nf-core: You can customise CI pipeline run tests as required
