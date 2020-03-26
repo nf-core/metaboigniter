@@ -1968,7 +1968,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
     shell:
       '''
   	mkdir out
-  	/usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_pos_msnbase}   compundID=!{params.compund_id_preparelibrary_pos_msnbase}   compoundName=!{params.compound_name_preparelibrary_pos_msnbase}  mzCol=!{params.mz_col_preparelibrary_pos_msnbase} whichmz=!{params.which_mz_preparelibrary_pos_msnbase}
+  	/usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} precursorppm=!{params.ppm_create_library_pos_msnbase} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_pos_msnbase}   compundID=!{params.compund_id_preparelibrary_pos_msnbase}   compoundName=!{params.compound_name_preparelibrary_pos_msnbase}  mzCol=!{params.mz_col_preparelibrary_pos_msnbase} whichmz=!{params.which_mz_preparelibrary_pos_msnbase}
 
   	'''
   }
@@ -3517,7 +3517,7 @@ if(params.library_charactrized_neg==false){
       '''
 
   	mkdir out
-  	/usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_neg_msnbase}   compundID=!{params.compund_id_preparelibrary_neg_msnbase}   compoundName=!{params.compound_name_preparelibrary_neg_msnbase}  mzCol=!{params.mz_col_preparelibrary_neg_msnbase} whichmz=!{params.which_mz_preparelibrary_neg_msnbase}
+  	/usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} precursorppm=!{params.ppm_create_library_neg_msnbase} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_neg_msnbase}   compundID=!{params.compund_id_preparelibrary_neg_msnbase}   compoundName=!{params.compound_name_preparelibrary_neg_msnbase}  mzCol=!{params.mz_col_preparelibrary_neg_msnbase} whichmz=!{params.which_mz_preparelibrary_neg_msnbase}
 
   	'''
   }

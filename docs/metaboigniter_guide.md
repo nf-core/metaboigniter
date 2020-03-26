@@ -803,6 +803,11 @@ The function can use feature range (f), centroid (c), and parent m/z (Parent) in
     which_mz_preparelibrary_pos_msnbase="f"
     which_mz_preparelibrary_neg_msnbase="f"
 
+Set the relative mass deviation (ppm) between the experimental and theoretical masses of metabolites:
+
+    ppm_create_library_pos_msnbase=10
+    ppm_create_library_neg_msnbase=10
+
 Number of cores for mapping the features:
 
     ncore_searchengine_library_pos_msnbase=1
@@ -893,6 +898,8 @@ rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass t
 
     rt_mapmsmstocamera_library_pos_msnbase="5"
     rt_mapmsmstocamera_library_neg_msnbase="5"
+
+
 
 if you already have your library characterize e.g the results of *process_collect_library_pos_msnbase* and *process_collect_library_neg_msnbase*. You can set the following parameters to true and also set the absolute paths to the the characterization file:
 

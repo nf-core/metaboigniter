@@ -1,0 +1,1582 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/metaboigniter/master/nextflow_schema.json",
+    "title": "nf-core/metaboigniter pipeline parameters",
+    "description": "Metabo",
+    "type": "object",
+    "properties": {
+        "outdir": {
+            "type": "string",
+            "description": "Output directory for results",
+            "default": "./results",
+            "fa_icon": "fas fa-folder-open"
+        },
+        "name": {
+            "type": "string",
+            "description": "Workflow name",
+            "fa_icon": "fas fa-fingerprint",
+            "help_text": "A custom name for the pipeline run. Unlike the core nextflow `-name` option with one hyphen this parameter can be reused multiple times, for example if using `-resume`. Passed through to steps such as MultiQC and used for things like report filenames and titles.",
+            "default": "metaboigniter"
+        },
+        "email": {
+            "type": "string",
+            "description": "Email address for completion summary",
+            "fa_icon": "fas fa-envelope",
+            "help_text": "An email address to send a summary email to when the pipeline is completed.",
+            "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+        },
+        "plaintext_email": {
+            "type": "boolean",
+            "description": "Send plain-text email instead of HTML",
+            "fa_icon": "fas fa-remove-format",
+            "hidden": true
+        },
+        "monochrome_logs": {
+            "type": "boolean",
+            "description": "Do not use coloured log outputs",
+            "fa_icon": "fas fa-palette",
+            "hidden": true
+        },
+        "tracedir": {
+            "type": "string",
+            "description": "Directory to keep pipeline Nextflow logs and reports",
+            "default": "./results/pipeline_info",
+            "fa_icon": "fas fa-cogs",
+            "hidden": true
+        },
+        "igenomes_base": {
+            "type": "string",
+            "description": "Directory / URL base for iGenomes references",
+            "default": "s3://ngi-igenomes/igenomes/",
+            "fa_icon": "fas fa-cloud-download-alt",
+            "hidden": true
+        },
+        "Maximum job request limits": {
+            "type": "object",
+            "description": "Limit the maximum computational requirements that a single job can request",
+            "default": "",
+            "properties": {
+                "max_cpus": {
+                    "type": "integer",
+                    "description": "Maximum number of CPUs that can be requested  for any single job",
+                    "default": 16,
+                    "fa_icon": "fas fa-microchip",
+                    "hidden": true
+                },
+                "max_memory": {
+                    "type": "string",
+                    "description": "Maximum amount of memory that can be requested for any single job",
+                    "default": "128 GB",
+                    "fa_icon": "fas fa-memory",
+                    "hidden": true
+                },
+                "max_time": {
+                    "type": "string",
+                    "description": "Maximum amount of time that can be requested for any single job",
+                    "default": "10d",
+                    "fa_icon": "far fa-clock",
+                    "hidden": true
+                }
+            }
+        },
+        "Institutional config params": {
+            "type": "object",
+            "description": "Params used by nf-core/configs",
+            "default": "",
+            "properties": {
+                "custom_config_version": {
+                    "type": "string",
+                    "description": "nf-core/configs parameter",
+                    "default": "master",
+                    "hidden": true
+                },
+                "custom_config_base": {
+                    "type": "string",
+                    "description": "nf-core/configs parameter",
+                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
+                    "hidden": true
+                },
+                "hostnames": {
+                    "type": "string",
+                    "description": "nf-core/configs parameter",
+                    "default": "",
+                    "hidden": true
+                },
+                "config_profile_description": {
+                    "type": "string",
+                    "description": "nf-core/configs parameter",
+                    "hidden": true
+                },
+                "config_profile_contact": {
+                    "type": "string",
+                    "description": "nf-core/configs parameter",
+                    "hidden": true
+                },
+                "config_profile_url": {
+                    "type": "string",
+                    "description": "nf-core/configs parameter",
+                    "hidden": true
+                }
+            }
+        },
+        "help": {
+            "type": "boolean",
+            "description": "Display help text",
+            "hidden": true,
+            "fa_icon": "fas fa-question-circle"
+        },
+        "Control parameters": {
+            "type": "object",
+            "description": "Used to control functionality of the workflow e.g identification, quantification etc",
+            "default": "",
+            "properties": {
+                "perform_identification": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should identification be performed?",
+                    "help_text": "If false, this will prevent the workflow to perform the identification. So you will not need to change the parameters related to the identification. Otherwise, you will have to set the identification-related parameters\n\n"
+                },
+                "perform_identification_metfrag": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should Metfrag be used for doing identification?"
+                },
+                "perform_identification_csifingerid": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Should CSI:FingerID be used for doing identification?"
+                },
+                "perform_identification_cfmid": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should CFM-ID be used for doing identification?"
+                },
+                "perform_identification_internal_library": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set the library parameter to true if you would like to perform library search",
+                    "help_text": "If true, you will need to provide library-related parameters."
+                },
+                "type_of_ionization": {
+                    "type": "string",
+                    "enum": [
+                        "pos",
+                        "neg",
+                        "both"
+                    ],
+                    "description": "Set what type of ionization you have",
+                    "default": "neg",
+                    "help_text": "You can either set to 'pos' (only positive), 'neg' (only negative), 'both' (both positive and negative)"
+                },
+                "need_centroiding": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set the following parameter to true to perform the centroiding",
+                    "help_text": "We recommend inputting already centroided files. You can achieve this at the conversion steps in msconvert. However, if your data is not centroided, you can let the workflow doing that for you. We use OpenMS \"PeakPickHiRes\" tool to perform that."
+                },
+                "quantification_openms_xcms_pos": {
+                    "type": "string",
+                    "description": "set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in positive ionization",
+                    "enum": [
+                        "xcms",
+                        "openms"
+                    ],
+                    "default": "xcms",
+                    "help_text": "MetaboIGNITER can perform quantification either using XCMS (default) or OpenMS (experimental). We only support OpenMS 2.4.0 at this stage"
+                },
+                "quantification_openms_xcms_neg": {
+                    "type": "string",
+                    "default": "xcms",
+                    "description": "set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in negative ionization",
+                    "enum": [
+                        "xcms",
+                        "openms"
+                    ],
+                    "help_text": "MetaboIGNITER can perform quantification either using XCMS (default) or OpenMS (experimental). We only support OpenMS 2.4.0 at this stage"
+                },
+                "quantification_openms_xcms_library_pos": {
+                    "type": "string",
+                    "default": "xcms",
+                    "description": "set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in positive ionization on the library",
+                    "enum": [
+                        "xcms",
+                        "openms"
+                    ]
+                },
+                "quantification_openms_xcms_library_neg": {
+                    "type": "string",
+                    "default": "xcms",
+                    "description": "set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in negative ionization on the library",
+                    "enum": [
+                        "xcms",
+                        "openms"
+                    ]
+                },
+                "library_charactrized_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If you have already characterized your library, set this to true and specify the path for library_charactrization_file_pos/neg:",
+                    "help_text": "if you already have your library characterize e.g the results of process_collect_library_pos_msnbase and process_collect_library_neg_msnbase."
+                },
+                "library_charactrized_neg": {
+                    "type": "string",
+                    "default": "false",
+                    "description": "If you have already characterized your library, set this to true and specify the path for library_charactrization_file_pos/neg:",
+                    "help_text": "if you already have your library characterize e.g the results of process_collect_library_pos_msnbase and process_collect_library_neg_msnbase."
+                }
+            },
+            "required": [
+                "perform_identification",
+                "type_of_ionization",
+                "need_centroiding",
+                "quantification_openms_xcms_pos",
+                "quantification_openms_xcms_neg",
+                "quantification_openms_xcms_library_pos"
+            ]
+        },
+        "OpenMS setting files": {
+            "type": "object",
+            "description": "Used for peak picking and feature detection",
+            "default": "",
+            "properties": {
+                "peakpicker_ini_file_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_ini_pos.ini'",
+                    "description": "Openms ini file for peakpickerhires (positive ionization)",
+                    "hidden": true
+                },
+                "peakpicker_ini_file_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_ini_neg.ini'",
+                    "description": "Openms ini file for peakpickerhires (negative ionization)",
+                    "hidden": true
+                },
+                "featurefinder_ini_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_feature_finder_metabo_ini_pos.ini'",
+                    "hidden": true,
+                    "description": "OpenMS ini file for featurefindermetabo (positive ionization)"
+                },
+                "featurefinder_ini_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_feature_finder_metabo_ini_neg.ini'",
+                    "hidden": true,
+                    "description": "OpenMS ini file for featurefindermetabo (negative ionization)"
+                },
+                "peakpicker_ini_file_library_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_lib_ini_pos.ini'",
+                    "hidden": true,
+                    "description": "OpenMS ini file for peakpickerhires (positive ionization)"
+                },
+                "peakpicker_ini_file_library_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_lib_ini_neg.ini'",
+                    "hidden": true,
+                    "description": "OpenMS ini file for peakpickerhires (negative ionization)"
+                },
+                "featurefinder_ini_library_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_feature_finder_metabo_lib_ini_pos.ini'",
+                    "description": "OpenMS ini file for featurefindermetabo"
+                },
+                "featurefinder_ini_library_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_feature_finder_metabo_lib_ini_neg.ini'",
+                    "description": "OpenMS ini file for featurefindermetabo"
+                }
+            },
+            "required": [
+                "peakpicker_ini_file_pos_openms",
+                "peakpicker_ini_file_neg_openms",
+                "featurefinder_ini_pos_openms",
+                "featurefinder_ini_neg_openms"
+            ]
+        },
+        "Input files": {
+            "type": "object",
+            "description": "Input files includes mzML files for performing identification, quantification, and databases",
+            "default": "",
+            "properties": {
+                "quant_mzml_files_pos": {
+                    "type": "string",
+                    "default": "'data_quant_pos/*.mzML'",
+                    "description": "a glob path to a folder containing mzML files used for doing quantification (MS1 data in positive ionization method)",
+                    "help_text": "If you only have MS1 data and you wish to perform quantification, you should first organize your mzML files into a folder structure. An example of such a structure can be seen here (https://github.com/MetaboIGNITER/test-datasets). You don't have to follow the folder tree in the example. You just have to make sure that mzML files from different ionization are placed in different folders. If you only have one ionization mode (positive or negative), just put all the files in a single folder. If you have both, then create two folders, one for each of the ionization modes. For example if you want to follow our example, we create to folders called mzML_NEG_Quant and mzML_POS_Quant. Then the corresponding files will be placed in each directory."
+                },
+                "quant_mzml_files_neg": {
+                    "type": "string",
+                    "default": "'data_quant_neg/*.mzML'",
+                    "description": "a glob path to a folder containing mzML files used for doing quantification (MS1 data in negative ionization method)",
+                    "help_text": "If you only have MS1 data and you wish to perform quantification, you should first organize your mzML files into a folder structure. An example of such a structure can be seen here (https://github.com/MetaboIGNITER/test-datasets). You don't have to follow the folder tree in the example. You just have to make sure that mzML files from different ionization are placed in different folders. If you only have one ionization mode (positive or negative), just put all the files in a single folder. If you have both, then create two folders, one for each of the ionization modes. For example if you want to follow our example, we create to folders called mzML_NEG_Quant and mzML_POS_Quant. Then the corresponding files will be placed in each directory."
+                },
+                "phenotype_design_pos": {
+                    "type": "string",
+                    "default": "data/phenotype_positive.csv",
+                    "description": "Path to a csv file containing the experimental design (MS1 data in positive ionization method)",
+                    "help_text": "A phenotype is a CSV (comma separated file) representing a table showing metadata of the samples. Each row is one sample and each column is a meta field (columns are separated by comma). An example of such a file can be found here (https://github.com/MetaboIGNITER/test-datasets). MetaboIGNITER expects a separate phenotype file for each ionization model. So if you have two ionization you will need to create two phenotype file. This file is used to set the class of the samples being analyzed. The file should have at least two columns: the first column is showing the raw file name and extension (for example sample1.mzML) and the second column should show it's phenotype type. This file is a comma-separated file and should container header (see the example).\nThe first column of this table must show the raw data file name (for example sample1.mzML). The file must have a header. Other information can also be added to this table such as age, gender, time etc. One can plan ahead and add even more information. In the example, we have added rename, technical replace and type. This information will be used later in the workflow to pre-process the samples. For example, Type can be used to filter out the samples not needed further down the pipeline. Rename can be us to rename the samples in the output file. Technical replicates can be used to average the samples that have been injected more than two times etc. The minimum number of columns is two showing the raw file name and class of the samples.\n\nPlease take your time and design the phenotype file so that you don't have to change it later. Pretty much all the steps of the workflow will depend on the correct designing of this file.\n\nWe included two examples of the phenotype file in the test data (https://github.com/MetaboIGNITER/test-datasets). The files are called phenotype_positive.csv and phenotype_negative.csv. The example design, includes six biological samples, three blank samples (e.g, only the buffer were run), dilution samples (D1, D2 etc), in which a different dilution of samples have been run. QC samples that are the same replicate that was repeatedly run throughout the MS experiment."
+                },
+                "phenotype_design_neg": {
+                    "type": "string",
+                    "default": "data/phenotype_negative.csv",
+                    "description": "Path to a csv file containing the experimental design (MS1 data in negative ionization method)",
+                    "help_text": "A phenotype is a CSV (comma separated file) representing a table showing metadata of the samples. Each row is one sample and each column is a meta field (columns are separated by comma). An example of such a file can be found here (https://github.com/MetaboIGNITER/test-datasets). MetaboIGNITER expects a separate phenotype file for each ionization model. So if you have two ionization you will need to create two phenotype file. This file is used to set the class of the samples being analyzed. The file should have at least two columns: the first column is showing the raw file name and extension (for example sample1.mzML) and the second column should show it's phenotype type. This file is a comma-separated file and should container header (see the example).\nThe first column of this table must show the raw data file name (for example sample1.mzML). The file must have a header. Other information can also be added to this table such as age, gender, time etc. One can plan ahead and add even more information. In the example, we have added rename, technical replace and type. This information will be used later in the workflow to pre-process the samples. For example, Type can be used to filter out the samples not needed further down the pipeline. Rename can be us to rename the samples in the output file. Technical replicates can be used to average the samples that have been injected more than two times etc. The minimum number of columns is two showing the raw file name and class of the samples.\n\nPlease take your time and design the phenotype file so that you don't have to change it later. Pretty much all the steps of the workflow will depend on the correct designing of this file.\n\nWe included two examples of the phenotype file in the test data (https://github.com/MetaboIGNITER/test-datasets). The files are called phenotype_positive.csv and phenotype_negative.csv. The example design, includes six biological samples, three blank samples (e.g, only the buffer were run), dilution samples (D1, D2 etc), in which a different dilution of samples have been run. QC samples that are the same replicate that was repeatedly run throughout the MS experiment."
+                },
+                "id_mzml_files_pos": {
+                    "type": "string",
+                    "default": "data_id_pos/*.mzML",
+                    "description": "A glob path to a folder containing mzML files used for doing identification (MS2 data in positive ionization method)",
+                    "help_text": "Before proceeding with setting the parameters for identification you need to complete the mzML folder structure.\n\nThis basically follows the same design as the MS1 data preparation. You need to create separate directories for mzML files that contain MS2 information. So if you have MS2 files both positive and negative mode, you need to create two more folders. For example, mzML_NEG_ID and mzML_POS_ID containing, negative and positive MS2 data respectively. The following file tree shows an example of such a structure. In this example, we have both positive and negative ionization. The files have been placed in different folders depending on the ionization and pre-processing needed."
+                },
+                "id_mzml_files_neg": {
+                    "type": "string",
+                    "default": "data_id_neg/*.mzML",
+                    "description": "A glob path to a folder containing mzML files used for doing identification (MS2 data in negative ionization method)",
+                    "help_text": "Before proceeding with setting the parameters for identification you need to complete the mzML folder structure.\n\nThis basically follows the same design as the MS1 data preparation. You need to create separate directories for mzML files that contain MS2 information. So if you have MS2 files both positive and negative mode, you need to create two more folders. For example, mzML_NEG_ID and mzML_POS_ID containing, negative and positive MS2 data respectively. The following file tree shows an example of such a structure. In this example, we have both positive and negative ionization. The files have been placed in different folders depending on the ionization and pre-processing needed."
+                },
+                "library_charactrization_file_pos": {
+                    "type": "string",
+                    "description": "Path to the characterized library file (positive ionization)",
+                    "help_text": "if you already have your library characterize e.g the results of process_collect_library_pos_msnbase and process_collect_library_neg_msnbase."
+                },
+                "library_charactrization_file_neg": {
+                    "type": "string",
+                    "default": "''",
+                    "description": "Path to the characterized library file  (negative ionization)",
+                    "help_text": "if you already have your library characterize e.g the results of process_collect_library_pos_msnbase and process_collect_library_neg_msnbase."
+                },
+                "quant_library_mzml_files_pos": {
+                    "type": "string",
+                    "default": "data_quant_lib_pos/*.mzML",
+                    "description": "a glob path to a folder containing library mzML files used for doing adduct calculation (positive ionization)",
+                    "help_text": "You will need to place positive and negative files in different folders. In the following example, we provide the complete folder structure used for doing quantification, in-silico and library identification. For example, we can place the library files in mzML_NEG_Lib and mzML_POS_Lib folders"
+                },
+                "id_library_mzml_files_pos": {
+                    "type": "string",
+                    "default": "data_quant_lib_pos/*.mzML",
+                    "description": "a glob path to a folder containing mzML files (for library) used for doing identification (positive ionization)",
+                    "help_text": "You will need to place positive and negative files in different folders. In the following example, we provide the complete folder structure used for doing quantification, in-silico and library identification. For example, we can place the library files in mzML_NEG_Lib and mzML_POS_Lib folders"
+                },
+                "quant_library_mzml_files_neg": {
+                    "type": "string",
+                    "default": "data_quant_lib_neg/*.mzML",
+                    "description": "a glob path to a folder containing library mzML files used for doing adduct calculation (negative ionization)"
+                },
+                "id_library_mzml_files_neg": {
+                    "type": "string",
+                    "default": "data_id_lib_neg/*.mzML",
+                    "description": "a glob path to a folder containing mzML files (for library) used for doing identification (negative ionization)"
+                },
+                "library_description_pos": {
+                    "type": "string",
+                    "description": "Absolute path to a csv file containing description of the library (positive ionization)",
+                    "help_text": "You need to fix for each of the ionization mode, a separate library description file. An example of such a file is provided here (https://github.com/MetaboIGNITER/test-datasets/blob/d2bc5c484fa292af686ac197f35955ba73083934/library_charac_pos.csv). This file must contain the following information in a comma separate file:\n\n*Name of the mzML file containing the compound\n\n*ID of the compound e.g. HMDB ID\n\n*Name of the compound\n\n*Theoretical m/z of the compound"
+                },
+                "library_description_neg": {
+                    "type": "string",
+                    "default": "'",
+                    "description": "Absolute path to a csv file containing description of the library (negative ionization)",
+                    "help_text": "You need to fix for each of the ionization mode, a separate library description file. An example of such a file is provided here (https://github.com/MetaboIGNITER/test-datasets/blob/d2bc5c484fa292af686ac197f35955ba73083934/library_charac_pos.csv). This file must contain the following information in a comma separate file:\n\n*Name of the mzML file containing the compound\n\n*ID of the compound e.g. HMDB ID\n\n*Name of the compound\n\n*Theoretical m/z of the compound"
+                }
+            }
+        },
+        "XCMS quantification (positive ionization)": {
+            "type": "object",
+            "description": "Used to find mass traces, align and correct retention time differences between them",
+            "default": "",
+            "properties": {
+                "masstrace_ppm_pos_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Maximal tolerated m/z deviation in consecutive scans, in ppm (positive ionization,only if quantifying using xcms)",
+                    "help_text": "Quantification using XCMS"
+                },
+                "peakwidthlow_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "Minimum value of chromatographic peak width in seconds (positive ionization,only if quantifying using xcms)",
+                    "help_text": "Quantification using XCMS\n"
+                },
+                "peakwidthhigh_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "Maximum value of chromatographic peak width in seconds (positive ionization,only if quantifying using xcms)",
+                    "help_text": "Only set if you are quantifying using XCMS\n"
+                },
+                "noise_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "Level of noise (positive ionization,only if quantifying using xcms)",
+                    "help_text": "This is useful for data that was centroided without any intensity threshold, centroids with intensity smaller noise are omitted from ROI detection"
+                },
+                "phenodatacolumn_quant_pos": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "column name in the phenotype file representing the class of the metabolite (positive ionization)",
+                    "help_text": "This should show the column name in the CSV file representing the class of the metabolite. In the case of the example phenotype table (https://github.com/MetaboIGNITER/test-datasets/blob/master/phenotype_positive.csv), it should be set to Class"
+                },
+                "sampleclass_quant_pos_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "hidden": true,
+                    "description": "Setting the sample class manually without phenotype file (experimental)"
+                },
+                "bandwidth_group_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 15,
+                    "description": "Bandwidth for first grouping (positive ionzation)",
+                    "help_text": "Bandwidth (standard deviation or half width at half maximum) of gaussian smoothing kernel to apply to the peak density chromatogram"
+                },
+                "mzwid_group_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 0.005,
+                    "description": "Width of overlapping m/z slices for first grouping (positive ionization)",
+                    "help_text": "Width of overlapping m/z slices to use for creating peak density chromatograms and grouping peaks across samples"
+                },
+                "method_align_N1_pos_xcms": {
+                    "type": "string",
+                    "default": "loess",
+                    "description": "Method to use for retention time correction",
+                    "enum": [
+                        "obiwarp",
+                        "loess"
+                    ],
+                    "help_text": "Method to use for retention time correction. There are 2 methods available: loess: Fit a polynomial surface determined by one or more numerical predictors, using local fitting.\n\nobiwarp: Calculate retention time deviations for each sample. It is based on the code at here (http://obi-warp.sourceforge.net/). However, this function is able to align multiple samples, by a centre-star strategy."
+                },
+                "bandwidth_group_N2_pos_xcms": {
+                    "type": "string",
+                    "default": "15",
+                    "description": "Bandwidth for second grouping (positive ionzation)",
+                    "help_text": "Bandwidth (standard deviation or half width at half maximum) of gaussian smoothing kernel to apply to the peak density chromatogram"
+                },
+                "mzwid_group_N2_pos_xcms": {
+                    "type": "string",
+                    "default": "0.005",
+                    "description": "Width of overlapping m/z slices for second grouping (positive ionization)",
+                    "help_text": "Width of overlapping m/z slices to use for creating peak density chromatograms and grouping peaks across samples"
+                },
+                "blank_filter_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should blank filtering be performed (positive ionization)?",
+                    "help_text": "This module filters out the signals that have higher abundance in non-biological samples (e.g. blank) compared to biological samples."
+                },
+                "method_blankfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "max",
+                    "description": "method to use for summarizing blank and biological sample for comparisons (positive ionization)",
+                    "enum": [
+                        "max",
+                        "mean",
+                        "median"
+                    ],
+                    "help_text": "Which method to use for summarizing blank and biological sample for comparisons. For example, if Max is selected, a signal will be removed if it Maximum abundance in the blank samples is higher than maximum abundance in biological samples (one of max, mean, median)"
+                },
+                "blank_blankfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "Blank",
+                    "description": "Class of blank samples  (positive ionization)",
+                    "help_text": "This must indicate the class of blank samples exactly as you refer to them in your phenotype file. IMPORTANT: This class should be identical for all the blank samples"
+                },
+                "sample_blankfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "class of the biological sample (positive ionization)",
+                    "help_text": "a sample class can be specified so that blank abundance will be compared against this sample class"
+                },
+                "rest_blankfilter_pos_xcms": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Should blank be compared to all other samples (positive ionization)",
+                    "help_text": "If true, the (average, median, max) abundance of blank samples will be compared against all other samples"
+                },
+                "dilution_filter_pos": {
+                    "type": "string",
+                    "default": "false",
+                    "description": "Should dilution filtering be performed (positive ionization)?",
+                    "help_text": "This module filters out the signals that do not correlate with a specified dilution trend. If you don't want to perform the dilution filtering. Set the following to false and go to the next step of the workflow (no need to set the parameters for this step!)"
+                },
+                "dilution_dilutionfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "D1,D2,D3,D4",
+                    "description": "The series of dilution for calculation of correlation (positive ionization)",
+                    "help_text": "This must indicate the class of dilution trend samples. IMPORTANT: the samples are correlated to the exact order of the sequence as set here"
+                },
+                "corto_dilutionfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "0.5,1,2,4",
+                    "help_text": "This series will be used for calculation of correlation. For example, if this parameter is set like 1,2,3 and the class of dilution trends is set as D1,D2,D3 the following the pairs will be used for calculating the correlation: (D1,1),(D2,2),(D3,3)",
+                    "description": "the class of dilution trend samples (positive ionization)"
+                },
+                "pvalue_dilutionfilter_pos_xcms": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "signals with correlation p-value higher than this will be removed (positive ionization)"
+                },
+                "corcut_dilutionfilter_pos_xcms": {
+                    "type": "number",
+                    "default": -1,
+                    "description": "signals with lower correlation than this will be removed (positive ionization)"
+                },
+                "abs_dilutionfilter_pos_xcms": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "should absolute correlation be calculated (positive ionization)",
+                    "help_text": "Should the algorithm use the correlation as it is (negative and positive) or absolute correlation (either true or false)"
+                },
+                "cv_filter_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should CV filtering be performed (positive ionization)",
+                    "help_text": "This module filters out the signals that do not show the desired coefficient of variation. If you don't want to perform the CV filtering."
+                },
+                "qc_cvfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "QC",
+                    "description": "class of QC samples (positive ionization)",
+                    "help_text": "This must indicate the class of QC samples exactly as indicated by the phenotype file."
+                },
+                "cvcut_cvfilter_pos_xcms": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "Signals with CVs higher than this will be removed (positive ionization)"
+                }
+            }
+        },
+        "CAMERA annotation (positive ionization)": {
+            "type": "object",
+            "description": "Used to annotated mass traces with isotopes and adducts",
+            "default": "",
+            "properties": {
+                "sigma_group_pos_camera": {
+                    "type": "number",
+                    "default": 8,
+                    "description": "multiplier of the standard deviation for FWHM grouping (positive ionization)",
+                    "help_text": "roup peaks of a xsAnnotate object according to there retention time into pseudospectra-groups. Uses the peak FWHMs as grouping borders. Returns xsAnnotate object with pseudospectra information. The multiplier of the standard deviation"
+                },
+                "perfwhm_group_pos_camera": {
+                    "type": "number",
+                    "default": 0.6,
+                    "description": "Percentage of the width of the FWHM (positive ionization)",
+                    "help_text": "roup peaks of a xsAnnotate object according to there retention time into pseudospectra-groups. Uses the peak FWHMs as grouping borders. Returns xsAnnotate object with pseudospectra information. The multiplier of the standard deviation"
+                },
+                "intval_group_pos_camera": {
+                    "type": "string",
+                    "default": "maxo",
+                    "description": "Intensity values for ordering (positive ionization)",
+                    "enum": [
+                        "into",
+                        "maxo",
+                        "intb"
+                    ]
+                },
+                "ppm_findaddcuts_pos_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm error for the adduct search (positive ionization)",
+                    "help_text": "Annotate adducts (and fragments) for a xsAnnotate object. Returns a xsAnnotate object with annotated pseudospectra. This is  ppm error for the adduct search."
+                },
+                "polarity_findaddcuts_pos_camera": {
+                    "type": "string",
+                    "default": "positive",
+                    "description": "select the ionization method (only for testing)",
+                    "hidden": true,
+                    "enum": [
+                        "positive",
+                        "negative"
+                    ]
+                },
+                "maxcharge_findisotopes_pos_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Max. number of the isotope charge (positive ionization)",
+                    "help_text": "Annotate isotope peaks for a xsAnnotate object. Returns a xsAnnotate object with annotated isotopes.\n\nSelect the maximum number of the isotope charges. This is usually 1."
+                }
+            }
+        },
+        "MSMS to CAMERA (positive ionization)": {
+            "type": "object",
+            "description": "This module is used to map MS/MS spectra to annotated CAMERA features. The mapping is performed based on retention time and m/z values of the annotated features.",
+            "default": "",
+            "properties": {
+                "ppm_mapmsmstocamera_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm error used for the mapping (positive ionization)",
+                    "help_text": "Set ppm error used for the mapping."
+                },
+                "rt_mapmsmstocamera_pos_msnbase": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "retention time error (in seconds) used for the mapping (positive ionization)",
+                    "help_text": "This module is used to map MS/MS spectra to annotated CAMERA features. The mapping is performed based on retention time and m/z values of the annotated features. Set the  retention time error (in seconds) used for the mapping"
+                }
+            }
+        },
+        "Generate search files (positive ionization)": {
+            "type": "object",
+            "description": "This module is used to generate search parameters with mapped MS/MS spectra retrieved from the mzML files. These parameters will be sent to all the search engines. You will then have the possibility to set the search engine specific parameters. The only exception is database_msmstoparam_pos/neg_msnbase that is only applicable in MetFrag.",
+            "default": "",
+            "properties": {
+                "precursorppm_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm error for the precursor mass to search candidates (positive ionization)",
+                    "help_text": "Set the ppm error for the precursor mass to search candidates."
+                },
+                "fragmentppm_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 20,
+                    "description": "ppm error to assign fragments to fragment peaks (positive ionization)",
+                    "help_text": "Set the ppm error for the precursor mass to search candidates."
+                },
+                "fragmentabs_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "absolute mass error to assign fragments to fragment peaks (positive ionization)"
+                },
+                "database_msmstoparam_pos_msnbase": {
+                    "type": "string",
+                    "default": "LocalCSV",
+                    "description": "select the database for doing identification (only applied on metfrag) (positive ionization)",
+                    "help_text": "Available databases are: KEGG, PubChem, MetChem (local database which needs to be set up beforehand). In addition, LocalCSV can be used which uses a csv file for searching. Such a csv file can be downloaded from here. If LocalCSV is selected, a specific file needs to be provided. The format of this file is very strict. See the database parameter.",
+                    "enum": [
+                        "KEGG",
+                        "PubChem",
+                        "MetChem",
+                        "LocalCSV"
+                    ]
+                },
+                "mode_msmstoparam_pos_msnbase": {
+                    "type": "string",
+                    "default": "pos",
+                    "description": "ionization mode"
+                },
+                "adductRules_msmstoparam_pos_msnbase": {
+                    "type": "string",
+                    "default": "primary",
+                    "description": "Adduct ruleset to be used (positive ionization)",
+                    "enum": [
+                        "primary",
+                        "extended"
+                    ],
+                    "help_text": "Adduct ruleset to be used: primary - contains most common adduct types ([M-H]-, [M-2H+Na]-, [M-2H+K]-, [M+Cl]-, [M+H]+, [M+Na]+, [M+K]+, [M+NH4]+) extended - next to primary also additional adduct types"
+                },
+                "minPeaks_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "minimum number of fragment peaks (positive ionization)",
+                    "help_text": "Filter spectra by a minimum number of fragment peaks"
+                }
+            }
+        },
+        "In-silico identification (positive ionization)": {
+            "type": "object",
+            "description": "Used to set database related parameters of the search engines",
+            "default": "",
+            "properties": {
+                "database_csifingerid_pos_csifingerid": {
+                    "type": "string",
+                    "default": "hmdb",
+                    "description": "Database for CSIFINGERID (positive ionization)",
+                    "help_text": "Database (this will overwrite the corresponding parameter in the input file). CSI:FingerID does not have LocalCSV. So if you set this in the previous step, change this to your desired database (one of: all, chebi, kegg, bio, natural products, pubmed, hmdb, biocyc, hsdb, knapsack, biological, zinc bio, gnps, pubchem, mesh, maconda).",
+                    "enum": [
+                        "all",
+                        "chebi",
+                        "kegg",
+                        "bio",
+                        "natural products",
+                        "pubmed",
+                        "hmdb",
+                        "biocyc",
+                        "hsdb",
+                        "knapsack",
+                        "biological",
+                        "zinc bio",
+                        "gnps",
+                        "pubchem",
+                        "mesh",
+                        "maconda"
+                    ]
+                },
+                "database_csv_files_pos_metfrag": {
+                    "type": "string",
+                    "description": "If LocalCSV, a path to the database file (positive ionization)",
+                    "help_text": "We only need one parameter if the global parameters have been set properly. This is the database file. An example of such a database can be found here (https://github.com/MetaboIGNITER/test-datasets/blob/d2bc5c484fa292af686ac197f35955ba73083934/hmdb_2017-07-23.csv). You can either use the example for HMDB (2017) or generate your own using MetChem (https://github.com/c-ruttkies/container-metchemdata). Please contact us if you need to generate this file."
+                },
+                "database_csv_files_pos_cfmid": {
+                    "type": "string",
+                    "description": "absolute path to a csv file containing your database (positive ionization)",
+                    "help_text": "You need to specify the database for CFM-ID. The rest of the parameters will be taken from the global parameters. Please see MetFrag parameter on how to construct the database. This database must at least contain the following columns: id of the molecules, smile of the molecules, mass of the molecules, name of the molecules and InChI of the molecules. The best practice would be to use MetChem (https://github.com/c-ruttkies/container-metchemdata) to construct the database."
+                },
+                "candidate_id_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "Identifier",
+                    "description": "Name of the column in the database file for id of the molecules (positive ionization)"
+                },
+                "candidate_inchi_smiles_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "SMILES",
+                    "description": "Name of the column in the database file for smile of the molecules (positive ionization)"
+                },
+                "candidate_mass_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "MonoisotopicMass",
+                    "description": "Name of the column in the database file for mass of the molecules (positive ionization)"
+                },
+                "database_name_column_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "Name",
+                    "description": "Name of the column in the database file for name of the molecules (positive ionization)"
+                },
+                "database_inchI_column_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "InChI",
+                    "description": "Name of the column in the database file for InChI of the molecules (positive ionization)"
+                }
+            }
+        },
+        "Output the results (positive ionization)": {
+            "type": "object",
+            "description": "This module converts the quantification and identification results to tabular files for multivariate and univariate data analysis. If you are only doing the identification, you can set the parameters and this stage and run the workflow. If you would like to do identification, you can still set the parameters of this stage and but also don't run the workflow, continue with this guide to set the parameters for identification and then run the workflow. This stage will output three tabular files: peak table containing abundances, sample metadata, and variable data containing identification (if identification is selected)",
+            "default": "",
+            "properties": {
+                "ppm_output_pos_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "m/z tolerance for matching identification results to quantification (ppm) (positive ionization)"
+                },
+                "rt_output_pos_camera": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "Retention time tolerance for matching identification results to quantification (sec) (positive ionization)"
+                },
+                "higher_the_better_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "In the original scores, is higher the better (positive ionization)?",
+                    "hidden": true
+                },
+                "impute_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "unidentified signals will be imputed by the identification (positive ionization)",
+                    "help_text": "Metabolites quantification profile often result in a number signals. One some of this signal can be identified. If this parameter is set, the unidentified signals will be imputed by the identification based on CAMERA grouping. Only if you have selected to do identification"
+                },
+                "type_column_output_pos_camera": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "which column shows what sample to keep (positive ionization)",
+                    "help_text": "The phenotype file must have a column showing which samples to keep and which to remove. Enter name of that column."
+                },
+                "selected_type_output_pos_camera": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "which sample type should be kept (positive ionization)",
+                    "help_text": "Based on information in \"type_column_output_pos/neg_camera\", enter which sample type should be kept."
+                },
+                "rename_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "rename the samples (positive ionization)",
+                    "help_text": "If true. The samples will be renamed based on information provide in column \"rename_col_output_pos/neg_camera\":\n\n"
+                },
+                "rename_col_output_pos_camera": {
+                    "type": "string",
+                    "default": "rename",
+                    "description": "Rename based on this column (positive ionization)",
+                    "help_text": "Enter the name of the column (in the phenotype file) showing the new file name of the samples"
+                },
+                "only_report_with_id_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "only identified metabolites will be reported (positive ionization)",
+                    "help_text": "If true. Only identified metabolites will be reported. Only if you have selected to do identification."
+                },
+                "combine_replicate_output_pos_camera": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "The technical replicates should be averaged (positive ionization)",
+                    "help_text": "If yes. The technical replicates (duplicate injections) will be averaged (median). This information should be provided in an additional column in the phenotype information."
+                },
+                "combine_replicate_column_output_pos_camera": {
+                    "type": "string",
+                    "default": "rep",
+                    "description": "he column name indicating technical replicate (positive ionization)",
+                    "help_text": "Enter the column name indicating technical replicate in the phenotype file. See the example in the phenotype design."
+                },
+                "log_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Do you want to perform log2 transformation (positive ionization)?"
+                },
+                "sample_coverage_output_pos_camera": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "How much of non-missing value should be present for each feature (positive ionization)"
+                },
+                "sample_coverage_method_output_pos_camera": {
+                    "type": "string",
+                    "default": "global",
+                    "description": "Do you want to apply coverage globally across all the runs or per group?",
+                    "help_text": "Do you want to apply the coverage globally across all the runs or per group? For applying globally write global otherwise write name of the column showing the grouping."
+                },
+                "normalize_output_pos_camera": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "Normalize the data using this method (positive ionization)",
+                    "help_text": "Normalize the data using this method, select the number for each normalization (1:Cyclic Loess, 2:Median, 3:Reference, 4:Regression), set to \"NA\" if you don't want to perform any normalization:",
+                    "enum": [
+                        "NA",
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                    ]
+                },
+                "ncore_output_pos_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of cores for performing mapping of IDs to features (positive ionization)"
+                }
+            }
+        },
+        "Library identification (positive ionization)": {
+            "type": "object",
+            "description": "This part of the workflow is used to create and characterize in-house library. This is how it works: we assume that the library consists of one or more mzML files, each containing a number of compounds. A possible scenario is when the users have several standard metabolites that can have overlapping masses with unknown retention times. The standards with overlapping masses can be run separately using MS, resulting in different runs. MetaboIGNITER will help you to characterize this type of internal libraries. You will need to construct the Characterization file (see the guide) that shows which standards are present in which mzML file. The workflow will then do mass trace detection, MS2 extraction and mapping of parent ions to mass traces. Doing so will result in finding the retention time and empirical m/z of each standard. This will then be used to create identification parameters and search the biological MS2 files.",
+            "default": "",
+            "properties": {
+                "raw_file_name_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "rawFile",
+                    "description": "Column name showing name of the raw file in the library file (positive ionization)",
+                    "help_text": "Column name showing name of the raw file in the library file e.g. \"raw.File\" in the characterization file (e.g, https://github.com/MetaboIGNITER/test-datasets/blob/master/library_charac_pos.csv)"
+                },
+                "compund_id_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "HMDB.YMDB.ID",
+                    "description": "Column name showing ID of the compound in the library file (positive ionization)",
+                    "help_text": "Column name showing ID of the compound in the library file e.g. \"HMDB.ID\" in the table (https://github.com/MetaboIGNITER/test-datasets/blob/master/library_charac_pos.csv)"
+                },
+                "compound_name_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "PRIMARY_NAME",
+                    "description": "Column name showing name of the compound in the library file (positive ionization)",
+                    "help_text": "Column name showing the name of the compound in the library file e.g. \"Name\" in the table (https://github.com/MetaboIGNITER/test-datasets/blob/master/library_charac_pos.csv)"
+                },
+                "mz_col_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "mz",
+                    "description": "Column name showing m/z of the compound in the library file (positive ionization)",
+                    "help_text": "Column name showing m/z of the compound in the library file e.g. \"m.z\" in the table (https://github.com/MetaboIGNITER/test-datasets/blob/master/library_charac_pos.csv)"
+                },
+                "which_mz_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "f",
+                    "description": "method of mapping f or c (positive ionization)",
+                    "enum": [
+                        "f",
+                        "c"
+                    ],
+                    "help_text": "The function can use feature range (f), centroid (c), and parent m/z (Parent) information in order to map a compound to MS1 and MS2 information."
+                },
+                "ncore_searchengine_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of cores for mapping the features (positive ionization)"
+                },
+                "masstrace_ppm_library_pos_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Masstrance deviation in ppm (positive ionization)",
+                    "help_text": "See quantification xcms parameter"
+                },
+                "peakwidthlow_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "Lower width of peaks (positive ionization)",
+                    "help_text": "See quantification xcms parameter"
+                },
+                "peakwidthhigh_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "Highest width of peaks (positive ionization)",
+                    "help_text": "See quantification xcms parameter"
+                },
+                "noise_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "Level of noise (positive ionization)",
+                    "help_text": "See quantification xcms parameter"
+                },
+                "sigma_group_library_pos_camera": {
+                    "type": "string",
+                    "default": "8",
+                    "description": "Sigma value for grouping the peaks across chromatogram (positive ionization)",
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "perfwhm_group_library_pos_camera": {
+                    "type": "string",
+                    "default": "0.6",
+                    "description": "Full width at half maximum for finding overlaping peaks (positive ionization)",
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "intval_group_library_pos_camera": {
+                    "type": "string",
+                    "default": "maxo",
+                    "description": "which intensity value to use (positive ionization)",
+                    "enum": [
+                        "into",
+                        "maxo",
+                        "intb"
+                    ],
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "ppm_findaddcuts_library_pos_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "The ppm error for the search for addcuts (positive ionization)",
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "polarity_findaddcuts_library_pos_camera": {
+                    "type": "string",
+                    "default": "positive",
+                    "enum": [
+                        "positive",
+                        "negative"
+                    ],
+                    "description": "ionization mode (only for testing) (positive ionization)",
+                    "hidden": true,
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "maxcharge_findisotopes_library_pos_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Max. number of the isotope charge (positive ionization)",
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "ppm_mapmsmstocamera_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation when mapping MS2 parent ion to a mass trace (positive ionization)",
+                    "help_text": "Mapping MS2 to features (within the library)"
+                },
+                "rt_mapmsmstocamera_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (positive ionization)",
+                    "help_text": "Mapping MS2 to features (within the library)"
+                },
+                "ppm_create_library_pos_msnbase": {
+                    "type": "string",
+                    "default": "10",
+                    "description": "relative mass error of library (positive ionization)",
+                    "help_text": "Set the relative mass deviation (ppm) between the experimental and theoretical masses of metabolites"
+                }
+            }
+        },
+        "XCMS quantification (negative ionization)": {
+            "type": "object",
+            "description": "Used to find mass traces, align and correct retention time differences between them",
+            "default": "",
+            "properties": {
+                "masstrace_ppm_neg_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Maximal tolerated m/z deviation in consecutive scans, in ppm (negative ionization,only if quantifying using xcms)",
+                    "help_text": "Quantification using XCMS"
+                },
+                "peakwidthlow_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "Minimum value of chromatographic peak width in seconds (negative ionization,only if quantifying using xcms)",
+                    "help_text": "Quantification using XCMS\n"
+                },
+                "peakwidthhigh_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "Maximum value of chromatographic peak width in seconds (negative ionization,only if quantifying using xcms)",
+                    "help_text": "Only set if you are quantifying using XCMS\n"
+                },
+                "noise_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "Level of noise (negative ionization,only if quantifying using xcms)",
+                    "help_text": "This is useful for data that was centroided without any intensity threshold, centroids with intensity smaller noise are omitted from ROI detection"
+                },
+                "phenodatacolumn_quant_neg": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "column name in the phenotype file representing the class of the metabolite (negative ionization)",
+                    "help_text": "This should show the column name in the CSV file representing the class of the metabolite. In the case of the example phenotype table (https://github.com/MetaboIGNITER/test-datasets/blob/master/phenotype_negative.csv), it should be set to Class"
+                },
+                "sampleclass_quant_neg_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "hidden": true,
+                    "description": "Setting the sample class manually without phenotype file (experimental)"
+                },
+                "bandwidth_group_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 15,
+                    "description": "Bandwidth for first grouping (negative ionzation)",
+                    "help_text": "Bandwidth (standard deviation or half width at half maximum) of gaussian smoothing kernel to apply to the peak density chromatogram"
+                },
+                "mzwid_group_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 0.005,
+                    "description": "Width of overlapping m/z slices for first grouping (negative ionization)",
+                    "help_text": "Width of overlapping m/z slices to use for creating peak density chromatograms and grouping peaks across samples"
+                },
+                "method_align_N1_neg_xcms": {
+                    "type": "string",
+                    "default": "loess",
+                    "description": "Method to use for retention time correction (negative ionization)",
+                    "enum": [
+                        "obiwarp",
+                        "loess"
+                    ],
+                    "help_text": "Method to use for retention time correction. There are 2 methods available: loess: Fit a polynomial surface determined by one or more numerical predictors, using local fitting.\n\nobiwarp: Calculate retention time deviations for each sample. It is based on the code at here (http://obi-warp.sourceforge.net/). However, this function is able to align multiple samples, by a centre-star strategy."
+                },
+                "bandwidth_group_N2_neg_xcms": {
+                    "type": "string",
+                    "default": "15",
+                    "description": "Bandwidth for second grouping (negative ionzation)",
+                    "help_text": "Bandwidth (standard deviation or half width at half maximum) of gaussian smoothing kernel to apply to the peak density chromatogram"
+                },
+                "mzwid_group_N2_neg_xcms": {
+                    "type": "string",
+                    "default": "0.005",
+                    "description": "Width of overlapping m/z slices for second grouping (negative ionization)",
+                    "help_text": "Width of overlapping m/z slices to use for creating peak density chromatograms and grouping peaks across samples"
+                },
+                "blank_filter_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should blank filtering be performed (negative ionization)?",
+                    "help_text": "This module filters out the signals that have higher abundance in non-biological samples (e.g. blank) compared to biological samples."
+                },
+                "method_blankfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "max",
+                    "description": "method to use for summarizing blank and biological sample for comparisons (negative ionization)",
+                    "enum": [
+                        "max",
+                        "mean",
+                        "median"
+                    ],
+                    "help_text": "Which method to use for summarizing blank and biological sample for comparisons. For example, if Max is selected, a signal will be removed if it Maximum abundance in the blank samples is higher than maximum abundance in biological samples (one of max, mean, median)"
+                },
+                "blank_blankfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "Blank",
+                    "description": "Class of blank samples  (negative ionization)",
+                    "help_text": "This must indicate the class of blank samples exactly as you refer to them in your phenotype file. IMPORTANT: This class should be identical for all the blank samples"
+                },
+                "sample_blankfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "class of the biological sample (negative ionization)",
+                    "help_text": "a sample class can be specified so that blank abundance will be compared against this sample class"
+                },
+                "rest_blankfilter_neg_xcms": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Should blank be compared to all other samples (negative ionization)",
+                    "help_text": "If true, the (average, median, max) abundance of blank samples will be compared against all other samples"
+                },
+                "dilution_filter_neg": {
+                    "type": "string",
+                    "default": "false",
+                    "description": "Should dilution filtering be performed (negative ionization)?",
+                    "help_text": "This module filters out the signals that do not correlate with a specified dilution trend. If you don't want to perform the dilution filtering. Set the following to false and go to the next step of the workflow (no need to set the parameters for this step!)"
+                },
+                "dilution_dilutionfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "D1,D2,D3,D4",
+                    "description": "The series of dilution for calculation of correlation (negative ionization)",
+                    "help_text": "This must indicate the class of dilution trend samples. IMPORTANT: the samples are correlated to the exact order of the sequence as set here"
+                },
+                "corto_dilutionfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "0.5,1,2,4",
+                    "help_text": "This series will be used for calculation of correlation. For example, if this parameter is set like 1,2,3 and the class of dilution trends is set as D1,D2,D3 the following the pairs will be used for calculating the correlation: (D1,1),(D2,2),(D3,3)",
+                    "description": "the class of dilution trend samples (negative ionization)"
+                },
+                "pvalue_dilutionfilter_neg_xcms": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "signals with correlation p-value higher than this will be removed (negative ionization)"
+                },
+                "corcut_dilutionfilter_neg_xcms": {
+                    "type": "number",
+                    "default": -1,
+                    "description": "signals with lower correlation than this will be removed (negative ionization)"
+                },
+                "abs_dilutionfilter_neg_xcms": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "should absolute correlation be calculated (negative ionization)",
+                    "help_text": "Should the algorithm use the correlation as it is (negative and negative) or absolute correlation (either true or false)"
+                },
+                "cv_filter_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should CV filtering be performed (negative ionization)",
+                    "help_text": "This module filters out the signals that do not show the desired coefficient of variation. If you don't want to perform the CV filtering."
+                },
+                "qc_cvfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "QC",
+                    "description": "class of QC samples (negative ionization)",
+                    "help_text": "This must indicate the class of QC samples exactly as indicated by the phenotype file."
+                },
+                "cvcut_cvfilter_neg_xcms": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "Signals with CVs higher than this will be removed (negative ionization)"
+                }
+            }
+        },
+        "CAMERA annotation (negative ionization)": {
+            "type": "object",
+            "description": "Used to annotated mass traces with isotopes and adducts",
+            "default": "",
+            "properties": {
+                "sigma_group_neg_camera": {
+                    "type": "number",
+                    "default": 8,
+                    "description": "multiplier of the standard deviation for FWHM grouping (negative ionization)",
+                    "help_text": "roup peaks of a xsAnnotate object according to there retention time into pseudospectra-groups. Uses the peak FWHMs as grouping borders. Returns xsAnnotate object with pseudospectra information. The multiplier of the standard deviation"
+                },
+                "perfwhm_group_neg_camera": {
+                    "type": "number",
+                    "default": 0.6,
+                    "description": "Percentage of the width of the FWHM (negative ionization)",
+                    "help_text": "roup peaks of a xsAnnotate object according to there retention time into pseudospectra-groups. Uses the peak FWHMs as grouping borders. Returns xsAnnotate object with pseudospectra information. The multiplier of the standard deviation"
+                },
+                "intval_group_neg_camera": {
+                    "type": "string",
+                    "default": "maxo",
+                    "description": "Intensity values for ordering (negative ionization)",
+                    "enum": [
+                        "into",
+                        "maxo",
+                        "intb"
+                    ]
+                },
+                "ppm_findaddcuts_neg_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm error for the adduct search (negative ionization)",
+                    "help_text": "Annotate adducts (and fragments) for a xsAnnotate object. Returns a xsAnnotate object with annotated pseudospectra. This is  ppm error for the adduct search."
+                },
+                "polarity_findaddcuts_neg_camera": {
+                    "type": "string",
+                    "default": "negative",
+                    "description": "select the ionization method (only for testing) (negative ionization)",
+                    "hidden": true,
+                    "enum": [
+                        "negative",
+                        "negative"
+                    ]
+                },
+                "maxcharge_findisotopes_neg_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Max. number of the isotope charge (negative ionization)",
+                    "help_text": "Annotate isotope peaks for a xsAnnotate object. Returns a xsAnnotate object with annotated isotopes.\n\nSelect the maximum number of the isotope charges. This is usually 1."
+                }
+            }
+        },
+        "MSMS to CAMERA (negative ionization)": {
+            "type": "object",
+            "description": "This module is used to map MS/MS spectra to annotated CAMERA features. The mapping is performed based on retention time and m/z values of the annotated features.",
+            "default": "",
+            "properties": {
+                "ppm_mapmsmstocamera_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm error used for the mapping (negative ionization)",
+                    "help_text": "Set ppm error used for the mapping."
+                },
+                "rt_mapmsmstocamera_neg_msnbase": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "retention time error (in seconds) used for the mapping (negative ionization)",
+                    "help_text": "This module is used to map MS/MS spectra to annotated CAMERA features. The mapping is performed based on retention time and m/z values of the annotated features. Set the  retention time error (in seconds) used for the mapping"
+                }
+            }
+        },
+        "Generate search files (negative ionization)": {
+            "type": "object",
+            "description": "This module is used to generate search parameters with mapped MS/MS spectra retrieved from the mzML files. These parameters will be sent to all the search engines. You will then have the possibility to set the search engine specific parameters. The only exception is database_msmstoparam_neg/neg_msnbase that is only applicable in MetFrag.",
+            "default": "",
+            "properties": {
+                "precursorppm_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm error for the precursor mass to search candidates (negative ionization)",
+                    "help_text": "Set the ppm error for the precursor mass to search candidates."
+                },
+                "fragmentppm_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 20,
+                    "description": "ppm error to assign fragments to fragment peaks (negative ionization)",
+                    "help_text": "Set the ppm error for the precursor mass to search candidates."
+                },
+                "fragmentabs_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "absolute mass error to assign fragments to fragment peaks (negative ionization)"
+                },
+                "database_msmstoparam_neg_msnbase": {
+                    "type": "string",
+                    "default": "LocalCSV",
+                    "description": "select the database for doing identification (only applied on metfrag) (negative ionization)",
+                    "help_text": "Available databases are: KEGG, PubChem, MetChem (local database which needs to be set up beforehand). In addition, LocalCSV can be used which uses a csv file for searching. Such a csv file can be downloaded from here. If LocalCSV is selected, a specific file needs to be provided. The format of this file is very strict. See the database parameter.",
+                    "enum": [
+                        "KEGG",
+                        "PubChem",
+                        "MetChem",
+                        "LocalCSV"
+                    ]
+                },
+                "mode_msmstoparam_neg_msnbase": {
+                    "type": "string",
+                    "default": "pos",
+                    "description": "ionization mode"
+                },
+                "adductRules_msmstoparam_neg_msnbase": {
+                    "type": "string",
+                    "default": "primary",
+                    "description": "Adduct ruleset to be used (negative ionization)",
+                    "enum": [
+                        "primary",
+                        "extended"
+                    ],
+                    "help_text": "Adduct ruleset to be used: primary - contains most common adduct types ([M-H]-, [M-2H+Na]-, [M-2H+K]-, [M+Cl]-, [M+H]+, [M+Na]+, [M+K]+, [M+NH4]+) extended - next to primary also additional adduct types"
+                },
+                "minPeaks_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "minimum number of fragment peaks (negative ionization)",
+                    "help_text": "Filter spectra by a minimum number of fragment peaks"
+                }
+            }
+        },
+        "In-silico identification (negative ionization)": {
+            "type": "object",
+            "description": "Used to set database related parameters of the search engines",
+            "default": "",
+            "properties": {
+                "database_csifingerid_neg_csifingerid": {
+                    "type": "string",
+                    "default": "hmdb",
+                    "description": "Database for CSIFINGERID (negative ionization)",
+                    "help_text": "Database (this will overwrite the corresponding parameter in the input file). CSI:FingerID does not have LocalCSV. So if you set this in the previous step, change this to your desired database (one of: all, chebi, kegg, bio, natural products, pubmed, hmdb, biocyc, hsdb, knapsack, biological, zinc bio, gnps, pubchem, mesh, maconda).",
+                    "enum": [
+                        "all",
+                        "chebi",
+                        "kegg",
+                        "bio",
+                        "natural products",
+                        "pubmed",
+                        "hmdb",
+                        "biocyc",
+                        "hsdb",
+                        "knapsack",
+                        "biological",
+                        "zinc bio",
+                        "gnps",
+                        "pubchem",
+                        "mesh",
+                        "maconda"
+                    ]
+                },
+                "database_csv_files_neg_metfrag": {
+                    "type": "string",
+                    "description": "If LocalCSV, a path to the database file (negative ionization)",
+                    "help_text": "We only need one parameter if the global parameters have been set properly. This is the database file. An example of such a database can be found here (https://github.com/MetaboIGNITER/test-datasets/blob/d2bc5c484fa292af686ac197f35955ba73083934/hmdb_2017-07-23.csv). You can either use the example for HMDB (2017) or generate your own using MetChem (https://github.com/c-ruttkies/container-metchemdata). Please contact us if you need to generate this file."
+                },
+                "database_csv_files_neg_cfmid": {
+                    "type": "string",
+                    "description": "absolute path to a csv file containing your database (negative ionization)",
+                    "help_text": "You need to specify the database for CFM-ID. The rest of the parameters will be taken from the global parameters. Please see MetFrag parameter on how to construct the database. This database must at least contain the following columns: id of the molecules, smile of the molecules, mass of the molecules, name of the molecules and InChI of the molecules. The best practice would be to use MetChem (https://github.com/c-ruttkies/container-metchemdata) to construct the database."
+                },
+                "candidate_id_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "Identifier",
+                    "description": "Name of the column in the database file for id of the molecules (negative ionization)"
+                },
+                "candidate_inchi_smiles_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "SMILES",
+                    "description": "Name of the column in the database file for smile of the molecules (negative ionization)"
+                },
+                "candidate_mass_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "MonoisotopicMass",
+                    "description": "Name of the column in the database file for mass of the molecules (negative ionization)"
+                },
+                "database_name_column_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "Name",
+                    "description": "Name of the column in the database file for name of the molecules (negative ionization)"
+                },
+                "database_inchI_column_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "InChI",
+                    "description": "Name of the column in the database file for InChI of the molecules (negative ionization)"
+                }
+            }
+        },
+        "Output the results (negative ionization)": {
+            "type": "object",
+            "description": "This module converts the quantification and identification results to tabular files for multivariate and univariate data analysis. If you are only doing the identification, you can set the parameters and this stage and run the workflow. If you would like to do identification, you can still set the parameters of this stage and but also don't run the workflow, continue with this guide to set the parameters for identification and then run the workflow. This stage will output three tabular files: peak table containing abundances, sample metadata, and variable data containing identification (if identification is selected)",
+            "default": "",
+            "properties": {
+                "ppm_output_neg_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "m/z tolerance for matching identification results to quantification (ppm) (negative ionization)"
+                },
+                "rt_output_neg_camera": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "Retention time tolerance for matching identification results to quantification (sec) (negative ionization)"
+                },
+                "higher_the_better_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "In the original scores, is higher the better (negative ionization)?",
+                    "hidden": true
+                },
+                "impute_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "unidentified signals will be imputed by the identification (negative ionization)",
+                    "help_text": "Metabolites quantification profile often result in a number signals. One some of this signal can be identified. If this parameter is set, the unidentified signals will be imputed by the identification based on CAMERA grouping. Only if you have selected to do identification"
+                },
+                "type_column_output_neg_camera": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "which column shows what sample to keep (negative ionization)",
+                    "help_text": "The phenotype file must have a column showing which samples to keep and which to remove. Enter name of that column."
+                },
+                "selected_type_output_neg_camera": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "which sample type should be kept (negative ionization)",
+                    "help_text": "Based on information in \"type_column_output_neg/neg_camera\", enter which sample type should be kept."
+                },
+                "rename_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "rename the samples (negative ionization)",
+                    "help_text": "If true. The samples will be renamed based on information provide in column \"rename_col_output_neg/neg_camera\":\n\n"
+                },
+                "rename_col_output_neg_camera": {
+                    "type": "string",
+                    "default": "rename",
+                    "description": "Rename based on this column (negative ionization)",
+                    "help_text": "Enter the name of the column (in the phenotype file) showing the new file name of the samples"
+                },
+                "only_report_with_id_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "only identified metabolites will be reported (negative ionization)",
+                    "help_text": "If true. Only identified metabolites will be reported. Only if you have selected to do identification."
+                },
+                "combine_replicate_output_neg_camera": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "The technical replicates should be averaged (negative ionization)",
+                    "help_text": "If yes. The technical replicates (duplicate injections) will be averaged (median). This information should be provided in an additional column in the phenotype information."
+                },
+                "combine_replicate_column_output_neg_camera": {
+                    "type": "string",
+                    "default": "rep",
+                    "description": "he column name indicating technical replicate (negative ionization)",
+                    "help_text": "Enter the column name indicating technical replicate in the phenotype file. See the example in the phenotype design."
+                },
+                "log_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Do you want to perform log2 transformation (negative ionization)?"
+                },
+                "sample_coverage_output_neg_camera": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "How much of non-missing value should be present for each feature (negative ionization)"
+                },
+                "sample_coverage_method_output_neg_camera": {
+                    "type": "string",
+                    "default": "global",
+                    "description": "Do you want to apply coverage globally across all the runs or per group?",
+                    "help_text": "Do you want to apply the coverage globally across all the runs or per group? For applying globally write global otherwise write name of the column showing the grouping."
+                },
+                "normalize_output_neg_camera": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "Normalize the data using this method (negative ionization)",
+                    "help_text": "Normalize the data using this method, select the number for each normalization (1:Cyclic Loess, 2:Median, 3:Reference, 4:Regression), set to \"NA\" if you don't want to perform any normalization:",
+                    "enum": [
+                        "NA",
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                    ]
+                },
+                "ncore_output_neg_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of cores for performing mapping of IDs to features (negative ionization)"
+                }
+            }
+        },
+        "Library identification (negative ionization)": {
+            "type": "object",
+            "description": "This part of the workflow is used to create and characterize in-house library. This is how it works: we assume that the library consists of one or more mzML files, each containing a number of compounds. A possible scenario is when the users have several standard metabolites that can have overlapping masses with unknown retention times. The standards with overlapping masses can be run separately using MS, resulting in different runs. MetaboIGNITER will help you to characterize this type of internal libraries. You will need to construct the Characterization file (see the guide) that shows which standards are present in which mzML file. The workflow will then do mass trace detection, MS2 extraction and mapping of parent ions to mass traces. Doing so will result in finding the retention time and empirical m/z of each standard. This will then be used to create identification parameters and search the biological MS2 files.",
+            "default": "",
+            "properties": {
+                "raw_file_name_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "rawFile",
+                    "description": "Column name showing name of the raw file in the library file (negative ionization)",
+                    "help_text": "Column name showing name of the raw file in the library file e.g. \"raw.File\" in the characterization file (e.g, https://github.com/MetaboIGNITER/test-datasets/blob/master/library_charac_neg.csv)"
+                },
+                "compund_id_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "HMDB.YMDB.ID",
+                    "description": "Column name showing ID of the compound in the library file (negative ionization)",
+                    "help_text": "Column name showing ID of the compound in the library file e.g. \"HMDB.ID\" in the table (https://github.com/MetaboIGNITER/test-datasets/blob/master/library_charac_neg.csv)"
+                },
+                "compound_name_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "PRIMARY_NAME",
+                    "description": "Column name showing name of the compound in the library file (negative ionization)",
+                    "help_text": "Column name showing the name of the compound in the library file e.g. \"Name\" in the table (https://github.com/MetaboIGNITER/test-datasets/blob/master/library_charac_neg.csv)"
+                },
+                "mz_col_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "mz",
+                    "description": "Column name showing m/z of the compound in the library file (negative ionization)",
+                    "help_text": "Column name showing m/z of the compound in the library file e.g. \"m.z\" in the table (https://github.com/MetaboIGNITER/test-datasets/blob/master/library_charac_neg.csv)"
+                },
+                "which_mz_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "f",
+                    "description": "method of mapping f or c (negative ionization)",
+                    "enum": [
+                        "f",
+                        "c"
+                    ],
+                    "help_text": "The function can use feature range (f), centroid (c), and parent m/z (Parent) information in order to map a compound to MS1 and MS2 information."
+                },
+                "ncore_searchengine_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of cores for mapping the features (negative ionization)"
+                },
+                "masstrace_ppm_library_neg_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Masstrance deviation in ppm (negative ionization)",
+                    "help_text": "See quantification xcms parameter"
+                },
+                "peakwidthlow_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "Lower width of peaks (negative ionization)",
+                    "help_text": "See quantification xcms parameter"
+                },
+                "peakwidthhigh_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "Highest width of peaks (negative ionization)",
+                    "help_text": "See quantification xcms parameter"
+                },
+                "noise_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "Level of noise (negative ionization)",
+                    "help_text": "See quantification xcms parameter"
+                },
+                "sigma_group_library_neg_camera": {
+                    "type": "string",
+                    "default": "8",
+                    "description": "Sigma value for grouping the peaks across chromatogram (negative ionization)",
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "perfwhm_group_library_neg_camera": {
+                    "type": "string",
+                    "default": "0.6",
+                    "description": "Full width at half maximum for finding overlaping peaks (negative ionization)",
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "intval_group_library_neg_camera": {
+                    "type": "string",
+                    "default": "maxo",
+                    "description": "which intensity value to use (negative ionization)",
+                    "enum": [
+                        "into",
+                        "maxo",
+                        "intb"
+                    ],
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "ppm_findaddcuts_library_neg_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "The ppm error for the search for addcuts (negative ionization)",
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "polarity_findaddcuts_library_neg_camera": {
+                    "type": "string",
+                    "default": "negative",
+                    "enum": [
+                        "negative",
+                        "negative"
+                    ],
+                    "description": "ionization mode (only for testing) (negative ionization)",
+                    "hidden": true,
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "maxcharge_findisotopes_library_neg_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Max. number of the isotope charge (negative ionization)",
+                    "help_text": "See quantification CAMERA parameter"
+                },
+                "ppm_mapmsmstocamera_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation when mapping MS2 parent ion to a mass trace (negative ionization)",
+                    "help_text": "Mapping MS2 to features (within the library)"
+                },
+                "rt_mapmsmstocamera_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (negative ionization)",
+                    "help_text": "Mapping MS2 to features (within the library)"
+                },
+                "ppm_create_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "relative mass error of library (negative ionization)",
+                    "help_text": "Set the relative mass deviation (ppm) between the experimental and theoretical masses of metabolites"
+                }
+            }
+        },
+        "awsqueue": {
+            "type": "string",
+            "default": "false"
+        },
+        "awsregion": {
+            "type": "string",
+            "default": "'eu-west-1'"
+        }
+    }
+}
