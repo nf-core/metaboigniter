@@ -9,7 +9,6 @@
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/metaboigniter.svg)](https://hub.docker.com/r/nfcore/metaboigniter)
 
-
 [![Gitter chat](https://badges.gitter.im/MetaboIGNITER/gitter.png)](https://gitter.im/MetaboIGNITER/community)
 
 ## Introduction
@@ -58,11 +57,11 @@ The nf-core/metaboigniter pipeline comes with documentation about the pipeline, 
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
-MetaboIGNITER is a comprehensive pipeline of several independent tools used to pre-process liquid chromatography-mass spectrometry (LCMS) data.  We use Nextflow and nf-core to build and run the workflow but parts of this pipeline have also been implemented using Galaxy as part of [PhenoMeNal](https://github.com/phnmnl/) and [Pachyderm](https://github.com/pharmbio/LC-MS-Pachyderm).
+MetaboIGNITER is a comprehensive pipeline of several independent tools used to pre-process liquid chromatography-mass spectrometry (LCMS) data. We use Nextflow and nf-core to build and run the workflow but parts of this pipeline have also been implemented using Galaxy as part of [PhenoMeNal](https://github.com/phnmnl/) and [Pachyderm](https://github.com/pharmbio/LC-MS-Pachyderm).
 
 ## Credits
 
-MetaboIGNITER was originally written by Payam Emami. This work has been supported by ELIXIR and PhenoMeNal. 
+MetaboIGNITER was originally written by Payam Emami. This work has been supported by ELIXIR and PhenoMeNal.
 
 ## Contributions and Support
 
@@ -81,5 +80,5 @@ You can cite the `nf-core` publication as follows:
 >
 > Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
 >
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).  
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
 > ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
