@@ -620,7 +620,7 @@ process get_software_versions {
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
-    file "software_versions.csv"
+    
 
     script:
     // TODO nf-core: Get all tools to print their version number here fastqc --version > v_fastqc.txt
