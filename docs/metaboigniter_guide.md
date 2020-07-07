@@ -749,7 +749,7 @@ a glob path to a folder containing mzML files (for library) used for doing ident
     id_library_mzml_files_pos=""
     id_library_mzml_files_neg=""
 
-For example, considering the structure above, we can set *quant_library_mzml_files_pos* and *id_library_mzml_files_pos* to "mydata/mzML_POS_Lib/*.mzML" and *quant_library_mzml_files_neg* and *id_library_mzml_files_neg* to "mydata/mzML_NEG_Lib/*.mzML".
+For example, considering the structure above, we can set *quant_library_mzml_files_pos* and *id_library_mzml_files_pos* to "mydata/mzML_POS_Lib/\*.mzML" and *quant_library_mzml_files_neg* and *id_library_mzml_files_neg* to "mydata/mzML_NEG_Lib/\*.mzML".
 
 #### Create your library description files
 
