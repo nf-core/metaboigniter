@@ -443,6 +443,7 @@ Only obiwarp is supported:
     ipo_methodRT_pos="obiwarp"
 
 ### XCMS
+
 This is the default behavior of the workflow. You need to set the following parameters:
 
 Maxmial tolerated m/z deviation in consecutive scans, in ppm (parts per million):
@@ -498,6 +499,7 @@ This should show the column name in the CSV file representing the class of the m
 We use XCMS to do the group and retention time correction. You should set the following parameters:
 
 ## Retention time correction
+
 Name of the method for correcting the RT shifts (only obiwarp is supported at this stage):
 
     method_align_N1_pos_xcms="obiwarp"
@@ -559,7 +561,6 @@ Minimum number of samples necessary in at least one of the sample groups for it 
 Maximum number of groups to identify in a single m/z slice:
 
     max_group_N1_pos_xcms=50
-
 
 ### Signal filtering
 
@@ -900,7 +901,6 @@ Number of seconds that each csi ion can rum (time limit)
 
     timeout_csifingerid_pos_csifingerid=600
 
-
 #### CFM-ID parameters
 
 You need to specify the database for CFM-ID. The rest of the parameters will be taken from the global parameters. Please see MetFrag parameter on how to construct the database.
@@ -946,7 +946,7 @@ This part of the workflow is used to create and characterize in-house library. T
 
 Set the library parameter to true if you would like to perform library search:
 
-    perform_identification_internal_library=true  
+    perform_identification_internal_library=true
 
 #### Create your folder structure
 
