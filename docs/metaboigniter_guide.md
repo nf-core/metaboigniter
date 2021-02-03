@@ -226,7 +226,7 @@ If you choose to perform the quantification using OpenMS, you should consider ch
 ### Automatic parameter detection using IPO
 
 MetaboIGNITER supports parameter detection using IPO. MetaboIGNITER can run IPO on pos, neg and library separately. Here we demonstrate the usage for positive ionization method.
-The same principles apply to negative and library mode.
+The same principles apply to negative and library mode. If you decided to go with full IPO, you won't need to set other parameters.
 In order to turn this parameter on, one should use:
 
     performIPO_pos="none"
