@@ -143,13 +143,13 @@ if(params.containsKey('need_centroiding') && params.need_centroiding instanceof 
  */
 if((params.type_of_ionization in (["pos","both"])))
 {
-  if(params.containsKey('quant_mzml_files_pos') && (params.quant_mzml_files_pos instanceof String || params.quant_mzml_files_pos instanceof java.util.ArrayList)){
+  if(params.containsKey('quant_mzml_files_pos') && (params.input instanceof String || params.input instanceof java.util.ArrayList)){
         Channel
-              .fromPath(params.quant_mzml_files_pos)
-              .ifEmpty { exit 1, "params.quant_mzml_files_pos was empty - no input files supplied" }
-              .set { quant_mzml_files_pos}
+              .fromPath(params.input)
+              .ifEmpty { exit 1, "params.input was empty - no input files supplied" }
+              .into { quant_mzml_files_pos; quant_mzml_files_params_pos}
   } else{
-    exit 1, "params.quant_mzml_files_pos was not found or not defined as string! You need to set quant_mzml_files_pos in conf/parameters.config to the path to a folder containing you input files"
+    exit 1, "params.input was not found or not defined as string! You need to set quant_mzml_files_pos in conf/parameters.config to the path to a folder containing you input files"
   }
 }
 
@@ -162,7 +162,7 @@ if((params.type_of_ionization in (["neg","both"])))
         Channel
               .fromPath(params.quant_mzml_files_neg)
               .ifEmpty { exit 1, "params.quant_mzml_files_neg was empty - no input files supplied" }
-              .set { quant_mzml_files_neg}
+              .into { quant_mzml_files_neg; quant_mzml_files_params_neg}
   } else{
     exit 1, "params.quant_mzml_files_neg was not found or not defined as string! You need to set quant_mzml_files_neg in conf/parameters.config to the path to a folder containing you input files"
   }
@@ -176,8 +176,8 @@ if((params.type_of_ionization in (["pos","both"])))
   if(params.containsKey('phenotype_design_pos') && params.phenotype_design_pos instanceof String){
         Channel
               .fromPath(params.phenotype_design_pos)
-              .ifEmpty { exit 1, "params.quant_mzml_files_pos was empty - no input files supplied" }
-              .into { phenotype_design_pos; phenotype_design_pos_csifingerid; phenotype_design_pos_cfmid; phenotype_design_pos_metfrag; phenotype_design_pos_library; phenotype_design_pos_noid}
+              .ifEmpty { exit 1, "params.input was empty - no input files supplied" }
+              .into { phenotype_design_pos; phenotype_design_pos_param; phenotype_design_pos_csifingerid; phenotype_design_pos_cfmid; phenotype_design_pos_metfrag; phenotype_design_pos_library; phenotype_design_pos_noid}
   } else{
     exit 1, "params.phenotype_design_pos was not found or not defined as string! You need to set phenotype_design_pos in conf/parameters.config to the path to a csv file containing your experimental design"
   }
@@ -186,13 +186,16 @@ if((params.type_of_ionization in (["pos","both"])))
 /*
  *  Create a channel for the design file (positive)
  */
+
+
+
 if((params.type_of_ionization in (["neg","both"])))
 {
   if(params.containsKey('phenotype_design_neg') && params.phenotype_design_neg instanceof String){
         Channel
               .fromPath(params.phenotype_design_neg)
               .ifEmpty { exit 1, "params.phenotype_design_neg was empty - no input files supplied" }
-              .into { phenotype_design_neg;  phenotype_design_neg_csifingerid; phenotype_design_neg_cfmid; phenotype_design_neg_metfrag; phenotype_design_neg_library; phenotype_design_neg_noid}
+              .into { phenotype_design_neg; phenotype_design_neg_param;  phenotype_design_neg_csifingerid; phenotype_design_neg_cfmid; phenotype_design_neg_metfrag; phenotype_design_neg_library; phenotype_design_neg_noid}
   } else{
     exit 1, "params.phenotype_design_neg was not found or not defined as string! You need to set phenotype_design_neg in conf/parameters.config to the path to a file containing your experimental design for negative ionization"
   }
@@ -290,9 +293,10 @@ if(params.perform_identification==true && params.perform_identification_internal
       }
     }else{
 
+
       if( !params.containsKey('quant_library_mzml_files_pos') ||
         !((params.quant_library_mzml_files_pos instanceof String) ||
-        !(params.quant_library_mzml_files_pos instanceof java.util.ArrayList)) ||
+        (params.quant_library_mzml_files_pos instanceof java.util.ArrayList)) ||
         !(params.library_charactrized_pos instanceof Boolean) ||
         !params.containsKey('id_library_mzml_files_pos') ||
         !((params.id_library_mzml_files_pos instanceof String) ||
@@ -306,7 +310,7 @@ if(params.perform_identification==true && params.perform_identification_internal
     Channel
           .fromPath(params.quant_library_mzml_files_pos)
           .ifEmpty { exit 1, "params.quant_library_mzml_files_pos was empty - no input files supplied" }
-          .set { quant_library_mzml_files_pos}
+          .into { quant_library_mzml_files_pos;quant_mzml_files_params_library_pos}
 
     Channel
           .fromPath(params.id_library_mzml_files_pos)
@@ -348,7 +352,7 @@ if(params.perform_identification==true && params.perform_identification_internal
     }else{
       if(!params.containsKey('quant_library_mzml_files_neg') ||
        !((params.quant_library_mzml_files_neg instanceof String) ||
-       !(params.quant_library_mzml_files_neg instanceof java.util.ArrayList)) ||
+       (params.quant_library_mzml_files_neg instanceof java.util.ArrayList)) ||
        !(params.library_charactrized_neg instanceof Boolean) ||
        !params.containsKey('id_library_mzml_files_neg') ||
        !((params.id_library_mzml_files_neg instanceof String) ||
@@ -362,7 +366,7 @@ if(params.perform_identification==true && params.perform_identification_internal
     Channel
           .fromPath(params.quant_library_mzml_files_neg)
           .ifEmpty { exit 1, "params.quant_library_mzml_files_neg was empty - no input files supplied" }
-          .set { quant_library_mzml_files_neg}
+          .into { quant_library_mzml_files_neg; quant_mzml_files_params_library_neg}
 
     Channel
           .fromPath(params.id_library_mzml_files_neg)
@@ -373,7 +377,6 @@ if(params.perform_identification==true && params.perform_identification_internal
           .fromPath(params.library_description_neg)
           .ifEmpty { exit 1, "params.library_description_neg was empty - no input files supplied" }
           .set { library_description_neg}
-
 
     }
     if(!(params.type_of_ionization in (["neg","both"])))
@@ -470,7 +473,61 @@ if(params.quantification_openms_xcms_library_neg=="openms")
 
 }
 
+if(params.need_centroiding==true)
+{
+  if(params.perform_identification==true && params.perform_identification_internal_library==true)
+  {
+    if((params.type_of_ionization in (["pos","both"])))
+    {
+  if(params.containsKey('peakpicker_ini_file_library_pos_openms') && params.peakpicker_ini_file_library_pos_openms instanceof String){
+        Channel
+              .fromPath(params.peakpicker_ini_file_library_pos_openms)
+              .ifEmpty { exit 1, "params.peakpicker_ini_file_library_pos_openms was empty - no input files supplied" }
+              .set { peakpicker_ini_file_library_pos_openms}
+  } else{
+     exit 1, "params.peakpicker_ini_file_library_pos_openms was not found or not defined as string! You need to set peakpicker_ini_file_library_pos_openms in conf/parameters.config"
+  }
+}}
+if(params.perform_identification==true && params.perform_identification_internal_library==true)
+{
+  if((params.type_of_ionization in (["neg","both"])))
+  {
+  if(params.containsKey('peakpicker_ini_file_library_neg_openms') && params.peakpicker_ini_file_library_neg_openms instanceof String){
+        Channel
+              .fromPath(params.peakpicker_ini_file_library_neg_openms)
+              .ifEmpty { exit 1, "params.peakpicker_ini_file_library_neg_openms was empty - no input files supplied" }
+              .set { peakpicker_ini_file_library_neg_openms}
+  } else{
+     exit 1, "params.peakpicker_ini_file_library_neg_openms was not found or not defined as string! You need to set peakpicker_ini_file_library_neg_openms in conf/parameters.config"
+  }
+}}
 
+
+  if((params.type_of_ionization in (["pos","both"])))
+  {
+  if(params.containsKey('peakpicker_ini_file_pos_openms') && params.peakpicker_ini_file_pos_openms instanceof String){
+        Channel
+              .fromPath(params.peakpicker_ini_file_pos_openms)
+              .ifEmpty { exit 1, "params.peakpicker_ini_file_pos_openms was empty - no input files supplied" }
+              .set { peakpicker_ini_file_pos_openms}
+  } else{
+     exit 1, "params.peakpicker_ini_file_pos_openms was not found or not defined as string! You need to set peakpicker_ini_file_pos_openms in conf/parameters.config"
+  }
+}
+
+  if((params.type_of_ionization in (["neg","both"])))
+  {
+  if(params.containsKey('peakpicker_ini_file_neg_openms') && params.peakpicker_ini_file_neg_openms instanceof String){
+        Channel
+              .fromPath(params.peakpicker_ini_file_neg_openms)
+              .ifEmpty { exit 1, "params.peakpicker_ini_file_neg_openms was empty - no input files supplied" }
+              .set { peakpicker_ini_file_neg_openms}
+  } else{
+     exit 1, "params.peakpicker_ini_file_neg_openms was not found or not defined as string! You need to set peakpicker_ini_file_neg_openms in conf/parameters.config"
+  }
+}
+
+}
 
 if(params.type_of_ionization in (["pos","both"]))
 {
@@ -561,6 +618,149 @@ if(params.containsKey('publishDir_intermediate') && params.publishDir_intermedia
   "publishDir_intermediate is missing or not defined as boolean! You need to specify whether you want to output all the intermedate stages. Set publishDir_intermediate to true or false in the parameter file (conf/parameter.config))"
 }
 
+/*
+ *  fix IPO parameters
+ */
+ipo_pos_globalQ=false
+ipo_pos_globalAvoidRT=false
+ipo_pos_localQ=false
+ipo_pos_localRT=false
+
+ipo_library_pos_globalQ=false
+ipo_library_pos_localQ=false
+
+if(params.type_of_ionization in (["pos","both"]))
+{
+  if(params.performIPO_pos in (["none","global","global_quant","local","local_quant","local_RT"]))
+  {
+    if(params.performIPO_pos=="none")
+    {
+      ipo_pos_globalQ=false
+      ipo_pos_globalAvoidRT=true
+      ipo_pos_localQ=false
+      ipo_pos_localRT=false
+    }else if(params.performIPO_pos=="global")
+    {
+      ipo_pos_globalQ=true
+      ipo_pos_globalAvoidRT=false
+    }else if(params.performIPO_pos=="global_quant")
+    {
+      ipo_pos_globalQ=true
+      ipo_pos_globalAvoidRT=true
+    }else if(params.performIPO_pos=="local")
+    {
+      ipo_pos_globalQ=false
+      ipo_pos_globalAvoidRT=true
+      ipo_pos_localQ=true
+      ipo_pos_localRT=true
+    }else if(params.performIPO_pos=="local_quant")
+    {
+      ipo_pos_globalQ=false
+      ipo_pos_globalAvoidRT=true
+      ipo_pos_localQ=true
+      ipo_pos_localRT=false
+    }else if(params.performIPO_pos=="local_RT")
+    {
+      ipo_pos_globalQ=false
+      ipo_pos_globalAvoidRT=true
+      ipo_pos_localQ=false
+      ipo_pos_localRT=true
+    }
+  }else{
+    exit 1, "performIPO_pos is set wrongly! You need to set performIPO_pos to one of none,global,global_quant,local,local_quant,local_RT"
+
+  }
+if(params.perform_identification_internal_library==true)
+{
+  if(params.performIPO_library_pos=="none")
+  {
+    ipo_library_pos_globalQ=false
+    ipo_library_pos_localQ=false
+  }else if(params.performIPO_library_pos=="local")
+  {
+    ipo_library_pos_globalQ=false
+    ipo_library_pos_localQ=true
+  }else if(params.performIPO_library_pos=="global"){
+    ipo_library_pos_globalQ=true
+    ipo_library_pos_localQ=false
+  }else{
+    exit 1, "performIPO_library_pos is set wrongly! You need to set performIPO_pos to one of none,global,local!"
+
+  }
+}
+
+}
+
+ipo_neg_globalQ=false
+ipo_neg_globalAvoidRT=false
+ipo_neg_localQ=false
+ipo_neg_localRT=false
+
+ipo_library_neg_globalQ=false
+ipo_library_neg_localQ=false
+
+if(params.type_of_ionization in (["neg","both"]))
+{
+  if(params.performIPO_neg in (["none","global","global_quant","local","local_quant","local_RT"]))
+  {
+    if(params.performIPO_neg=="none")
+    {
+      ipo_neg_globalQ=false
+      ipo_neg_globalAvoidRT=true
+      ipo_neg_localQ=false
+      ipo_neg_localRT=false
+    }else if(params.performIPO_neg=="global")
+    {
+      ipo_neg_globalQ=true
+      ipo_neg_globalAvoidRT=false
+    }else if(params.performIPO_neg=="global_quant")
+    {
+      ipo_neg_globalQ=true
+      ipo_neg_globalAvoidRT=true
+    }else if(params.performIPO_neg=="local")
+    {
+      ipo_neg_globalQ=false
+      ipo_neg_globalAvoidRT=true
+      ipo_neg_localQ=true
+      ipo_neg_localRT=true
+    }else if(params.performIPO_neg=="local_quant")
+    {
+      ipo_neg_globalQ=false
+      ipo_neg_globalAvoidRT=true
+      ipo_neg_localQ=true
+      ipo_neg_localRT=false
+    }else if(params.performIPO_neg=="local_RT")
+    {
+      ipo_neg_globalQ=false
+      ipo_neg_globalAvoidRT=true
+      ipo_neg_localQ=false
+      ipo_neg_localRT=true
+    }
+  }else{
+    exit 1, "performIPO_neg is set wrongly! You need to set performIPO_neg to one of none,global,global_quant,local,local_quant,local_RT"
+
+  }
+if(params.perform_identification_internal_library==true)
+{
+  if(params.performIPO_library_neg=="none")
+  {
+    ipo_library_neg_globalQ=false
+    ipo_library_neg_localQ=false
+  }else if(params.performIPO_library_neg=="local")
+  {
+    ipo_library_neg_globalQ=false
+    ipo_library_neg_localQ=true
+  }else if(params.performIPO_library_neg=="global"){
+    ipo_library_neg_globalQ=true
+    ipo_library_neg_localQ=false
+  }else{
+    exit 1, "performIPO_library_neg is set wrongly! You need to set performIPO_neg to one of none,global,local!"
+
+  }
+}
+
+}
+
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
@@ -570,7 +770,7 @@ summary['Run Name']         = custom_runName ?: workflow.runName
 summary['Type of ionization'] =  params.type_of_ionization
 if(params.type_of_ionization in (["pos","both"]))
 {
-summary['Path to mzML quantification files (positive)'] = params.quant_mzml_files_pos
+summary['Path to mzML quantification files (positive)'] = params.input
 if(params.perform_identification == true)
 {
   summary['Path to mzML identification files (positive)'] = params.id_mzml_files_pos
@@ -664,9 +864,6 @@ process get_software_versions {
 */
 
 
-
-
-
 if(params.type_of_ionization in (["pos","both"]))
 {
 
@@ -687,13 +884,15 @@ if(params.type_of_ionization in (["pos","both"]))
         each file(setting_file) from peakpicker_ini_file_pos_openms
 
         output:
-        file "${mzMLFile}" into masstrace_detection_process_pos
+        file "${mzMLFile}" into masstrace_detection_process_pos, param_detection_process_pos
 
         shell:
         '''
         PeakPickerHiRes -in !{mzMLFile} -out !{mzMLFile} -ini !{setting_file}
         '''
     }
+
+
 
 
       /*
@@ -748,6 +947,54 @@ if(params.type_of_ionization in (["pos","both"]))
      /*
       * STEP 2 - feature detection by xcms
       */
+      if(ipo_pos_globalQ==true)
+      {
+
+
+      process process_ipo_param_pos_ipo_centroided{
+          label 'ipo'
+          tag "$name"
+          publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+
+
+          input:
+          file mzMLFile from param_detection_process_pos.collect()
+          each file(phenotype_file) from phenotype_design_pos_param
+          output:
+          file "quant_params_pos.json" into param_to_detection_process_pos
+          file "rt_params_pos.json" into param_to_rt_process_pos
+
+          script:
+            def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
+          shell:
+          """
+          touch quant_params_pos.json
+          touch rt_params_pos.json
+            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_pos_globalAvoidRT} allSamples=!{params.ipo_allSamples_pos} columnToSelect=!{params.ipo_columnToSelect_pos}\
+             valueToSelect=!{params.ipo_valueToSelect_pos} phenoFile=!{phenotype_file} \
+            methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos}\
+             noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
+            prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos}\
+             snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos} mzCenterFun=!{params.ipo_mzCenterFun_pos}\
+              integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos}\
+               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos}\
+             ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos} \
+             response_l=!{params.ipo_response_l_pos} response_h=!{params.ipo_response_h_pos} distFunc=!{params.ipo_distFunc_pos} factorDiag_l=!{params.ipo_factorDiag_l_pos} factorDiag_h=!{params.ipo_factorDiag_h_pos} factorGap_l=!{params.ipo_factorGap_l_pos} \
+             factorGap_h=!{params.ipo_factorGap_h_pos} localAlignment=!{params.ipo_localAlignment_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_pos}\
+             ipo_gapExtend_h=!{params.ipo_gapExtend_h_pos} ipo_profStep_l=!{params.ipo_profStep_l_pos} ipo_profStep_h=!{params.ipo_profStep_h_pos} bw_l=!{params.ipo_bw_l_pos} bw_h=!{params.ipo_bw_h_pos} minfrac_l=!{params.ipo_minfrac_l_pos} \
+              minfrac_h=!{params.ipo_minfrac_h_pos} mzwid_l=!{params.ipo_mzwid_l_pos} mzwid_h=!{params.ipo_mzwid_h_pos} minsamp_l=!{params.ipo_minsamp_l_pos}\
+               minsamp_h=!{params.ipo_minsamp_h_pos} max_l=!{params.ipo_max_l_pos} max_h=!{params.ipo_max_h_pos} ncores=!{params.ipo_ncores_pos} outputxset=quant_params_pos.json outputrt=rt_params_pos.json
+          """
+      }
+        }
+
+        param_target_to_detection_process_pos= ( ipo_pos_globalQ
+                     ? param_to_detection_process_pos
+                     :  file("NO_QFILE"))
+                     param_target_to_rt_process_pos= ( ipo_pos_globalAvoidRT==true
+                                  ? file("NO_RTFILE")
+                                  :  param_to_rt_process_pos)
+
      process process_masstrace_detection_pos_xcms_centroided{
        label 'xcms'
        tag "$name"
@@ -758,14 +1005,25 @@ if(params.type_of_ionization in (["pos","both"]))
        input:
        file mzMLFile from masstrace_detection_process_pos
        each file(phenotype_file) from phenotype_design_pos
+       each file(paramsQ) from param_target_to_detection_process_pos
 
        output:
        file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
+       file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
 
        shell:
-       '''
-	/usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms}
-       '''
+        def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+       """
+	/usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms} mzdiff=!{params.mzdiff_quant_pos_xcms} snthresh=!{params.snthresh_quant_pos_xcms} prefilter_l=!{params.prefilter_quant_pos_xcms} prefilter_h=!{params.value_of_prefilter_quant_pos_xcms} mzCenterFun=!{params.mzCenterFun_quant_pos_xcms} integrate=!{params.integrate_quant_pos_xcms} fitgauss=!{params.fitgauss_quant_pos_xcms} \
+  methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos}\
+   noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
+  prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos}\
+   snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos} mzCenterFun=!{params.ipo_mzCenterFun_pos}\
+    integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos}\
+     ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos}\
+   ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos}\
+   ipo_inv=!{ipo_pos_localQ}  ${filter_argument}
+       """
      }
 
    }
@@ -825,6 +1083,54 @@ if(params.type_of_ionization in (["pos","both"]))
    /*
     * STEP 2 - feature detection by xcms
     */
+    if(ipo_pos_globalQ==true)
+    {
+
+
+    process process_ipo_param_pos_ipo_noncentroided{
+        label 'ipo'
+        tag "$name"
+        publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+
+
+        input:
+        file mzMLFile from quant_mzml_files_params_pos.collect()
+        each file(phenotype_file) from phenotype_design_pos_param
+        output:
+        file "quant_params_pos.json" into param_to_detection_process_pos
+        file "rt_params_pos.json" into param_to_rt_process_pos
+
+        script:
+          def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
+        shell:
+        """
+        touch quant_params_pos.json
+        touch rt_params_pos.json
+        /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_pos_globalAvoidRT} allSamples=!{params.ipo_allSamples_pos} columnToSelect=!{params.ipo_columnToSelect_pos}\
+           valueToSelect=!{params.ipo_valueToSelect_pos} phenoFile=!{phenotype_file} \
+          methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos}\
+           noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
+          prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos}\
+           snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos} mzCenterFun=!{params.ipo_mzCenterFun_pos}\
+            integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos}\
+             ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos}\
+           ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos} \
+           response_l=!{params.ipo_response_l_pos} response_h=!{params.ipo_response_h_pos} distFunc=!{params.ipo_distFunc_pos} factorDiag_l=!{params.ipo_factorDiag_l_pos} factorDiag_h=!{params.ipo_factorDiag_h_pos} factorGap_l=!{params.ipo_factorGap_l_pos} \
+           factorGap_h=!{params.ipo_factorGap_h_pos} localAlignment=!{params.ipo_localAlignment_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_pos}\
+           ipo_gapExtend_h=!{params.ipo_gapExtend_h_pos} ipo_profStep_l=!{params.ipo_profStep_l_pos} ipo_profStep_h=!{params.ipo_profStep_h_pos} bw_l=!{params.ipo_bw_l_pos} bw_h=!{params.ipo_bw_h_pos} minfrac_l=!{params.ipo_minfrac_l_pos} \
+            minfrac_h=!{params.ipo_minfrac_h_pos} mzwid_l=!{params.ipo_mzwid_l_pos} mzwid_h=!{params.ipo_mzwid_h_pos} minsamp_l=!{params.ipo_minsamp_l_pos}\
+             minsamp_h=!{params.ipo_minsamp_h_pos} max_l=!{params.ipo_max_l_pos} max_h=!{params.ipo_max_h_pos} ncores=!{params.ipo_ncores_pos} outputxset=quant_params_pos.json outputrt=rt_params_pos.json
+        """
+    }
+      }
+      param_target_to_detection_process_pos= ( ipo_pos_globalQ
+                   ? param_to_detection_process_pos
+                   :  file("NO_QFILE"))
+
+
+                   param_target_to_rt_process_pos= ( ipo_pos_globalAvoidRT==true
+                                ? file("NO_RTFILE")
+                                :  param_to_rt_process_pos)
    process process_masstrace_detection_pos_xcms_noncentroided{
      label 'xcms'
      tag "$name"
@@ -835,14 +1141,25 @@ if(params.type_of_ionization in (["pos","both"]))
      input:
      file mzMLFile from quant_mzml_files_pos
      each file(phenotype_file) from phenotype_design_pos
+     each file(paramsQ) from param_target_to_detection_process_pos
 
      output:
      file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
+     file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
 
      shell:
-     '''
-/usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms}
-     '''
+      def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+     """
+/usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms}  mzdiff=!{params.mzdiff_quant_pos_xcms} snthresh=!{params.snthresh_quant_pos_xcms} prefilter_l=!{params.prefilter_quant_pos_xcms} prefilter_h=!{params.value_of_prefilter_quant_pos_xcms} mzCenterFun=!{params.mzCenterFun_quant_pos_xcms} integrate=!{params.integrate_quant_pos_xcms} fitgauss=!{params.fitgauss_quant_pos_xcms}\
+methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos}\
+ noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
+prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos}\
+ snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos} mzCenterFun=!{params.ipo_mzCenterFun_pos}\
+  integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos}\
+   ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos}\
+ ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos}\
+ ipo_inv=!{ipo_pos_localQ} ${filter_argument}
+     """
    }
 
  }
@@ -852,6 +1169,9 @@ if(params.type_of_ionization in (["pos","both"]))
   /*
    * STEP 3 - collect xcms objects into a hyper object
    */
+
+
+
   process  process_collect_rdata_pos_xcms{
     label 'xcms'
     tag "$name"
@@ -862,42 +1182,23 @@ if(params.type_of_ionization in (["pos","both"]))
     input:
     file rdata_files from collect_rdata_pos_xcms.collect()
 
+
   output:
-  file "collection_pos.rdata" into group_peaks_pos_N1_xcms
+  file "collection_pos.rdata" into align_rdata_pos_xcms
 
   script:
     def inputs_aggregated = rdata_files.collect{ "$it" }.join(",")
   shell:
+
      """
   	nextFlowDIR=\$PWD
   	/usr/local/bin/xcmsCollect.r input=$inputs_aggregated output=collection_pos.rdata
   	"""
   }
 
-  /*
-   * STEP 4 - link the mass traces across the samples
-   */
-  process  process_group_peaks_pos_N1_xcms{
-    label 'xcms'
-    tag "$name"
-    publishDir "${params.outdir}/process_group_peaks_pos_N1_xcms", mode: 'copy', enabled: params.publishDir_intermediate
-
-
-
-    input:
-    file rdata_files from group_peaks_pos_N1_xcms
-
-  output:
-  file "groupN1_pos.rdata" into align_rdata_pos_xcms
-
-    shell:
-      '''
-  	/usr/local/bin/group.r input=!{rdata_files} output=groupN1_pos.rdata bandwidth=!{params.bandwidth_group_N1_pos_xcms} mzwid=!{params.mzwid_group_N1_pos_xcms}
-  	'''
-  }
 
   /*
-   * STEP 5 - do RT correction
+   * STEP 4 - do RT correction
    */
   process  process_align_peaks_pos_xcms{
     label 'xcms'
@@ -909,39 +1210,52 @@ if(params.type_of_ionization in (["pos","both"]))
 
     input:
     file rdata_files from align_rdata_pos_xcms
-
+    file rd from rt_rdata_pos_xcms.collect()
+    each file(paramsRT) from param_target_to_rt_process_pos
   output:
-  file "RTcorrected_pos.rdata" into group_peaks_pos_N2_xcms
+  file "RTcorrected_pos.rdata" into group_peaks_pos_N1_xcms
 
+  script:
+    def inputs_aggregated = rd.collect{ "$it" }.join(",")
     shell:
-      '''
-  	/usr/local/bin/retCor.r input=!{rdata_files} output=RTcorrected_pos.rdata method=!{params.method_align_N1_pos_xcms}
+      def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=${paramsRT}" : ''
+      """
+    /usr/local/bin/retCor.r input=\$PWD/!{rdata_files} output=RTcorrected_pos.rdata method=obiwarp  response_l=!{params.ipo_response_l_pos} response_h=!{params.ipo_response_h_pos} distFunc=!{params.ipo_distFunc_pos} factorDiag_l=!{params.ipo_factorDiag_l_pos} factorDiag_h=!{params.ipo_factorDiag_h_pos} factorGap_l=!{params.ipo_factorGap_l_pos} \
+      factorGap_h=!{params.ipo_factorGap_h_pos} localAlignment=!{params.ipo_localAlignment_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_pos}\
+      ipo_gapExtend_h=!{params.ipo_gapExtend_h_pos} ipo_profStep_l=!{params.ipo_profStep_l_pos} ipo_profStep_h=!{params.ipo_profStep_h_pos} bw_l=!{params.ipo_bw_l_pos} bw_h=!{params.ipo_bw_h_pos} minfrac_l=!{params.ipo_minfrac_l_pos} \
+       minfrac_h=!{params.ipo_minfrac_h_pos} mzwid_l=!{params.ipo_mzwid_l_pos} mzwid_h=!{params.ipo_mzwid_h_pos} minsamp_l=!{params.ipo_minsamp_l_pos}\
+        minsamp_h=!{params.ipo_minsamp_h_pos} max_l=!{params.ipo_max_l_pos} max_h=!{params.ipo_max_h_pos} ipo_inv=!{ipo_pos_localRT} ncores=!{params.ipo_ncores_pos}\
+        profStep=!{params.profStep_align_N1_pos_xcms} center=!{params.center_align_N1_pos_xcms} response=!{params.response_align_N1_pos_xcms}\
+        distFunc=!{params.distFunc_align_N1_pos_xcms} gapInit=!{params.gapInit_align_N1_pos_xcms} gapExtend=!{params.gapExtend_align_N1_pos_xcms} \
+        factorDiag=!{params.factorDiag_align_N1_pos_xcms} factorGap=!{params.factorDiag_align_N1_pos_xcms} localAlignment=!{params.localAlignment_align_N1_pos_xcms} ${filter_argument} inputraw=${inputs_aggregated}
 
-  	'''
+    """
+
   }
-
 
   /*
-   * STEP 6 - do another round of grouping
+   * STEP 4 - link the mass traces across the samples
    */
-  process  process_group_peaks_pos_N2_xcms{
+
+
+  process  process_group_peaks_pos_N1_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_group_peaks_pos_N2_xcms", mode: 'copy', enabled: params.publishDir_intermediate
-
-
+    publishDir "${params.outdir}/process_group_peaks_pos_N1_xcms", mode: 'copy', enabled: params.publishDir_intermediate
 
     input:
-    file rdata_files from group_peaks_pos_N2_xcms
+    file rdata_files from group_peaks_pos_N1_xcms
 
   output:
-  file "groupN2_pos.rdata" into temp_unfiltered_channel_pos_1
+  file "groupN1_pos.rdata" into temp_unfiltered_channel_pos_1
 
     shell:
       '''
-  	/usr/local/bin/group.r input=!{rdata_files} output=groupN2_pos.rdata bandwidth=!{params.bandwidth_group_N2_pos_xcms} mzwid=!{params.mzwid_group_N2_pos_xcms}
+  	/usr/local/bin/group.r input=!{rdata_files} output=groupN1_pos.rdata bandwidth=!{params.bandwidth_group_N1_pos_xcms} minfrac=!{params.minfrac_group_N1_pos_xcms} minsamp=!{params.minsamp_group_N1_pos_xcms} max=!{params.max_group_N1_pos_xcms}\
+      mzwid=!{params.mzwid_group_N1_pos_xcms}
   	'''
   }
+
 
   /*
    * STEP 7 - noise filtering by using blank samples, if selected by the users
@@ -1669,7 +1983,7 @@ if(params.library_charactrized_pos==false){
         each file(setting_file) from peakpicker_ini_file_library_pos_openms
 
         output:
-        file "${mzMLFile}" into masstrace_detection_process_library_pos
+        file "${mzMLFile}" into masstrace_detection_process_library_pos, param_detection_process_library_pos
 
         shell:
         '''
@@ -1732,6 +2046,49 @@ if(params.library_charactrized_pos==false){
      /*
       * STEP 33 - feature detection using xcms
       */
+      if(ipo_library_pos_globalQ==true)
+      {
+
+
+      process process_ipo_param_library_pos_ipo_centroided{
+          label 'ipo'
+          tag "$name"
+          publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+
+
+          input:
+          file mzMLFile from param_detection_process_library_pos.collect()
+          output:
+          file "quant_params_library_pos.json" into param_to_detection_process_library_pos
+          file "rt_params_library_pos.json" into param_to_rt_process_library_pos
+
+          script:
+            def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
+          shell:
+          """
+          touch quant_params_library_pos.json
+          touch rt_params_library_pos.json
+            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \
+            methodXset=!{params.ipo_methodXset_library_pos} methodRT=!{params.ipo_methodRT_library_pos} noise_l=!{params.ipo_noise_l_library_pos}\
+             noise_h=!{params.ipo_noise_h_library_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_library_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_library_pos} \
+            prefilter_h_l=!{params.ipo_prefilter_h_l_library_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_library_pos}\
+             snthresh_l=!{params.ipo_snthresh_l_library_pos} snthresh_h=!{params.ipo_snthresh_h_library_pos} mzCenterFun=!{params.ipo_mzCenterFun_library_pos}\
+              integrate=!{params.ipo_integrate_library_pos} fitgauss=!{params.ipo_fitgauss_library_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_pos}\
+               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_pos} ipo_ppm_l=!{params.ipo_ppm_l_library_pos}\
+             ipo_ppm_h=!{params.ipo_ppm_h_library_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_pos} ipo_charge_camera=!{params.ipo_charge_camera_library_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_pos} \
+             response_l=!{params.ipo_response_l_library_pos} response_h=!{params.ipo_response_h_library_pos} distFunc=!{params.ipo_distFunc_library_pos} factorDiag_l=!{params.ipo_factorDiag_l_library_pos} factorDiag_h=!{params.ipo_factorDiag_h_library_pos} factorGap_l=!{params.ipo_factorGap_l_library_pos} \
+             factorGap_h=!{params.ipo_factorGap_h_library_pos} localAlignment=!{params.ipo_localAlignment_library_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_library_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_library_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_library_pos}\
+             ipo_gapExtend_h=!{params.ipo_gapExtend_h_library_pos} ipo_profStep_l=!{params.ipo_profStep_l_library_pos} ipo_profStep_h=!{params.ipo_profStep_h_library_pos} bw_l=!{params.ipo_bw_l_library_pos} bw_h=!{params.ipo_bw_h_library_pos} minfrac_l=!{params.ipo_minfrac_l_library_pos} \
+              minfrac_h=!{params.ipo_minfrac_h_library_pos} mzwid_l=!{params.ipo_mzwid_l_library_pos} mzwid_h=!{params.ipo_mzwid_h_library_pos} minsamp_l=!{params.ipo_minsamp_l_library_pos}\
+               minsamp_h=!{params.ipo_minsamp_h_library_pos} max_l=!{params.ipo_max_l_library_pos} max_h=!{params.ipo_max_h_library_pos} ncores=!{params.ipo_ncores_library_pos} outputxset=quant_params_library_pos.json outputrt=rt_params_library_pos.json
+          """
+      }
+        }
+
+        param_target_to_detection_process_library_pos= ( ipo_library_pos_globalQ
+                     ? param_to_detection_process_library_pos
+                     :  file("NO_QFILE"))
+
 
      process process_masstrace_detection_library_pos_xcms_centroided{
        label 'xcms'
@@ -1742,15 +2099,25 @@ if(params.library_charactrized_pos==false){
 
        input:
        file mzMLFile from masstrace_detection_process_library_pos
-  //     each file(phenotype_file) from phenotype_design_library_pos
+       each file(paramsQ) from param_target_to_detection_process_library_pos
 
        output:
        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
-       shell:
-       '''
-  /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=library
-       '''
+
+         shell:
+          def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
+         """
+         /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=!{params.sampleclass_quant_library_pos_xcms} mzdiff=!{params.mzdiff_quant_library_pos_xcms} snthresh=!{params.snthresh_quant_library_pos_xcms} prefilter_l=!{params.prefilter_quant_library_pos_xcms} prefilter_h=!{params.value_of_prefilter_quant_library_pos_xcms} mzCenterFun=!{params.mzCenterFun_quant_library_pos_xcms} integrate=!{params.integrate_quant_library_pos_xcms} fitgauss=!{params.fitgauss_quant_library_pos_xcms} \
+         methodXset=!{params.ipo_methodXset_library_pos} methodRT=!{params.ipo_methodRT_library_pos} noise_l=!{params.ipo_noise_l_library_pos}\
+         noise_h=!{params.ipo_noise_h_library_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_library_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_library_pos} \
+         prefilter_h_l=!{params.ipo_prefilter_h_l_library_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_library_pos}\
+         snthresh_l=!{params.ipo_snthresh_l_library_pos} snthresh_h=!{params.ipo_snthresh_h_library_pos} mzCenterFun=!{params.ipo_mzCenterFun_library_pos}\
+         integrate=!{params.ipo_integrate_library_pos} fitgauss=!{params.ipo_fitgauss_library_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_pos}\
+         ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_pos} ipo_ppm_l=!{params.ipo_ppm_l_library_pos}\
+         ipo_ppm_h=!{params.ipo_ppm_h_library_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_pos} ipo_charge_camera=!{params.ipo_charge_camera_library_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_pos}\
+         ipo_inv=!{ipo_library_pos_localQ}  ${filter_argument}
+         """
      }
 
    }
@@ -1815,6 +2182,49 @@ if(params.library_charactrized_pos==false){
        * STEP 33 - feature detection using xcms
        */
 
+
+       if(ipo_library_pos_globalQ==true)
+       {
+
+
+       process process_ipo_param_library_pos_ipo_noncentroided{
+           label 'ipo'
+           tag "$name"
+           publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+
+
+           input:
+           file mzMLFile from quant_mzml_files_params_library_pos.collect()
+           output:
+           file "quant_params_library_pos.json" into param_to_detection_process_library_pos
+           file "rt_params_library_pos.json" into param_to_rt_process_library_pos
+
+           script:
+             def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
+           shell:
+           """
+           touch quant_params_library_pos.json
+           touch rt_params_library_pos.json
+           /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \
+             methodXset=!{params.ipo_methodXset_library_pos} methodRT=!{params.ipo_methodRT_library_pos} noise_l=!{params.ipo_noise_l_library_pos}\
+              noise_h=!{params.ipo_noise_h_library_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_library_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_library_pos} \
+             prefilter_h_l=!{params.ipo_prefilter_h_l_library_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_library_pos}\
+              snthresh_l=!{params.ipo_snthresh_l_library_pos} snthresh_h=!{params.ipo_snthresh_h_library_pos} mzCenterFun=!{params.ipo_mzCenterFun_library_pos}\
+               integrate=!{params.ipo_integrate_library_pos} fitgauss=!{params.ipo_fitgauss_library_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_pos}\
+                ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_pos} ipo_ppm_l=!{params.ipo_ppm_l_library_pos}\
+              ipo_ppm_h=!{params.ipo_ppm_h_library_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_pos} ipo_charge_camera=!{params.ipo_charge_camera_library_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_pos} \
+              response_l=!{params.ipo_response_l_library_pos} response_h=!{params.ipo_response_h_library_pos} distFunc=!{params.ipo_distFunc_library_pos} factorDiag_l=!{params.ipo_factorDiag_l_library_pos} factorDiag_h=!{params.ipo_factorDiag_h_library_pos} factorGap_l=!{params.ipo_factorGap_l_library_pos} \
+              factorGap_h=!{params.ipo_factorGap_h_library_pos} localAlignment=!{params.ipo_localAlignment_library_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_library_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_library_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_library_pos}\
+              ipo_gapExtend_h=!{params.ipo_gapExtend_h_library_pos} ipo_profStep_l=!{params.ipo_profStep_l_library_pos} ipo_profStep_h=!{params.ipo_profStep_h_library_pos} bw_l=!{params.ipo_bw_l_library_pos} bw_h=!{params.ipo_bw_h_library_pos} minfrac_l=!{params.ipo_minfrac_l_library_pos} \
+               minfrac_h=!{params.ipo_minfrac_h_library_pos} mzwid_l=!{params.ipo_mzwid_l_library_pos} mzwid_h=!{params.ipo_mzwid_h_library_pos} minsamp_l=!{params.ipo_minsamp_l_library_pos}\
+                minsamp_h=!{params.ipo_minsamp_h_library_pos} max_l=!{params.ipo_max_l_library_pos} max_h=!{params.ipo_max_h_library_pos} ncores=!{params.ipo_ncores_library_pos} outputxset=quant_params_library_pos.json outputrt=rt_params_library_pos.json
+           """
+       }
+         }
+         param_target_to_detection_process_library_pos= ( ipo_library_pos_globalQ
+                      ? param_to_detection_process_library_pos
+                      :  file("NO_QFILE"))
+
       process process_masstrace_detection_library_pos_xcms_noncentroided{
         label 'xcms'
         tag "$name"
@@ -1824,15 +2234,24 @@ if(params.library_charactrized_pos==false){
 
         input:
         file mzMLFile from quant_library_mzml_files_pos
-   //     each file(phenotype_file) from phenotype_design_library_pos
+        each file(paramsQ) from param_target_to_detection_process_library_pos
 
         output:
         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
         shell:
-        '''
-   /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=library
-        '''
+        def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+        """
+       /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=!{params.sampleclass_quant_library_pos_xcms}  mzdiff=!{params.mzdiff_quant_library_pos_xcms} snthresh=!{params.snthresh_quant_library_pos_xcms} prefilter_l=!{params.prefilter_quant_library_pos_xcms} prefilter_h=!{params.value_of_prefilter_quant_library_pos_xcms} mzCenterFun=!{params.mzCenterFun_quant_library_pos_xcms} integrate=!{params.integrate_quant_library_pos_xcms} fitgauss=!{params.fitgauss_quant_library_pos_xcms}\
+       methodXset=!{params.ipo_methodXset_library_pos} methodRT=!{params.ipo_methodRT_library_pos} noise_l=!{params.ipo_noise_l_library_pos}\
+       noise_h=!{params.ipo_noise_h_library_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_library_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_library_pos} \
+       prefilter_h_l=!{params.ipo_prefilter_h_l_library_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_library_pos}\
+       snthresh_l=!{params.ipo_snthresh_l_library_pos} snthresh_h=!{params.ipo_snthresh_h_library_pos} mzCenterFun=!{params.ipo_mzCenterFun_library_pos}\
+       integrate=!{params.ipo_integrate_library_pos} fitgauss=!{params.ipo_fitgauss_library_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_pos}\
+       ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_pos} ipo_ppm_l=!{params.ipo_ppm_l_library_pos}\
+       ipo_ppm_h=!{params.ipo_ppm_h_library_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_pos} ipo_charge_camera=!{params.ipo_charge_camera_library_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_pos}\
+       ipo_inv=!{ipo_library_pos_localQ} ${filter_argument}
+        """
       }
 
     }
@@ -2067,12 +2486,17 @@ process process_remove_adducts_library_pos_msnbase{
 file txt_files from addcutremove_txt_pos_msnbase.collect()
 
 output:
-file "*.zip" into librarysearchengine_txt_pos_msnbase_tmp
+file "mappedtometfrag_pos.zip" into librarysearchengine_txt_pos_msnbase_tmp
 
 script:
   """
   #!/usr/bin/env Rscript
-
+ Files<-list.files(,pattern = "zip",full.names=T)
+ Files_org<-list.files(,pattern = "zip")
+ for(f in Files)
+ {
+   zip::unzip(zipfile = f,junkpaths = T)
+ }
   Files<-list.files(,pattern = "txt",full.names=T)
   FilesTMP<-sapply(strsplit(split = "_",fixed = T,x = basename(Files)),function(x){paste(x[-1],collapse = "_")})
   FileDub<-Files[duplicated(FilesTMP)]
@@ -2080,7 +2504,9 @@ for(x in FileDub)
 {
   file.remove(x)
 }
-zip::zip(zipfile="mappedtometfrag_pos.zip",files=list.files(pattern="txt"))
+files_to_pass<-list.files(pattern="txt")
+files_to_pass<-files_to_pass[!files_to_pass%in%Files_org]
+zip::zip(zipfile="mappedtometfrag_pos.zip",files=files_to_pass)
   """
 }
 
@@ -2240,10 +2666,6 @@ then
 * for negative data if specified by the user
 */
 
-
-
-
-
 if(params.type_of_ionization in (["neg","both"]))
 {
 
@@ -2264,13 +2686,15 @@ if(params.type_of_ionization in (["neg","both"]))
         each file(setting_file) from peakpicker_ini_file_neg_openms
 
         output:
-        file "${mzMLFile}" into masstrace_detection_process_neg
+        file "${mzMLFile}" into masstrace_detection_process_neg, param_detection_process_neg
 
         shell:
         '''
         PeakPickerHiRes -in !{mzMLFile} -out !{mzMLFile} -ini !{setting_file}
         '''
     }
+
+
 
 
       /*
@@ -2325,6 +2749,54 @@ if(params.type_of_ionization in (["neg","both"]))
      /*
       * STEP 2 - feature detection by xcms
       */
+      if(ipo_neg_globalQ==true)
+      {
+
+
+      process process_ipo_param_neg_ipo_centroided{
+          label 'ipo'
+          tag "$name"
+          publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+
+
+          input:
+          file mzMLFile from param_detection_process_neg.collect()
+          each file(phenotype_file) from phenotype_design_neg_param
+          output:
+          file "quant_params_neg.json" into param_to_detection_process_neg
+          file "rt_params_neg.json" into param_to_rt_process_neg
+
+          script:
+            def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
+          shell:
+          """
+          touch quant_params_neg.json
+          touch rt_params_neg.json
+          /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_neg_globalAvoidRT} allSamples=!{params.ipo_allSamples_neg} columnToSelect=!{params.ipo_columnToSelect_neg}\
+             valueToSelect=!{params.ipo_valueToSelect_neg} phenoFile=!{phenotype_file} \
+            methodXset=!{params.ipo_methodXset_neg} methodRT=!{params.ipo_methodRT_neg} noise_l=!{params.ipo_noise_l_neg}\
+             noise_h=!{params.ipo_noise_h_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_neg} \
+            prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_neg}\
+             snthresh_l=!{params.ipo_snthresh_l_neg} snthresh_h=!{params.ipo_snthresh_h_neg} mzCenterFun=!{params.ipo_mzCenterFun_neg}\
+              integrate=!{params.ipo_integrate_neg} fitgauss=!{params.ipo_fitgauss_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_neg}\
+               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_neg} ipo_ppm_l=!{params.ipo_ppm_l_neg}\
+             ipo_ppm_h=!{params.ipo_ppm_h_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_neg} ipo_charge_camera=!{params.ipo_charge_camera_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_neg} \
+             response_l=!{params.ipo_response_l_neg} response_h=!{params.ipo_response_h_neg} distFunc=!{params.ipo_distFunc_neg} factorDiag_l=!{params.ipo_factorDiag_l_neg} factorDiag_h=!{params.ipo_factorDiag_h_neg} factorGap_l=!{params.ipo_factorGap_l_neg} \
+             factorGap_h=!{params.ipo_factorGap_h_neg} localAlignment=!{params.ipo_localAlignment_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_neg}\
+             ipo_gapExtend_h=!{params.ipo_gapExtend_h_neg} ipo_profStep_l=!{params.ipo_profStep_l_neg} ipo_profStep_h=!{params.ipo_profStep_h_neg} bw_l=!{params.ipo_bw_l_neg} bw_h=!{params.ipo_bw_h_neg} minfrac_l=!{params.ipo_minfrac_l_neg} \
+              minfrac_h=!{params.ipo_minfrac_h_neg} mzwid_l=!{params.ipo_mzwid_l_neg} mzwid_h=!{params.ipo_mzwid_h_neg} minsamp_l=!{params.ipo_minsamp_l_neg}\
+               minsamp_h=!{params.ipo_minsamp_h_neg} max_l=!{params.ipo_max_l_neg} max_h=!{params.ipo_max_h_neg} ncores=!{params.ipo_ncores_neg} outputxset=quant_params_neg.json outputrt=rt_params_neg.json
+          """
+      }
+        }
+
+        param_target_to_detection_process_neg= ( ipo_neg_globalQ
+                     ? param_to_detection_process_neg
+                     :  file("NO_QFILE"))
+                     param_target_to_rt_process_neg= ( ipo_neg_globalAvoidRT==true
+                                  ? file("NO_RTFILE")
+                                  :  param_to_rt_process_neg)
+
      process process_masstrace_detection_neg_xcms_centroided{
        label 'xcms'
        tag "$name"
@@ -2335,14 +2807,25 @@ if(params.type_of_ionization in (["neg","both"]))
        input:
        file mzMLFile from masstrace_detection_process_neg
        each file(phenotype_file) from phenotype_design_neg
+       each file(paramsQ) from param_target_to_detection_process_neg
 
        output:
        file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
+       file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
 
        shell:
-       '''
-	/usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_neg_xcms} noise=!{params.noise_quant_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms}
-       '''
+        def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+       """
+	/usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_neg_xcms} noise=!{params.noise_quant_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms} mzdiff=!{params.mzdiff_quant_neg_xcms} snthresh=!{params.snthresh_quant_neg_xcms} prefilter_l=!{params.prefilter_quant_neg_xcms} prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzCenterFun_quant_neg_xcms} integrate=!{params.integrate_quant_neg_xcms} fitgauss=!{params.fitgauss_quant_neg_xcms} \
+  methodXset=!{params.ipo_methodXset_neg} methodRT=!{params.ipo_methodRT_neg} noise_l=!{params.ipo_noise_l_neg}\
+   noise_h=!{params.ipo_noise_h_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_neg} \
+  prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_neg}\
+   snthresh_l=!{params.ipo_snthresh_l_neg} snthresh_h=!{params.ipo_snthresh_h_neg} mzCenterFun=!{params.ipo_mzCenterFun_neg}\
+    integrate=!{params.ipo_integrate_neg} fitgauss=!{params.ipo_fitgauss_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_neg}\
+     ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_neg} ipo_ppm_l=!{params.ipo_ppm_l_neg}\
+   ipo_ppm_h=!{params.ipo_ppm_h_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_neg} ipo_charge_camera=!{params.ipo_charge_camera_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_neg}\
+   ipo_inv=!{ipo_neg_localQ}  ${filter_argument}
+       """
      }
 
    }
@@ -2402,6 +2885,54 @@ if(params.type_of_ionization in (["neg","both"]))
    /*
     * STEP 2 - feature detection by xcms
     */
+    if(ipo_neg_globalQ==true)
+    {
+
+
+    process process_ipo_param_neg_ipo_noncentroided{
+        label 'ipo'
+        tag "$name"
+        publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+
+
+        input:
+        file mzMLFile from quant_mzml_files_params_neg.collect()
+        each file(phenotype_file) from phenotype_design_neg_param
+        output:
+        file "quant_params_neg.json" into param_to_detection_process_neg
+        file "rt_params_neg.json" into param_to_rt_process_neg
+
+        script:
+          def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
+        shell:
+        """
+        touch quant_params_neg.json
+        touch rt_params_neg.json
+        /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_neg_globalAvoidRT} allSamples=!{params.ipo_allSamples_neg} columnToSelect=!{params.ipo_columnToSelect_neg}\
+           valueToSelect=!{params.ipo_valueToSelect_neg} phenoFile=!{phenotype_file} \
+          methodXset=!{params.ipo_methodXset_neg} methodRT=!{params.ipo_methodRT_neg} noise_l=!{params.ipo_noise_l_neg}\
+           noise_h=!{params.ipo_noise_h_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_neg} \
+          prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_neg}\
+           snthresh_l=!{params.ipo_snthresh_l_neg} snthresh_h=!{params.ipo_snthresh_h_neg} mzCenterFun=!{params.ipo_mzCenterFun_neg}\
+            integrate=!{params.ipo_integrate_neg} fitgauss=!{params.ipo_fitgauss_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_neg}\
+             ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_neg} ipo_ppm_l=!{params.ipo_ppm_l_neg}\
+           ipo_ppm_h=!{params.ipo_ppm_h_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_neg} ipo_charge_camera=!{params.ipo_charge_camera_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_neg} \
+           response_l=!{params.ipo_response_l_neg} response_h=!{params.ipo_response_h_neg} distFunc=!{params.ipo_distFunc_neg} factorDiag_l=!{params.ipo_factorDiag_l_neg} factorDiag_h=!{params.ipo_factorDiag_h_neg} factorGap_l=!{params.ipo_factorGap_l_neg} \
+           factorGap_h=!{params.ipo_factorGap_h_neg} localAlignment=!{params.ipo_localAlignment_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_neg}\
+           ipo_gapExtend_h=!{params.ipo_gapExtend_h_neg} ipo_profStep_l=!{params.ipo_profStep_l_neg} ipo_profStep_h=!{params.ipo_profStep_h_neg} bw_l=!{params.ipo_bw_l_neg} bw_h=!{params.ipo_bw_h_neg} minfrac_l=!{params.ipo_minfrac_l_neg} \
+            minfrac_h=!{params.ipo_minfrac_h_neg} mzwid_l=!{params.ipo_mzwid_l_neg} mzwid_h=!{params.ipo_mzwid_h_neg} minsamp_l=!{params.ipo_minsamp_l_neg}\
+             minsamp_h=!{params.ipo_minsamp_h_neg} max_l=!{params.ipo_max_l_neg} max_h=!{params.ipo_max_h_neg} ncores=!{params.ipo_ncores_neg} outputxset=quant_params_neg.json outputrt=rt_params_neg.json
+        """
+    }
+      }
+      param_target_to_detection_process_neg= ( ipo_neg_globalQ
+                   ? param_to_detection_process_neg
+                   :  file("NO_QFILE"))
+
+
+                   param_target_to_rt_process_neg= ( ipo_neg_globalAvoidRT==true
+                                ? file("NO_RTFILE")
+                                :  param_to_rt_process_neg)
    process process_masstrace_detection_neg_xcms_noncentroided{
      label 'xcms'
      tag "$name"
@@ -2412,14 +2943,25 @@ if(params.type_of_ionization in (["neg","both"]))
      input:
      file mzMLFile from quant_mzml_files_neg
      each file(phenotype_file) from phenotype_design_neg
+     each file(paramsQ) from param_target_to_detection_process_neg
 
      output:
      file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
+     file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
 
      shell:
-     '''
-/usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_neg_xcms} noise=!{params.noise_quant_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms}
-     '''
+      def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+     """
+/usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_neg_xcms} noise=!{params.noise_quant_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms}  mzdiff=!{params.mzdiff_quant_neg_xcms} snthresh=!{params.snthresh_quant_neg_xcms} prefilter_l=!{params.prefilter_quant_neg_xcms} prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzCenterFun_quant_neg_xcms} integrate=!{params.integrate_quant_neg_xcms} fitgauss=!{params.fitgauss_quant_neg_xcms}\
+methodXset=!{params.ipo_methodXset_neg} methodRT=!{params.ipo_methodRT_neg} noise_l=!{params.ipo_noise_l_neg}\
+ noise_h=!{params.ipo_noise_h_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_neg} \
+prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_neg}\
+ snthresh_l=!{params.ipo_snthresh_l_neg} snthresh_h=!{params.ipo_snthresh_h_neg} mzCenterFun=!{params.ipo_mzCenterFun_neg}\
+  integrate=!{params.ipo_integrate_neg} fitgauss=!{params.ipo_fitgauss_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_neg}\
+   ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_neg} ipo_ppm_l=!{params.ipo_ppm_l_neg}\
+ ipo_ppm_h=!{params.ipo_ppm_h_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_neg} ipo_charge_camera=!{params.ipo_charge_camera_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_neg}\
+ ipo_inv=!{ipo_neg_localQ} ${filter_argument}
+     """
    }
 
  }
@@ -2429,6 +2971,9 @@ if(params.type_of_ionization in (["neg","both"]))
   /*
    * STEP 3 - collect xcms objects into a hyper object
    */
+
+
+
   process  process_collect_rdata_neg_xcms{
     label 'xcms'
     tag "$name"
@@ -2439,42 +2984,23 @@ if(params.type_of_ionization in (["neg","both"]))
     input:
     file rdata_files from collect_rdata_neg_xcms.collect()
 
+
   output:
-  file "collection_neg.rdata" into group_peaks_neg_N1_xcms
+  file "collection_neg.rdata" into align_rdata_neg_xcms
 
   script:
     def inputs_aggregated = rdata_files.collect{ "$it" }.join(",")
   shell:
+
      """
   	nextFlowDIR=\$PWD
   	/usr/local/bin/xcmsCollect.r input=$inputs_aggregated output=collection_neg.rdata
   	"""
   }
 
-  /*
-   * STEP 4 - link the mass traces across the samples
-   */
-  process  process_group_peaks_neg_N1_xcms{
-    label 'xcms'
-    tag "$name"
-    publishDir "${params.outdir}/process_group_peaks_neg_N1_xcms", mode: 'copy', enabled: params.publishDir_intermediate
-
-
-
-    input:
-    file rdata_files from group_peaks_neg_N1_xcms
-
-  output:
-  file "groupN1_neg.rdata" into align_rdata_neg_xcms
-
-    shell:
-      '''
-  	/usr/local/bin/group.r input=!{rdata_files} output=groupN1_neg.rdata bandwidth=!{params.bandwidth_group_N1_neg_xcms} mzwid=!{params.mzwid_group_N1_neg_xcms}
-  	'''
-  }
 
   /*
-   * STEP 5 - do RT correction
+   * STEP 4 - do RT correction
    */
   process  process_align_peaks_neg_xcms{
     label 'xcms'
@@ -2486,39 +3012,52 @@ if(params.type_of_ionization in (["neg","both"]))
 
     input:
     file rdata_files from align_rdata_neg_xcms
-
+    file rd from rt_rdata_neg_xcms.collect()
+    each file(paramsRT) from param_target_to_rt_process_neg
   output:
-  file "RTcorrected_neg.rdata" into group_peaks_neg_N2_xcms
+  file "RTcorrected_neg.rdata" into group_peaks_neg_N1_xcms
 
+  script:
+    def inputs_aggregated = rd.collect{ "$it" }.join(",")
     shell:
-      '''
-  	/usr/local/bin/retCor.r input=!{rdata_files} output=RTcorrected_neg.rdata method=!{params.method_align_N1_neg_xcms}
+      def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=${paramsRT}" : ''
+      """
+    /usr/local/bin/retCor.r input=\$PWD/!{rdata_files} output=RTcorrected_neg.rdata method=obiwarp  response_l=!{params.ipo_response_l_neg} response_h=!{params.ipo_response_h_neg} distFunc=!{params.ipo_distFunc_neg} factorDiag_l=!{params.ipo_factorDiag_l_neg} factorDiag_h=!{params.ipo_factorDiag_h_neg} factorGap_l=!{params.ipo_factorGap_l_neg} \
+      factorGap_h=!{params.ipo_factorGap_h_neg} localAlignment=!{params.ipo_localAlignment_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_neg}\
+      ipo_gapExtend_h=!{params.ipo_gapExtend_h_neg} ipo_profStep_l=!{params.ipo_profStep_l_neg} ipo_profStep_h=!{params.ipo_profStep_h_neg} bw_l=!{params.ipo_bw_l_neg} bw_h=!{params.ipo_bw_h_neg} minfrac_l=!{params.ipo_minfrac_l_neg} \
+       minfrac_h=!{params.ipo_minfrac_h_neg} mzwid_l=!{params.ipo_mzwid_l_neg} mzwid_h=!{params.ipo_mzwid_h_neg} minsamp_l=!{params.ipo_minsamp_l_neg}\
+        minsamp_h=!{params.ipo_minsamp_h_neg} max_l=!{params.ipo_max_l_neg} max_h=!{params.ipo_max_h_neg} ipo_inv=!{ipo_neg_localRT} ncores=!{params.ipo_ncores_neg}\
+        profStep=!{params.profStep_align_N1_neg_xcms} center=!{params.center_align_N1_neg_xcms} response=!{params.response_align_N1_neg_xcms}\
+        distFunc=!{params.distFunc_align_N1_neg_xcms} gapInit=!{params.gapInit_align_N1_neg_xcms} gapExtend=!{params.gapExtend_align_N1_neg_xcms} \
+        factorDiag=!{params.factorDiag_align_N1_neg_xcms} factorGap=!{params.factorDiag_align_N1_neg_xcms} localAlignment=!{params.localAlignment_align_N1_neg_xcms} ${filter_argument} inputraw=${inputs_aggregated}
 
-  	'''
+    """
+
   }
-
 
   /*
-   * STEP 6 - do another round of grouping
+   * STEP 4 - link the mass traces across the samples
    */
-  process  process_group_peaks_neg_N2_xcms{
+
+
+  process  process_group_peaks_neg_N1_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_group_peaks_neg_N2_xcms", mode: 'copy', enabled: params.publishDir_intermediate
-
-
+    publishDir "${params.outdir}/process_group_peaks_neg_N1_xcms", mode: 'copy', enabled: params.publishDir_intermediate
 
     input:
-    file rdata_files from group_peaks_neg_N2_xcms
+    file rdata_files from group_peaks_neg_N1_xcms
 
   output:
-  file "groupN2_neg.rdata" into temp_unfiltered_channel_neg_1
+  file "groupN1_neg.rdata" into temp_unfiltered_channel_neg_1
 
     shell:
       '''
-  	/usr/local/bin/group.r input=!{rdata_files} output=groupN2_neg.rdata bandwidth=!{params.bandwidth_group_N2_neg_xcms} mzwid=!{params.mzwid_group_N2_neg_xcms}
+  	/usr/local/bin/group.r input=!{rdata_files} output=groupN1_neg.rdata bandwidth=!{params.bandwidth_group_N1_neg_xcms} minfrac=!{params.minfrac_group_N1_neg_xcms} minsamp=!{params.minsamp_group_N1_neg_xcms} max=!{params.max_group_N1_neg_xcms}\
+      mzwid=!{params.mzwid_group_N1_neg_xcms}
   	'''
   }
+
 
   /*
    * STEP 7 - noise filtering by using blank samples, if selected by the users
@@ -3246,7 +3785,7 @@ if(params.library_charactrized_neg==false){
         each file(setting_file) from peakpicker_ini_file_library_neg_openms
 
         output:
-        file "${mzMLFile}" into masstrace_detection_process_library_neg
+        file "${mzMLFile}" into masstrace_detection_process_library_neg, param_detection_process_library_neg
 
         shell:
         '''
@@ -3309,6 +3848,49 @@ if(params.library_charactrized_neg==false){
      /*
       * STEP 33 - feature detection using xcms
       */
+      if(ipo_library_neg_globalQ==true)
+      {
+
+
+      process process_ipo_param_library_neg_ipo_centroided{
+          label 'ipo'
+          tag "$name"
+          publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+
+
+          input:
+          file mzMLFile from param_detection_process_library_neg.collect()
+          output:
+          file "quant_params_library_neg.json" into param_to_detection_process_library_neg
+          file "rt_params_library_neg.json" into param_to_rt_process_library_neg
+
+          script:
+            def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
+          shell:
+          """
+          touch quant_params_library_neg.json
+          touch rt_params_library_neg.json
+            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \
+            methodXset=!{params.ipo_methodXset_library_neg} methodRT=!{params.ipo_methodRT_library_neg} noise_l=!{params.ipo_noise_l_library_neg}\
+             noise_h=!{params.ipo_noise_h_library_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_library_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_library_neg} \
+            prefilter_h_l=!{params.ipo_prefilter_h_l_library_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_library_neg}\
+             snthresh_l=!{params.ipo_snthresh_l_library_neg} snthresh_h=!{params.ipo_snthresh_h_library_neg} mzCenterFun=!{params.ipo_mzCenterFun_library_neg}\
+              integrate=!{params.ipo_integrate_library_neg} fitgauss=!{params.ipo_fitgauss_library_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_neg}\
+               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_neg} ipo_ppm_l=!{params.ipo_ppm_l_library_neg}\
+             ipo_ppm_h=!{params.ipo_ppm_h_library_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_neg} ipo_charge_camera=!{params.ipo_charge_camera_library_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_neg} \
+             response_l=!{params.ipo_response_l_library_neg} response_h=!{params.ipo_response_h_library_neg} distFunc=!{params.ipo_distFunc_library_neg} factorDiag_l=!{params.ipo_factorDiag_l_library_neg} factorDiag_h=!{params.ipo_factorDiag_h_library_neg} factorGap_l=!{params.ipo_factorGap_l_library_neg} \
+             factorGap_h=!{params.ipo_factorGap_h_library_neg} localAlignment=!{params.ipo_localAlignment_library_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_library_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_library_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_library_neg}\
+             ipo_gapExtend_h=!{params.ipo_gapExtend_h_library_neg} ipo_profStep_l=!{params.ipo_profStep_l_library_neg} ipo_profStep_h=!{params.ipo_profStep_h_library_neg} bw_l=!{params.ipo_bw_l_library_neg} bw_h=!{params.ipo_bw_h_library_neg} minfrac_l=!{params.ipo_minfrac_l_library_neg} \
+              minfrac_h=!{params.ipo_minfrac_h_library_neg} mzwid_l=!{params.ipo_mzwid_l_library_neg} mzwid_h=!{params.ipo_mzwid_h_library_neg} minsamp_l=!{params.ipo_minsamp_l_library_neg}\
+               minsamp_h=!{params.ipo_minsamp_h_library_neg} max_l=!{params.ipo_max_l_library_neg} max_h=!{params.ipo_max_h_library_neg} ncores=!{params.ipo_ncores_library_neg} outputxset=quant_params_library_neg.json outputrt=rt_params_library_neg.json
+          """
+      }
+        }
+
+        param_target_to_detection_process_library_neg= ( ipo_library_neg_globalQ
+                     ? param_to_detection_process_library_neg
+                     :  file("NO_QFILE"))
+
 
      process process_masstrace_detection_library_neg_xcms_centroided{
        label 'xcms'
@@ -3319,15 +3901,25 @@ if(params.library_charactrized_neg==false){
 
        input:
        file mzMLFile from masstrace_detection_process_library_neg
-  //     each file(phenotype_file) from phenotype_design_library_neg
+       each file(paramsQ) from param_target_to_detection_process_library_neg
 
        output:
        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
-       shell:
-       '''
-  /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=library
-       '''
+
+         shell:
+          def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
+         """
+         /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=!{params.sampleclass_quant_library_neg_xcms} mzdiff=!{params.mzdiff_quant_library_neg_xcms} snthresh=!{params.snthresh_quant_library_neg_xcms} prefilter_l=!{params.prefilter_quant_library_neg_xcms} prefilter_h=!{params.value_of_prefilter_quant_library_neg_xcms} mzCenterFun=!{params.mzCenterFun_quant_library_neg_xcms} integrate=!{params.integrate_quant_library_neg_xcms} fitgauss=!{params.fitgauss_quant_library_neg_xcms} \
+         methodXset=!{params.ipo_methodXset_library_neg} methodRT=!{params.ipo_methodRT_library_neg} noise_l=!{params.ipo_noise_l_library_neg}\
+         noise_h=!{params.ipo_noise_h_library_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_library_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_library_neg} \
+         prefilter_h_l=!{params.ipo_prefilter_h_l_library_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_library_neg}\
+         snthresh_l=!{params.ipo_snthresh_l_library_neg} snthresh_h=!{params.ipo_snthresh_h_library_neg} mzCenterFun=!{params.ipo_mzCenterFun_library_neg}\
+         integrate=!{params.ipo_integrate_library_neg} fitgauss=!{params.ipo_fitgauss_library_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_neg}\
+         ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_neg} ipo_ppm_l=!{params.ipo_ppm_l_library_neg}\
+         ipo_ppm_h=!{params.ipo_ppm_h_library_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_neg} ipo_charge_camera=!{params.ipo_charge_camera_library_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_neg}\
+         ipo_inv=!{ipo_library_neg_localQ}  ${filter_argument}
+         """
      }
 
    }
@@ -3392,6 +3984,49 @@ if(params.library_charactrized_neg==false){
        * STEP 33 - feature detection using xcms
        */
 
+
+       if(ipo_library_neg_globalQ==true)
+       {
+
+
+       process process_ipo_param_library_neg_ipo_noncentroided{
+           label 'ipo'
+           tag "$name"
+           publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+
+
+           input:
+           file mzMLFile from quant_mzml_files_params_library_neg.collect()
+           output:
+           file "quant_params_library_neg.json" into param_to_detection_process_library_neg
+           file "rt_params_library_neg.json" into param_to_rt_process_library_neg
+
+           script:
+             def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
+           shell:
+           """
+           touch quant_params_library_neg.json
+           touch rt_params_library_neg.json
+           /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \
+             methodXset=!{params.ipo_methodXset_library_neg} methodRT=!{params.ipo_methodRT_library_neg} noise_l=!{params.ipo_noise_l_library_neg}\
+              noise_h=!{params.ipo_noise_h_library_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_library_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_library_neg} \
+             prefilter_h_l=!{params.ipo_prefilter_h_l_library_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_library_neg}\
+              snthresh_l=!{params.ipo_snthresh_l_library_neg} snthresh_h=!{params.ipo_snthresh_h_library_neg} mzCenterFun=!{params.ipo_mzCenterFun_library_neg}\
+               integrate=!{params.ipo_integrate_library_neg} fitgauss=!{params.ipo_fitgauss_library_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_neg}\
+                ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_neg} ipo_ppm_l=!{params.ipo_ppm_l_library_neg}\
+              ipo_ppm_h=!{params.ipo_ppm_h_library_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_neg} ipo_charge_camera=!{params.ipo_charge_camera_library_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_neg} \
+              response_l=!{params.ipo_response_l_library_neg} response_h=!{params.ipo_response_h_library_neg} distFunc=!{params.ipo_distFunc_library_neg} factorDiag_l=!{params.ipo_factorDiag_l_library_neg} factorDiag_h=!{params.ipo_factorDiag_h_library_neg} factorGap_l=!{params.ipo_factorGap_l_library_neg} \
+              factorGap_h=!{params.ipo_factorGap_h_library_neg} localAlignment=!{params.ipo_localAlignment_library_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_library_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_library_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_library_neg}\
+              ipo_gapExtend_h=!{params.ipo_gapExtend_h_library_neg} ipo_profStep_l=!{params.ipo_profStep_l_library_neg} ipo_profStep_h=!{params.ipo_profStep_h_library_neg} bw_l=!{params.ipo_bw_l_library_neg} bw_h=!{params.ipo_bw_h_library_neg} minfrac_l=!{params.ipo_minfrac_l_library_neg} \
+               minfrac_h=!{params.ipo_minfrac_h_library_neg} mzwid_l=!{params.ipo_mzwid_l_library_neg} mzwid_h=!{params.ipo_mzwid_h_library_neg} minsamp_l=!{params.ipo_minsamp_l_library_neg}\
+                minsamp_h=!{params.ipo_minsamp_h_library_neg} max_l=!{params.ipo_max_l_library_neg} max_h=!{params.ipo_max_h_library_neg} ncores=!{params.ipo_ncores_library_neg} outputxset=quant_params_library_neg.json outputrt=rt_params_library_neg.json
+           """
+       }
+         }
+         param_target_to_detection_process_library_neg= ( ipo_library_neg_globalQ
+                      ? param_to_detection_process_library_neg
+                      :  file("NO_QFILE"))
+
       process process_masstrace_detection_library_neg_xcms_noncentroided{
         label 'xcms'
         tag "$name"
@@ -3401,15 +4036,24 @@ if(params.library_charactrized_neg==false){
 
         input:
         file mzMLFile from quant_library_mzml_files_neg
-   //     each file(phenotype_file) from phenotype_design_library_neg
+        each file(paramsQ) from param_target_to_detection_process_library_neg
 
         output:
         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
         shell:
-        '''
-   /usr/local/bin/findPeaks.r input=$PWD/!{mzMLFile} output=$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=library
-        '''
+        def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+        """
+       /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=!{params.sampleclass_quant_library_neg_xcms}  mzdiff=!{params.mzdiff_quant_library_neg_xcms} snthresh=!{params.snthresh_quant_library_neg_xcms} prefilter_l=!{params.prefilter_quant_library_neg_xcms} prefilter_h=!{params.value_of_prefilter_quant_library_neg_xcms} mzCenterFun=!{params.mzCenterFun_quant_library_neg_xcms} integrate=!{params.integrate_quant_library_neg_xcms} fitgauss=!{params.fitgauss_quant_library_neg_xcms}\
+       methodXset=!{params.ipo_methodXset_library_neg} methodRT=!{params.ipo_methodRT_library_neg} noise_l=!{params.ipo_noise_l_library_neg}\
+       noise_h=!{params.ipo_noise_h_library_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_library_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_library_neg} \
+       prefilter_h_l=!{params.ipo_prefilter_h_l_library_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_library_neg}\
+       snthresh_l=!{params.ipo_snthresh_l_library_neg} snthresh_h=!{params.ipo_snthresh_h_library_neg} mzCenterFun=!{params.ipo_mzCenterFun_library_neg}\
+       integrate=!{params.ipo_integrate_library_neg} fitgauss=!{params.ipo_fitgauss_library_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_neg}\
+       ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_neg} ipo_ppm_l=!{params.ipo_ppm_l_library_neg}\
+       ipo_ppm_h=!{params.ipo_ppm_h_library_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_neg} ipo_charge_camera=!{params.ipo_charge_camera_library_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_neg}\
+       ipo_inv=!{ipo_library_neg_localQ} ${filter_argument}
+        """
       }
 
     }
@@ -3644,12 +4288,17 @@ process process_remove_adducts_library_neg_msnbase{
 file txt_files from addcutremove_txt_neg_msnbase.collect()
 
 output:
-file "*.zip" into librarysearchengine_txt_neg_msnbase_tmp
+file "mappedtometfrag_neg.zip" into librarysearchengine_txt_neg_msnbase_tmp
 
 script:
   """
   #!/usr/bin/env Rscript
-
+ Files<-list.files(,pattern = "zip",full.names=T)
+ Files_org<-list.files(,pattern = "zip")
+ for(f in Files)
+ {
+   zip::unzip(zipfile = f,junkpaths = T)
+ }
   Files<-list.files(,pattern = "txt",full.names=T)
   FilesTMP<-sapply(strsplit(split = "_",fixed = T,x = basename(Files)),function(x){paste(x[-1],collapse = "_")})
   FileDub<-Files[duplicated(FilesTMP)]
@@ -3657,7 +4306,9 @@ for(x in FileDub)
 {
   file.remove(x)
 }
-zip::zip(zipfile="mappedtometfrag_neg.zip",files=list.files(pattern="txt"))
+files_to_pass<-list.files(pattern="txt")
+files_to_pass<-files_to_pass[!files_to_pass%in%Files_org]
+zip::zip(zipfile="mappedtometfrag_neg.zip",files=files_to_pass)
   """
 }
 
