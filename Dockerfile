@@ -1,6 +1,6 @@
 FROM nfcore/base:1.12.1
 LABEL authors="Payam Emami" \
-      description="Docker image containing all requirements for nf-core/metaboigniter pipeline"
+      description="Docker image containing all software requirements for the nf-core/metaboigniter pipeline"
 
 # Install the conda environment
 #COPY environment.yml /
