@@ -57,8 +57,6 @@ MetaboIGNITER is a comprehensive pipeline of several independent tools used to p
 
 nf-core/metaboigniter was originally written by Payam Emami.
 
-
-
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
