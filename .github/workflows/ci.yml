@@ -12,7 +12,7 @@ jobs:
   test:
     name: Run workflow tests
     # Only run on push if this is the nf-core dev branch (merged PRs)
-    if: ${{ github.event_name == 'push' || (github.event_name == 'push' && github.repository == 'nf-core/metaboigniter') }}
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/metaboigniter') }}
     runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
@@ -33,13 +33,13 @@ jobs:
 
       - name: Build new docker image
         if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/metaboigniter:dev
+        run: docker build --no-cache . -t nfcore/metaboigniter:1.0.0
 
       - name: Pull docker image
         if: ${{ !env.MATCHED_FILES }}
         run: |
           docker pull nfcore/metaboigniter:dev
-          docker tag nfcore/metaboigniter:dev nfcore/metaboigniter:dev
+          docker tag nfcore/metaboigniter:dev nfcore/metaboigniter:1.0.0
 
       - name: Install Nextflow
         env:
