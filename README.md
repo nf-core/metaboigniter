@@ -40,7 +40,7 @@ We highly recommend that you use the parameter file located in conf/parameters.c
 **Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
 
 ```bash
-nextflow run nf-core/metaboigniter -profile analysis,<docker/singularity/conda/institute>
+nextflow run nf-core/metaboigniter -profile <docker/singularity/conda/institute>
 ```
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.

@@ -56,7 +56,7 @@ For running the test dataset:
 
 For running on your own data, set the parameters below and then:
 
-    nextflow run main.nf -profile analysis,docker
+    nextflow run main.nf -profile docker
 
 If you want to run singularity, replace docker with singularity. The main workflow path (main.nf) is in the case that you are standing in the main directory of the workflow. Otherwise, replace main.nf with its correct path
 
