@@ -863,14 +863,13 @@ process get_software_versions {
 */
 
 
-if(params.type_of_ionization in (["pos","both"]))
-{
+if(params.type_of_ionization in (["pos","both"])){
 
   /*
    * STEP 1 - PeakPickerHiRes if selected by the user
    */
-  if(params.need_centroiding==true)
-  {
+  if(params.need_centroiding==true) {
+
     process process_peak_picker_pos_openms{
         label 'openms'
         tag "$name"
@@ -886,9 +885,9 @@ if(params.type_of_ionization in (["pos","both"]))
         file "${mzMLFile}" into masstrace_detection_process_pos, param_detection_process_pos
 
         shell:
-        '''
-        PeakPickerHiRes -in !{mzMLFile} -out !{mzMLFile} -ini !{setting_file}
-        '''
+        """
+        PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
+        """
     }
 
 
@@ -914,9 +913,9 @@ if(params.type_of_ionization in (["pos","both"]))
          file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion
 
          shell:
-         '''
-         FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-         '''
+         """
+         FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
+         """
      }
      /*
       * STEP 2.5 - convert openms to xcms
@@ -936,10 +935,17 @@ if(params.type_of_ionization in (["pos","both"]))
          file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
 
          shell:
-         '''
-          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
-
-         '''
+         """
+         /usr/local/bin/featurexmlToCamera.r \
+            input=$mzMLFile \
+            realFileName=$mzMLFile \
+            polarity=positive \
+            output=${mzMLFile.baseName}.rdata \
+            phenoFile=$phenotype_file \
+            phenoDataColumn=$params.phenodatacolumn_quant_pos \
+            sampleClass=$params.sampleclass_quant_pos_xcms \
+            changeNameTO=${mzMLFile.baseName}.mzML
+         """
      }
 
    }else{
@@ -969,20 +975,63 @@ if(params.type_of_ionization in (["pos","both"]))
           """
           touch quant_params_pos.json
           touch rt_params_pos.json
-            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_pos_globalAvoidRT} allSamples=!{params.ipo_allSamples_pos} columnToSelect=!{params.ipo_columnToSelect_pos}\
-             valueToSelect=!{params.ipo_valueToSelect_pos} phenoFile=!{phenotype_file} \
-            methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos}\
-             noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
-            prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos}\
-             snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos} mzCenterFun=!{params.ipo_mzCenterFun_pos}\
-              integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos}\
-               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos}\
-             ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos} \
-             response_l=!{params.ipo_response_l_pos} response_h=!{params.ipo_response_h_pos} distFunc=!{params.ipo_distFunc_pos} factorDiag_l=!{params.ipo_factorDiag_l_pos} factorDiag_h=!{params.ipo_factorDiag_h_pos} factorGap_l=!{params.ipo_factorGap_l_pos} \
-             factorGap_h=!{params.ipo_factorGap_h_pos} localAlignment=!{params.ipo_localAlignment_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_pos}\
-             ipo_gapExtend_h=!{params.ipo_gapExtend_h_pos} ipo_profStep_l=!{params.ipo_profStep_l_pos} ipo_profStep_h=!{params.ipo_profStep_h_pos} bw_l=!{params.ipo_bw_l_pos} bw_h=!{params.ipo_bw_h_pos} minfrac_l=!{params.ipo_minfrac_l_pos} \
-              minfrac_h=!{params.ipo_minfrac_h_pos} mzwid_l=!{params.ipo_mzwid_l_pos} mzwid_h=!{params.ipo_mzwid_h_pos} minsamp_l=!{params.ipo_minsamp_l_pos}\
-               minsamp_h=!{params.ipo_minsamp_h_pos} max_l=!{params.ipo_max_l_pos} max_h=!{params.ipo_max_h_pos} ncores=!{params.ipo_ncores_pos} outputxset=quant_params_pos.json outputrt=rt_params_pos.json
+          /usr/local/bin/ipo.r \
+              input=$inputs_aggregated \
+              quantOnly=$ipo_pos_globalAvoidRT \
+              allSamples=$params.ipo_allSamples_pos \
+              columnToSelect=$params.ipo_columnToSelect_pos \
+              valueToSelect=$params.ipo_valueToSelect_pos \
+              phenoFile=$phenotype_file \
+              methodXset=$params.ipo_methodXset_pos \
+              methodRT=$params.ipo_methodRT_pos \
+              noise_l=$params.ipo_noise_l_pos \
+              noise_h=$params.ipo_noise_h_pos \
+              prefilter_l_l=$params.ipo_prefilter_l_l_pos \
+              prefilter_l_h=$params.ipo_prefilter_l_h_pos \
+              prefilter_h_l=$params.ipo_prefilter_h_l_pos \
+              prefilter_h_h=$params.ipo_prefilter_h_h_pos \
+              snthresh_l=$params.ipo_snthresh_l_pos \
+              snthresh_h=$params.ipo_snthresh_h_pos \
+              mzCenterFun=$params.ipo_mzCenterFun_pos \
+              integrate=$params.ipo_integrate_pos \
+              fitgauss=$params.ipo_fitgauss_pos \
+              ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos \
+              ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \
+              ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \
+              ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \
+              ipo_ppm_l=$params.ipo_ppm_l_pos \
+              ipo_ppm_h=$params.ipo_ppm_h_pos \
+              ipo_mzdiff_l=$params.ipo_mzdiff_l_pos \
+              ipo_mzdiff_h=$params.ipo_mzdiff_h_pos \
+              ipo_charge_camera=$params.ipo_charge_camera_pos \
+              ipo_max_ppm_camera=$params.ipo_max_ppm_camera_pos \
+              response_l=$params.ipo_response_l_pos \
+              response_h=$params.ipo_response_h_pos \
+              distFunc=$params.ipo_distFunc_pos \
+              factorDiag_l=$params.ipo_factorDiag_l_pos \
+              factorDiag_h=$params.ipo_factorDiag_h_pos \
+              factorGap_l=$params.ipo_factorGap_l_pos \
+              factorGap_h=$params.ipo_factorGap_h_pos \
+              localAlignment=$params.ipo_localAlignment_pos \
+              ipo_gapInit_l=$params.ipo_gapInit_l_pos \
+              ipo_gapInit_h=$params.ipo_gapInit_h_pos \
+              ipo_gapExtend_l=$params.ipo_gapExtend_l_pos \
+              ipo_gapExtend_h=$params.ipo_gapExtend_h_pos \
+              ipo_profStep_l=$params.ipo_profStep_l_pos \
+              ipo_profStep_h=$params.ipo_profStep_h_pos \
+              bw_l=$params.ipo_bw_l_pos \
+              bw_h=$params.ipo_bw_h_pos \
+              minfrac_l=$params.ipo_minfrac_l_pos \
+              minfrac_h=$params.ipo_minfrac_h_pos \
+              mzwid_l=$params.ipo_mzwid_l_pos \
+              mzwid_h=$params.ipo_mzwid_h_pos \
+              minsamp_l=$params.ipo_minsamp_l_pos \
+              minsamp_h=$params.ipo_minsamp_h_pos \
+              max_l=$params.ipo_max_l_pos \
+              max_h=$params.ipo_max_h_pos \
+              ncores=$params.ipo_ncores_pos \
+              outputxset=quant_params_pos.json \
+              outputrt=rt_params_pos.json
           """
       }
         }
