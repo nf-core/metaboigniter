@@ -9,9 +9,9 @@
 ----------------------------------------------------------------------------------------
 */
 
+log.info nfcoreHeader()
+
 def helpMessage() {
-    // TODO nf-core: Add to this help message with new command line parameters
-    log.info nfcoreHeader()
     log.info"""
 
     Usage:
@@ -36,18 +36,26 @@ def helpMessage() {
     """.stripIndent()
 }
 
-
-
-/*
- * SET UP CONFIGURATION VARIABLES
- */
-
 // Show help emssage
 if (params.help){
     helpMessage()
     exit 0
 }
 
+////////////////////////////////////////////////////
+/* --         VALIDATE PARAMETERS              -- */
+////////////////////////////////////////////////////+
+def json_schema = "$baseDir/nextflow_schema.json"
+def unexpectedParams = []
+if (params.validate_params) {
+    unexpectedParams = NfcoreSchema.validateParameters(params, json_schema, log)
+}
+////////////////////////////////////////////////////
+
+
+/*
+ * SET UP CONFIGURATION VARIABLES
+ */
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
