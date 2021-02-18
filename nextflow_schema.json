@@ -4,22 +4,29 @@
     "title": "nf-core/metaboigniter pipeline parameters",
     "description": "Get your metabolomics analysis up and running",
     "type": "object",
-    "properties": {
-        "outdir": {
-            "type": "string",
-            "description": "Output directory for results",
-            "default": "./results",
-            "fa_icon": "fas fa-folder-open"
-        },
-        "email": {
-            "type": "string",
-            "description": "Email address for completion summary",
-            "fa_icon": "fas fa-envelope",
-            "help_text": "An email address to send a summary email to when the pipeline is completed.",
-            "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
-        },
-    },
     "definitions": {
+        "global_options": {
+            "title": "Global options",
+            "type": "object",
+            "description": "General options that affect the whole pipeline",
+            "default": "",
+            "properties": {
+                "outdir": {
+                    "type": "string",
+                    "description": "Output directory for results",
+                    "default": "./results",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Email address for completion summary",
+                    "fa_icon": "fas fa-envelope",
+                    "help_text": "An email address to send a summary email to when the pipeline is completed.",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                }
+            },
+            "fa_icon": "fas fa-globe"
+        },
         "internal_library_quantification_and_identification_parameters_negative_mode": {
             "title": "Internal library quantification and identification parameters (negative mode)",
             "type": "object",
@@ -29,12 +36,19 @@
                 "performIPO_library_neg": {
                     "type": "string",
                     "default": "none",
-                    "description": "controls how to perform IPO possible values: \"none\": don't perform IPO, \"global\": performs IPO on all or selected number of samples. \"local\": performs IPO on individual samples one at the time."
+                    "description": "Controls how to perform IPO",
+                    "help_text": "Possible values:\n* `none`: don't perform IPO\n* `global`: performs IPO on all or selected number of samples\n* `local`: performs IPO on individual samples one at the time",
+                    "enum": [
+                        "none",
+                        "global",
+                        "local"
+                    ]
                 },
                 "ipo_methodXset_library_neg": {
                     "type": "string",
                     "default": "centWave",
-                    "description": "Quantification methods for IPO. Only centWave is supported at this stage."
+                    "description": "Quantification methods for IPO",
+                    "help_text": "Only centWave is supported at this stage."
                 },
                 "ipo_noise_l_library_neg": {
                     "type": "integer",
@@ -62,7 +76,8 @@
                 "ipo_integrate_library_neg": {
                     "type": "integer",
                     "default": 1,
-                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact."
+                    "description": "Integration method",
+                    "help_text": "If `=1` peak limits are found through descent on the mexican hat filtered data, if `=2` the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact."
                 },
                 "ipo_fitgauss_library_neg": {
                     "type": "boolean",
@@ -2641,64 +2656,16 @@
     },
     "allOf": [
         {
-            "$ref": "#/definitions/control_parameters"
+            "$ref": "#/definitions/global_options"
         },
         {
-            "$ref": "#/definitions/quantification_input_files"
+            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_negative_mode"
         },
         {
-            "$ref": "#/definitions/identification_input_files"
+            "$ref": "#/definitions/internal_library_parameters_negative_mode"
         },
         {
-            "$ref": "#/definitions/openms_setting_files"
-        },
-        {
-            "$ref": "#/definitions/quantification_parameter_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/filtering_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/adduct_and_isotope_annotation_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/global_identification_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/cfm_id_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/metfrag_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/csi_fingerid_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/library_controls_and_files_negative_mode"
-        },
-        {
-            "$ref": "#/definitions/library_controls_and_files_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/internal_library_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/output_preparation_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/quantification_parameter_negative_mode"
-        },
-        {
-            "$ref": "#/definitions/filtering_parameters_negative_mode"
-        },
-        {
-            "$ref": "#/definitions/adduct_and_isotope_annotation_negative_mode"
-        },
-        {
-            "$ref": "#/definitions/global_identification_parameters_negative_mode"
+            "$ref": "#/definitions/output_preparation_negative_mode"
         },
         {
             "$ref": "#/definitions/cfm_id_parameters_negative_mode"
@@ -2710,19 +2677,64 @@
             "$ref": "#/definitions/csi_fingerid_parameters_negative_mode"
         },
         {
-            "$ref": "#/definitions/library_controls_and_files_negative_mode"
+            "$ref": "#/definitions/global_identification_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/adduct_and_isotope_annotation_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/filtering_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/quantification_parameter_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/internal_library_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/output_preparation_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/cfm_id_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/metfrag_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/csi_fingerid_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/global_identification_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/adduct_and_isotope_annotation_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/filtering_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/quantification_parameter_positive_mode"
         },
         {
             "$ref": "#/definitions/library_controls_and_files_negative_mode"
         },
         {
-            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_negative_mode"
+            "$ref": "#/definitions/library_controls_and_files_positive_mode"
         },
         {
-            "$ref": "#/definitions/internal_library_parameters_negative_mode"
+            "$ref": "#/definitions/identification_input_files"
         },
         {
-            "$ref": "#/definitions/output_preparation_negative_mode"
+            "$ref": "#/definitions/control_parameters"
+        },
+        {
+            "$ref": "#/definitions/openms_setting_files"
+        },
+        {
+            "$ref": "#/definitions/quantification_input_files"
         },
         {
             "$ref": "#/definitions/generic_options"
