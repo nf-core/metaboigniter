@@ -811,7 +811,6 @@ summary['Config Files'] = workflow.configFiles.join(', ')
 if (params.email || params.email_on_fail) {
     summary['E-mail Address']    = params.email
     summary['E-mail on failure'] = params.email_on_fail
-    summary['MultiQC maxsize']   = params.max_multiqc_email_size
 }
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
@@ -839,7 +838,7 @@ Channel.from(summary.collect{ [it.key, it.value] })
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy', enabled: params.publishDir_intermediate,
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate,
     saveAs: {filename ->
         if (filename.indexOf(".csv") > 0) filename
         else null
@@ -875,7 +874,7 @@ if(params.type_of_ionization in (["pos","both"]))
     process process_peak_picker_pos_openms{
         label 'openms'
         tag "$name"
-        publishDir "${params.outdir}/process_peak_picker_pos_openms", mode: 'copy', enabled: params.publishDir_intermediate
+        publishDir "${params.outdir}/process_peak_picker_pos_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
         stageInMode 'copy'
 
 
@@ -903,7 +902,7 @@ if(params.type_of_ionization in (["pos","both"]))
      process process_masstrace_detection_pos_openms_centroided {
         label 'openms'
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_pos_openms_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+         publishDir "${params.outdir}/process_masstrace_detection_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -925,7 +924,7 @@ if(params.type_of_ionization in (["pos","both"]))
      process process_openms_to_xcms_conversion_pos_centroided {
          label 'xcmsconvert'
          tag "$name"
-         publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+         publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -954,7 +953,7 @@ if(params.type_of_ionization in (["pos","both"]))
       process process_ipo_param_pos_ipo_centroided{
           label 'ipo'
           tag "$name"
-          publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+          publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
           input:
@@ -998,7 +997,7 @@ if(params.type_of_ionization in (["pos","both"]))
      process process_masstrace_detection_pos_xcms_centroided{
        label 'xcms'
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+       publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1039,7 +1038,7 @@ if(params.type_of_ionization in (["pos","both"]))
    process process_masstrace_detection_pos_openms_noncentroided {
        label 'openms'
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_pos_openms_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+       publishDir "${params.outdir}/process_masstrace_detection_pos_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1061,7 +1060,7 @@ if(params.type_of_ionization in (["pos","both"]))
    process process_openms_to_xcms_conversion_pos_noncentroided {
        label 'xcmsconvert'
        tag "$name"
-       publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+       publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1090,7 +1089,7 @@ if(params.type_of_ionization in (["pos","both"]))
     process process_ipo_param_pos_ipo_noncentroided{
         label 'ipo'
         tag "$name"
-        publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+        publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
         input:
@@ -1134,7 +1133,7 @@ if(params.type_of_ionization in (["pos","both"]))
    process process_masstrace_detection_pos_xcms_noncentroided{
      label 'xcms'
      tag "$name"
-     publishDir "${params.outdir}/process_masstrace_detection_pos_xcms_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+     publishDir "${params.outdir}/process_masstrace_detection_pos_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1175,7 +1174,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
   process  process_collect_rdata_pos_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_collect_rdata_pos_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_collect_rdata_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1203,7 +1202,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
   process  process_align_peaks_pos_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_align_peaks_pos_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_align_peaks_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1241,7 +1240,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
   process  process_group_peaks_pos_N1_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_group_peaks_pos_N1_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_group_peaks_pos_N1_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
     input:
     file rdata_files from group_peaks_pos_N1_xcms
@@ -1268,7 +1267,7 @@ if(params.blank_filter_pos)
   process  process_blank_filter_pos_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_blank_filter_pos_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_blank_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1297,7 +1296,7 @@ if(params.dilution_filter_pos==true)
   process  process_dilution_filter_pos_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_dilution_filter_pos_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_dilution_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1326,7 +1325,7 @@ if(params.cv_filter_pos==true)
   process  process_cv_filter_pos_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_cv_filter_pos_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_cv_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1355,7 +1354,7 @@ annotation_rdata_pos_camera=temp_unfiltered_channel_pos_4
 process  process_annotate_peaks_pos_camera{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_annotate_peaks_pos_camera", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_annotate_peaks_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1378,7 +1377,7 @@ file "CameraAnnotatePeaks_pos.rdata" into group_rdata_pos_camera
 process  process_group_peaks_pos_camera{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_group_peaks_pos_camera", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_group_peaks_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1401,7 +1400,7 @@ file "CameraGroup_pos.rdata" into findaddcuts_rdata_pos_camera
 process  process_find_addcuts_pos_camera{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_find_addcuts_pos_camera", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_find_addcuts_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1424,7 +1423,7 @@ file "CameraFindAdducts_pos.rdata" into findisotopes_rdata_pos_camera
 process  process_find_isotopes_pos_camera{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_find_isotopes_pos_camera", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_find_isotopes_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1457,7 +1456,7 @@ if(params.perform_identification==true)
   process  process_read_MS2_pos_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_read_MS2_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_read_MS2_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1480,7 +1479,7 @@ if(params.perform_identification==true)
   process  process_mapmsms_tocamera_pos_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_mapmsms_tocamera_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_mapmsms_tocamera_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1506,7 +1505,7 @@ if(params.perform_identification==true)
   process  process_mapmsms_toparam_pos_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_mapmsms_toparam_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_mapmsms_toparam_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -1543,7 +1542,7 @@ csifingerid_txt_pos_msnbase_flatten=csifingerid_txt_pos_msnbase.flatten()
 process  process_ms2_identification_pos_csifingerid{
   label 'csifingerid'
   tag "$name"
-  publishDir "${params.outdir}/process_ms2_identification_pos_csifingerid", mode: 'copy'
+  publishDir "${params.outdir}/process_ms2_identification_pos_csifingerid", mode: params.publish_dir_mode
 
 
   input:
@@ -1572,7 +1571,7 @@ process  process_ms2_identification_pos_csifingerid{
 process  process_identification_aggregate_pos_csifingerid{
   label 'msnbase'
   tag "$name"
-  publishDir "${params.outdir}/process_identification_aggregate_pos_csifingerid", mode: 'copy'
+  publishDir "${params.outdir}/process_identification_aggregate_pos_csifingerid", mode: params.publish_dir_mode
 
 
   input:
@@ -1598,7 +1597,7 @@ sed -i '/^$/d' aggregated_identification_csifingerid_pos.csv
 process process_pepcalculation_csifingerid_pos_passatutto{
   label 'passatutto'
   tag "$name"
-  publishDir "${params.outdir}/process_pepcalculation_csifingerid_pos_passatutto", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_pepcalculation_csifingerid_pos_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
   input:
@@ -1627,7 +1626,7 @@ fi
 process  process_output_quantid_pos_camera_csifingerid{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_output_quantid_pos_camera_csifingerid", mode: 'copy'
+  publishDir "${params.outdir}/process_output_quantid_pos_camera_csifingerid", mode: params.publish_dir_mode
 
 
 
@@ -1688,7 +1687,7 @@ metfrag_txt_pos_msnbase_flatten=metfrag_txt_pos_msnbase.flatten()
 process  process_ms2_identification_pos_metfrag{
   label 'metfrag'
   tag "$name"
-  publishDir "${params.outdir}/process_ms2_identification_pos_metfrag", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_ms2_identification_pos_metfrag", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
   input:
@@ -1719,7 +1718,7 @@ process  process_ms2_identification_pos_metfrag{
 process  process_identification_aggregate_pos_metfrag{
   label 'msnbase'
   tag "$name"
-  publishDir "${params.outdir}/process_identification_aggregate_pos_metfrag", mode: 'copy'
+  publishDir "${params.outdir}/process_identification_aggregate_pos_metfrag", mode: params.publish_dir_mode
 
 
   input:
@@ -1746,7 +1745,7 @@ file "aggregated_identification_metfrag_pos.csv" into metfrag_tsv_pos_passatutto
 process process_pepcalculation_metfrag_pos_passatutto{
   label 'passatutto'
   tag "$name"
-  publishDir "${params.outdir}/process_pepcalculation_metfrag_pos_passatutto", mode: 'copy'
+  publishDir "${params.outdir}/process_pepcalculation_metfrag_pos_passatutto", mode: params.publish_dir_mode
 
 
   input:
@@ -1779,7 +1778,7 @@ fi
 process  process_output_quantid_pos_camera_metfrag{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_output_quantid_pos_camera_metfrag", mode: 'copy'
+  publishDir "${params.outdir}/process_output_quantid_pos_camera_metfrag", mode: params.publish_dir_mode
 
 
 
@@ -1831,7 +1830,7 @@ cfmid_txt_pos_msnbase_flatten=cfmidin_txt_pos_msnbase.flatten()
 process  process_ms2_identification_pos_cfmid{
   label 'cfmid'
   tag "$name"
-  publishDir "${params.outdir}/process_ms2_identification_pos_cfmid", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_ms2_identification_pos_cfmid", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
   input:
@@ -1865,7 +1864,7 @@ process  process_ms2_identification_pos_cfmid{
 process  process_identification_aggregate_pos_cfmid{
   label 'msnbase'
   tag "$name"
-  publishDir "${params.outdir}/process_identification_aggregate_pos_cfmid", mode: 'copy'
+  publishDir "${params.outdir}/process_identification_aggregate_pos_cfmid", mode: params.publish_dir_mode
 
 
   input:
@@ -1893,7 +1892,7 @@ file "aggregated_identification_cfmid_pos.csv" into cfmid_tsv_pos_passatutto
 process process_pepcalculation_cfmid_pos_passatutto{
   label 'passatutto'
   tag "$name"
-  publishDir "${params.outdir}/process_pepcalculation_cfmid_pos_passatutto", mode: 'copy'
+  publishDir "${params.outdir}/process_pepcalculation_cfmid_pos_passatutto", mode: params.publish_dir_mode
 
 
   input:
@@ -1924,7 +1923,7 @@ fi
 process  process_output_quantid_pos_camera_cfmid{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_output_quantid_pos_camera_cfmid", mode: 'copy'
+  publishDir "${params.outdir}/process_output_quantid_pos_camera_cfmid", mode: params.publish_dir_mode
 
 
 
@@ -1974,7 +1973,7 @@ if(params.library_charactrized_pos==false){
     process process_peak_picker_library_pos_openms_centroided {
       label 'openms'
         tag "$name"
-        publishDir "${params.outdir}/process_peak_picker_library_pos_openms_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+        publishDir "${params.outdir}/process_peak_picker_library_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
         stageInMode 'copy'
 
 
@@ -1999,7 +1998,7 @@ if(params.library_charactrized_pos==false){
      process process_masstrace_detection_library_pos_openms_centroided {
        label 'openms'
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+         publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2023,7 +2022,7 @@ if(params.library_charactrized_pos==false){
      process process_openms_to_xcms_conversion_library_pos_centroided {
        label 'xcmsconvert'
          tag "$name"
-         publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+         publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2053,7 +2052,7 @@ if(params.library_charactrized_pos==false){
       process process_ipo_param_library_pos_ipo_centroided{
           label 'ipo'
           tag "$name"
-          publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+          publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
           input:
@@ -2093,7 +2092,7 @@ if(params.library_charactrized_pos==false){
      process process_masstrace_detection_library_pos_xcms_centroided{
        label 'xcms'
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+       publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2134,7 +2133,7 @@ if(params.library_charactrized_pos==false){
       process process_masstrace_detection_library_pos_openms_noncentroided {
         label 'openms'
           tag "$name"
-          publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+          publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2158,7 +2157,7 @@ if(params.library_charactrized_pos==false){
       process process_openms_to_xcms_conversion_library_pos_noncentroided {
         label 'xcmsconvert'
           tag "$name"
-          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2190,7 +2189,7 @@ if(params.library_charactrized_pos==false){
        process process_ipo_param_library_pos_ipo_noncentroided{
            label 'ipo'
            tag "$name"
-           publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+           publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
            input:
@@ -2228,7 +2227,7 @@ if(params.library_charactrized_pos==false){
       process process_masstrace_detection_library_pos_xcms_noncentroided{
         label 'xcms'
         tag "$name"
-        publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+        publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2268,7 +2267,7 @@ if(params.library_charactrized_pos==false){
   process  process_annotate_peaks_library_pos_camera{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_annotate_peaks_library_pos_camera", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_annotate_peaks_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
 
@@ -2291,7 +2290,7 @@ if(params.library_charactrized_pos==false){
   process  process_group_peaks_library_pos_camera{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_group_peaks_library_pos_camera", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_group_peaks_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
 
@@ -2314,7 +2313,7 @@ if(params.library_charactrized_pos==false){
   process  process_find_addcuts_library_pos_camera{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_find_addcuts_library_pos_camera", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_find_addcuts_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
 
@@ -2337,7 +2336,7 @@ if(params.library_charactrized_pos==false){
   process  process_find_isotopes_library_pos_camera{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_find_isotopes_library_pos_camera", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_find_isotopes_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
 
@@ -2362,7 +2361,7 @@ if(params.library_charactrized_pos==false){
   process  process_read_MS2_library_pos_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_read_MS2_library_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_read_MS2_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2393,7 +2392,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
   process  process_mapmsms_tocamera_library_pos_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_mapmsms_tocamera_library_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_mapmsms_tocamera_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2426,7 +2425,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
   process  process_create_library_pos_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_create_library_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_create_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2453,7 +2452,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
   process  process_collect_library_pos_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_collect_library_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_collect_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2478,7 +2477,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 process process_remove_adducts_library_pos_msnbase{
   label 'msnbase'
   tag "$name"
-  publishDir "${params.outdir}/process_remove_adducts_library_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_remove_adducts_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2519,7 +2518,7 @@ zip::zip(zipfile="mappedtometfrag_pos.zip",files=files_to_pass)
   process  process_search_engine_library_pos_msnbase_nolibcharac{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
     input:
@@ -2545,7 +2544,7 @@ sed -i '/^$/d' aggregated_identification_library_pos.csv
   process  process_search_engine_library_pos_msnbase_libcharac{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
     input:
@@ -2573,7 +2572,7 @@ sed -i '/^$/d' aggregated_identification_library_pos.csv
 process process_pepcalculation_library_pos_passatutto{
   label 'passatutto'
   tag "$name"
-  publishDir "${params.outdir}/process_pepcalculation_library_pos_passatutto", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_pepcalculation_library_pos_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
   input:
@@ -2605,7 +2604,7 @@ fi
 process  process_output_quantid_pos_camera_library{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_output_quantid_pos_camera_library", mode: 'copy'
+  publishDir "${params.outdir}/process_output_quantid_pos_camera_library", mode: params.publish_dir_mode
 
 
 
@@ -2640,7 +2639,7 @@ then
   process  process_output_quantid_pos_camera_noid{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_output_quantid_pos_camera_noid", mode: 'copy'
+    publishDir "${params.outdir}/process_output_quantid_pos_camera_noid", mode: params.publish_dir_mode
 
 
 
@@ -2677,7 +2676,7 @@ if(params.type_of_ionization in (["neg","both"]))
     process process_peak_picker_neg_openms{
         label 'openms'
         tag "$name"
-        publishDir "${params.outdir}/process_peak_picker_neg_openms", mode: 'copy', enabled: params.publishDir_intermediate
+        publishDir "${params.outdir}/process_peak_picker_neg_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
         stageInMode 'copy'
 
 
@@ -2705,7 +2704,7 @@ if(params.type_of_ionization in (["neg","both"]))
      process process_masstrace_detection_neg_openms_centroided {
         label 'openms'
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_neg_openms_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+         publishDir "${params.outdir}/process_masstrace_detection_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2727,7 +2726,7 @@ if(params.type_of_ionization in (["neg","both"]))
      process process_openms_to_xcms_conversion_neg_centroided {
          label 'xcmsconvert'
          tag "$name"
-         publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+         publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2756,7 +2755,7 @@ if(params.type_of_ionization in (["neg","both"]))
       process process_ipo_param_neg_ipo_centroided{
           label 'ipo'
           tag "$name"
-          publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+          publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
           input:
@@ -2800,7 +2799,7 @@ if(params.type_of_ionization in (["neg","both"]))
      process process_masstrace_detection_neg_xcms_centroided{
        label 'xcms'
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+       publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2841,7 +2840,7 @@ if(params.type_of_ionization in (["neg","both"]))
    process process_masstrace_detection_neg_openms_noncentroided {
        label 'openms'
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_neg_openms_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+       publishDir "${params.outdir}/process_masstrace_detection_neg_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2863,7 +2862,7 @@ if(params.type_of_ionization in (["neg","both"]))
    process process_openms_to_xcms_conversion_neg_noncentroided {
        label 'xcmsconvert'
        tag "$name"
-       publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+       publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2892,7 +2891,7 @@ if(params.type_of_ionization in (["neg","both"]))
     process process_ipo_param_neg_ipo_noncentroided{
         label 'ipo'
         tag "$name"
-        publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+        publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
         input:
@@ -2936,7 +2935,7 @@ if(params.type_of_ionization in (["neg","both"]))
    process process_masstrace_detection_neg_xcms_noncentroided{
      label 'xcms'
      tag "$name"
-     publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+     publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -2977,7 +2976,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilt
   process  process_collect_rdata_neg_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_collect_rdata_neg_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_collect_rdata_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3005,7 +3004,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilt
   process  process_align_peaks_neg_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_align_peaks_neg_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_align_peaks_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3043,7 +3042,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilt
   process  process_group_peaks_neg_N1_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_group_peaks_neg_N1_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_group_peaks_neg_N1_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
     input:
     file rdata_files from group_peaks_neg_N1_xcms
@@ -3070,7 +3069,7 @@ if(params.blank_filter_neg)
   process  process_blank_filter_neg_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_blank_filter_neg_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_blank_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3099,7 +3098,7 @@ if(params.dilution_filter_neg==true)
   process  process_dilution_filter_neg_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_dilution_filter_neg_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_dilution_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3128,7 +3127,7 @@ if(params.cv_filter_neg==true)
   process  process_cv_filter_neg_xcms{
     label 'xcms'
     tag "$name"
-    publishDir "${params.outdir}/process_cv_filter_neg_xcms", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_cv_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3157,7 +3156,7 @@ annotation_rdata_neg_camera=temp_unfiltered_channel_neg_4
 process  process_annotate_peaks_neg_camera{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_annotate_peaks_neg_camera", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_annotate_peaks_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3180,7 +3179,7 @@ file "CameraAnnotatePeaks_neg.rdata" into group_rdata_neg_camera
 process  process_group_peaks_neg_camera{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_group_peaks_neg_camera", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_group_peaks_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3203,7 +3202,7 @@ file "CameraGroup_neg.rdata" into findaddcuts_rdata_neg_camera
 process  process_find_addcuts_neg_camera{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_find_addcuts_neg_camera", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_find_addcuts_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3226,7 +3225,7 @@ file "CameraFindAdducts_neg.rdata" into findisotopes_rdata_neg_camera
 process  process_find_isotopes_neg_camera{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_find_isotopes_neg_camera", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_find_isotopes_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3259,7 +3258,7 @@ if(params.perform_identification==true)
   process  process_read_MS2_neg_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_read_MS2_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_read_MS2_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3282,7 +3281,7 @@ if(params.perform_identification==true)
   process  process_mapmsms_tocamera_neg_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_mapmsms_tocamera_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_mapmsms_tocamera_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3308,7 +3307,7 @@ if(params.perform_identification==true)
   process  process_mapmsms_toparam_neg_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_mapmsms_toparam_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_mapmsms_toparam_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3345,7 +3344,7 @@ csifingerid_txt_neg_msnbase_flatten=csifingerid_txt_neg_msnbase.flatten()
 process  process_ms2_identification_neg_csifingerid{
   label 'csifingerid'
   tag "$name"
-  publishDir "${params.outdir}/process_ms2_identification_neg_csifingerid", mode: 'copy'
+  publishDir "${params.outdir}/process_ms2_identification_neg_csifingerid", mode: params.publish_dir_mode
 
 
   input:
@@ -3374,7 +3373,7 @@ process  process_ms2_identification_neg_csifingerid{
 process  process_identification_aggregate_neg_csifingerid{
   label 'msnbase'
   tag "$name"
-  publishDir "${params.outdir}/process_identification_aggregate_neg_csifingerid", mode: 'copy'
+  publishDir "${params.outdir}/process_identification_aggregate_neg_csifingerid", mode: params.publish_dir_mode
 
 
   input:
@@ -3400,7 +3399,7 @@ sed -i '/^$/d' aggregated_identification_csifingerid_neg.csv
 process process_pepcalculation_csifingerid_neg_passatutto{
   label 'passatutto'
   tag "$name"
-  publishDir "${params.outdir}/process_pepcalculation_csifingerid_neg_passatutto", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_pepcalculation_csifingerid_neg_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
   input:
@@ -3429,7 +3428,7 @@ fi
 process  process_output_quantid_neg_camera_csifingerid{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_output_quantid_neg_camera_csifingerid", mode: 'copy'
+  publishDir "${params.outdir}/process_output_quantid_neg_camera_csifingerid", mode: params.publish_dir_mode
 
 
 
@@ -3490,7 +3489,7 @@ metfrag_txt_neg_msnbase_flatten=metfrag_txt_neg_msnbase.flatten()
 process  process_ms2_identification_neg_metfrag{
   label 'metfrag'
   tag "$name"
-  publishDir "${params.outdir}/process_ms2_identification_neg_metfrag", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_ms2_identification_neg_metfrag", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
   input:
@@ -3521,7 +3520,7 @@ process  process_ms2_identification_neg_metfrag{
 process  process_identification_aggregate_neg_metfrag{
   label 'msnbase'
   tag "$name"
-  publishDir "${params.outdir}/process_identification_aggregate_neg_metfrag", mode: 'copy'
+  publishDir "${params.outdir}/process_identification_aggregate_neg_metfrag", mode: params.publish_dir_mode
 
 
   input:
@@ -3548,7 +3547,7 @@ file "aggregated_identification_metfrag_neg.csv" into metfrag_tsv_neg_passatutto
 process process_pepcalculation_metfrag_neg_passatutto{
   label 'passatutto'
   tag "$name"
-  publishDir "${params.outdir}/process_pepcalculation_metfrag_neg_passatutto", mode: 'copy'
+  publishDir "${params.outdir}/process_pepcalculation_metfrag_neg_passatutto", mode: params.publish_dir_mode
 
 
   input:
@@ -3581,7 +3580,7 @@ fi
 process  process_output_quantid_neg_camera_metfrag{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_output_quantid_neg_camera_metfrag", mode: 'copy'
+  publishDir "${params.outdir}/process_output_quantid_neg_camera_metfrag", mode: params.publish_dir_mode
 
 
 
@@ -3633,7 +3632,7 @@ cfmid_txt_neg_msnbase_flatten=cfmidin_txt_neg_msnbase.flatten()
 process  process_ms2_identification_neg_cfmid{
   label 'cfmid'
   tag "$name"
-  publishDir "${params.outdir}/process_ms2_identification_neg_cfmid", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_ms2_identification_neg_cfmid", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
   input:
@@ -3667,7 +3666,7 @@ process  process_ms2_identification_neg_cfmid{
 process  process_identification_aggregate_neg_cfmid{
   label 'msnbase'
   tag "$name"
-  publishDir "${params.outdir}/process_identification_aggregate_neg_cfmid", mode: 'copy'
+  publishDir "${params.outdir}/process_identification_aggregate_neg_cfmid", mode: params.publish_dir_mode
 
 
   input:
@@ -3695,7 +3694,7 @@ file "aggregated_identification_cfmid_neg.csv" into cfmid_tsv_neg_passatutto
 process process_pepcalculation_cfmid_neg_passatutto{
   label 'passatutto'
   tag "$name"
-  publishDir "${params.outdir}/process_pepcalculation_cfmid_neg_passatutto", mode: 'copy'
+  publishDir "${params.outdir}/process_pepcalculation_cfmid_neg_passatutto", mode: params.publish_dir_mode
 
 
   input:
@@ -3726,7 +3725,7 @@ fi
 process  process_output_quantid_neg_camera_cfmid{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_output_quantid_neg_camera_cfmid", mode: 'copy'
+  publishDir "${params.outdir}/process_output_quantid_neg_camera_cfmid", mode: params.publish_dir_mode
 
 
 
@@ -3776,7 +3775,7 @@ if(params.library_charactrized_neg==false){
     process process_peak_picker_library_neg_openms_centroided {
       label 'openms'
         tag "$name"
-        publishDir "${params.outdir}/process_peak_picker_library_neg_openms_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+        publishDir "${params.outdir}/process_peak_picker_library_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
         stageInMode 'copy'
 
 
@@ -3801,7 +3800,7 @@ if(params.library_charactrized_neg==false){
      process process_masstrace_detection_library_neg_openms_centroided {
        label 'openms'
          tag "$name"
-         publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+         publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3825,7 +3824,7 @@ if(params.library_charactrized_neg==false){
      process process_openms_to_xcms_conversion_library_neg_centroided {
        label 'xcmsconvert'
          tag "$name"
-         publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+         publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3855,7 +3854,7 @@ if(params.library_charactrized_neg==false){
       process process_ipo_param_library_neg_ipo_centroided{
           label 'ipo'
           tag "$name"
-          publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+          publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
           input:
@@ -3895,7 +3894,7 @@ if(params.library_charactrized_neg==false){
      process process_masstrace_detection_library_neg_xcms_centroided{
        label 'xcms'
        tag "$name"
-       publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_centroided", mode: 'copy', enabled: params.publishDir_intermediate
+       publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3936,7 +3935,7 @@ if(params.library_charactrized_neg==false){
       process process_masstrace_detection_library_neg_openms_noncentroided {
         label 'openms'
           tag "$name"
-          publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+          publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3960,7 +3959,7 @@ if(params.library_charactrized_neg==false){
       process process_openms_to_xcms_conversion_library_neg_noncentroided {
         label 'xcmsconvert'
           tag "$name"
-          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -3992,7 +3991,7 @@ if(params.library_charactrized_neg==false){
        process process_ipo_param_library_neg_ipo_noncentroided{
            label 'ipo'
            tag "$name"
-           publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: 'copy', enabled: params.publishDir_intermediate
+           publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
            input:
@@ -4030,7 +4029,7 @@ if(params.library_charactrized_neg==false){
       process process_masstrace_detection_library_neg_xcms_noncentroided{
         label 'xcms'
         tag "$name"
-        publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_noncentroided", mode: 'copy', enabled: params.publishDir_intermediate
+        publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -4070,7 +4069,7 @@ if(params.library_charactrized_neg==false){
   process  process_annotate_peaks_library_neg_camera{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_annotate_peaks_library_neg_camera", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_annotate_peaks_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
 
@@ -4093,7 +4092,7 @@ if(params.library_charactrized_neg==false){
   process  process_group_peaks_library_neg_camera{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_group_peaks_library_neg_camera", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_group_peaks_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
 
@@ -4116,7 +4115,7 @@ if(params.library_charactrized_neg==false){
   process  process_find_addcuts_library_neg_camera{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_find_addcuts_library_neg_camera", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_find_addcuts_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
 
@@ -4139,7 +4138,7 @@ if(params.library_charactrized_neg==false){
   process  process_find_isotopes_library_neg_camera{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_find_isotopes_library_neg_camera", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_find_isotopes_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
 
@@ -4164,7 +4163,7 @@ if(params.library_charactrized_neg==false){
   process  process_read_MS2_library_neg_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_read_MS2_library_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_read_MS2_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -4195,7 +4194,7 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
   process  process_mapmsms_tocamera_library_neg_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_mapmsms_tocamera_library_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_mapmsms_tocamera_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -4228,7 +4227,7 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
   process  process_create_library_neg_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_create_library_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_create_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -4255,7 +4254,7 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
   process  process_collect_library_neg_msnbase{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_collect_library_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_collect_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -4280,7 +4279,7 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
 process process_remove_adducts_library_neg_msnbase{
   label 'msnbase'
   tag "$name"
-  publishDir "${params.outdir}/process_remove_adducts_library_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_remove_adducts_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
@@ -4321,7 +4320,7 @@ zip::zip(zipfile="mappedtometfrag_neg.zip",files=files_to_pass)
   process  process_search_engine_library_neg_msnbase_nolibcharac{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
     input:
@@ -4347,7 +4346,7 @@ sed -i '/^$/d' aggregated_identification_library_neg.csv
   process  process_search_engine_library_neg_msnbase_libcharac{
     label 'msnbase'
     tag "$name"
-    publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: 'copy', enabled: params.publishDir_intermediate
+    publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
     input:
@@ -4375,7 +4374,7 @@ sed -i '/^$/d' aggregated_identification_library_neg.csv
 process process_pepcalculation_library_neg_passatutto{
   label 'passatutto'
   tag "$name"
-  publishDir "${params.outdir}/process_pepcalculation_library_neg_passatutto", mode: 'copy', enabled: params.publishDir_intermediate
+  publishDir "${params.outdir}/process_pepcalculation_library_neg_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
   input:
@@ -4407,7 +4406,7 @@ fi
 process  process_output_quantid_neg_camera_library{
   label 'camera'
   tag "$name"
-  publishDir "${params.outdir}/process_output_quantid_neg_camera_library", mode: 'copy'
+  publishDir "${params.outdir}/process_output_quantid_neg_camera_library", mode: params.publish_dir_mode
 
 
 
@@ -4442,7 +4441,7 @@ then
   process  process_output_quantid_neg_camera_noid{
     label 'camera'
     tag "$name"
-    publishDir "${params.outdir}/process_output_quantid_neg_camera_noid", mode: 'copy'
+    publishDir "${params.outdir}/process_output_quantid_neg_camera_noid", mode: params.publish_dir_mode
 
 
 
@@ -4531,9 +4530,6 @@ workflow.onComplete {
         } catch (all) {
             // Catch failures and try with plaintext
             def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
-            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
-              mail_cmd += [ '-A', mqc_report ]
-            }
             mail_cmd.execute() << email_html
             log.info "[nf-core/metaboigniter] Sent summary e-mail to $email_address (mail)"
         }
