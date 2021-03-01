@@ -4,168 +4,29 @@
     "title": "nf-core/metaboigniter pipeline parameters",
     "description": "Get your metabolomics analysis up and running",
     "type": "object",
-    "properties": {
-        "outdir": {
-            "type": "string",
-            "description": "Output directory for results",
-            "default": "./results",
-            "fa_icon": "fas fa-folder-open"
-        },
-        "name": {
-            "type": "string",
-            "description": "Workflow name",
-            "fa_icon": "fas fa-fingerprint",
-            "help_text": "A custom name for the pipeline run. Unlike the core nextflow `-name` option with one hyphen this parameter can be reused multiple times, for example if using `-resume`. Passed through to steps such as MultiQC and used for things like report filenames and titles.",
-            "default": "metaboigniter"
-        },
-        "email": {
-            "type": "string",
-            "description": "Email address for completion summary",
-            "fa_icon": "fas fa-envelope",
-            "help_text": "An email address to send a summary email to when the pipeline is completed.",
-            "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
-        },
-        "plaintext_email": {
-            "type": "boolean",
-            "description": "Send plain-text email instead of HTML",
-            "fa_icon": "fas fa-remove-format",
-            "hidden": true
-        },
-        "monochrome_logs": {
-            "type": "boolean",
-            "description": "Do not use coloured log outputs",
-            "fa_icon": "fas fa-palette",
-            "hidden": true
-        },
-        "tracedir": {
-            "type": "string",
-            "description": "Directory to keep pipeline Nextflow logs and reports",
-            "default": "./results/pipeline_info",
-            "fa_icon": "fas fa-cogs",
-            "hidden": true
-        },
-        "igenomes_base": {
-            "type": "string",
-            "description": "Directory / URL base for iGenomes references",
-            "default": "s3://ngi-igenomes/igenomes/",
-            "fa_icon": "fas fa-cloud-download-alt",
-            "hidden": true
-        },
-        "Maximum job request limits": {
-            "type": "object",
-            "description": "Limit the maximum computational requirements that a single job can request",
-            "properties": {
-                "max_cpus": {
-                    "type": "integer",
-                    "description": "Maximum number of CPUs that can be requested  for any single job",
-                    "default": 16,
-                    "fa_icon": "fas fa-microchip",
-                    "hidden": true
-                },
-                "max_memory": {
-                    "type": "string",
-                    "description": "Maximum amount of memory that can be requested for any single job",
-                    "default": "128 GB",
-                    "fa_icon": "fas fa-memory",
-                    "hidden": true
-                },
-                "max_time": {
-                    "type": "string",
-                    "description": "Maximum amount of time that can be requested for any single job",
-                    "default": "10d",
-                    "fa_icon": "far fa-clock",
-                    "hidden": true
-                }
-            }
-        },
-        "Institutional config params": {
-            "type": "object",
-            "description": "Params used by nf-core/configs",
-            "properties": {
-                "custom_config_version": {
-                    "type": "string",
-                    "description": "nf-core/configs parameter",
-                    "default": "master",
-                    "hidden": true
-                },
-                "custom_config_base": {
-                    "type": "string",
-                    "description": "nf-core/configs parameter",
-                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
-                    "hidden": true
-                },
-                "hostnames": {
-                    "type": "string",
-                    "description": "nf-core/configs parameter",
-                    "default": "",
-                    "hidden": true
-                },
-                "config_profile_description": {
-                    "type": "string",
-                    "description": "nf-core/configs parameter",
-                    "hidden": true
-                },
-                "config_profile_contact": {
-                    "type": "string",
-                    "description": "nf-core/configs parameter",
-                    "hidden": true
-                },
-                "config_profile_url": {
-                    "type": "string",
-                    "description": "nf-core/configs parameter",
-                    "hidden": true
-                }
-            }
-        },
-        "help": {
-            "type": "boolean",
-            "description": "Display help text",
-            "hidden": true,
-            "fa_icon": "fas fa-question-circle"
-        },
-        "awsqueue": {
-            "type": "string",
-            "default": "false"
-        },
-        "awsregion": {
-            "type": "string",
-            "default": "'eu-west-1'"
-        },
-        "custom_config_version": {
-            "type": "string",
-            "default": "master"
-        },
-        "custom_config_base": {
-            "type": "string",
-            "default": "https://raw.githubusercontent.com/nf-core/configs/master"
-        },
-        "hostnames": {
-            "type": "string",
-            "default": "[binac:['.binac.uni-tuebingen.de'], cbe:['.cbe.vbc.ac.at'], cfc:['.hpc.uni-tuebingen.de'], crick:['.thecrick.org'], icr_davros:['.davros.compute.estate'], imperial:['.hpc.ic.ac.uk'], imperial_mb:['.hpc.ic.ac.uk'], genotoul:['.genologin1.toulouse.inra.fr', '.genologin2.toulouse.inra.fr'], genouest:['.genouest.org'], uppmax:['.uppmax.uu.se'], utd_ganymede:['ganymede.utdallas.edu']]"
-        },
-        "config_profile_description": {
-            "type": "string"
-        },
-        "config_profile_contact": {
-            "type": "string"
-        },
-        "config_profile_url": {
-            "type": "string"
-        },
-        "max_memory": {
-            "type": "string",
-            "default": "128 GB"
-        },
-        "max_cpus": {
-            "type": "integer",
-            "default": 16
-        },
-        "max_time": {
-            "type": "string",
-            "default": "10d"
-        }
-    },
     "definitions": {
+        "global_options": {
+            "title": "Global options",
+            "type": "object",
+            "description": "General options that affect the whole pipeline",
+            "default": "",
+            "properties": {
+                "outdir": {
+                    "type": "string",
+                    "description": "Output directory for results",
+                    "default": "./results",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Email address for completion summary",
+                    "fa_icon": "fas fa-envelope",
+                    "help_text": "An email address to send a summary email to when the pipeline is completed.",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                }
+            },
+            "fa_icon": "fas fa-globe"
+        },
         "internal_library_quantification_and_identification_parameters_negative_mode": {
             "title": "Internal library quantification and identification parameters (negative mode)",
             "type": "object",
@@ -175,12 +36,19 @@
                 "performIPO_library_neg": {
                     "type": "string",
                     "default": "none",
-                    "description": "controls how to perform IPO possible values: \"none\": don't perform IPO, \"global\": performs IPO on all or selected number of samples. \"local\": performs IPO on individual samples one at the time."
+                    "description": "Controls how to perform IPO",
+                    "help_text": "Possible values:\n* `none`: don't perform IPO\n* `global`: performs IPO on all or selected number of samples\n* `local`: performs IPO on individual samples one at the time",
+                    "enum": [
+                        "none",
+                        "global",
+                        "local"
+                    ]
                 },
                 "ipo_methodXset_library_neg": {
                     "type": "string",
                     "default": "centWave",
-                    "description": "Quantification methods for IPO. Only centWave is supported at this stage."
+                    "description": "Quantification methods for IPO",
+                    "help_text": "Only centWave is supported at this stage."
                 },
                 "ipo_noise_l_library_neg": {
                     "type": "integer",
@@ -208,7 +76,8 @@
                 "ipo_integrate_library_neg": {
                     "type": "integer",
                     "default": 1,
-                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact."
+                    "description": "Integration method",
+                    "help_text": "If `=1` peak limits are found through descent on the mexican hat filtered data, if `=2` the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact."
                 },
                 "ipo_fitgauss_library_neg": {
                     "type": "boolean",
@@ -2634,68 +2503,169 @@
                 "phenotype_design_pos",
                 "phenotype_design_neg"
             ]
+        },
+        "generic_options": {
+            "title": "Generic options",
+            "type": "object",
+            "fa_icon": "fas fa-file-import",
+            "description": "Less common options for the pipeline, typically set in a config file.",
+            "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
+            "properties": {
+                "help": {
+                    "type": "boolean",
+                    "description": "Display help text.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-question-circle"
+                },
+                "publish_dir_mode": {
+                    "type": "string",
+                    "default": "copy",
+                    "hidden": true,
+                    "description": "Method used to save pipeline results to output directory.",
+                    "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
+                    "fa_icon": "fas fa-copy",
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Workflow name.",
+                    "fa_icon": "fas fa-fingerprint",
+                    "hidden": true,
+                    "help_text": "A custom name for the pipeline run. Unlike the core nextflow `-name` option with one hyphen this parameter can be reused multiple times, for example if using `-resume`. Passed through to steps such as MultiQC and used for things like report filenames and titles."
+                },
+                "email_on_fail": {
+                    "type": "string",
+                    "description": "Email address for completion summary, only when pipeline fails.",
+                    "fa_icon": "fas fa-exclamation-triangle",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+                    "hidden": true,
+                    "help_text": "This works exactly as with `--email`, except emails are only sent if the workflow is not successful."
+                },
+                "plaintext_email": {
+                    "type": "boolean",
+                    "description": "Send plain-text email instead of HTML.",
+                    "fa_icon": "fas fa-remove-format",
+                    "hidden": true,
+                    "help_text": "Set to receive plain-text e-mails instead of HTML formatted."
+                },
+                "monochrome_logs": {
+                    "type": "boolean",
+                    "description": "Do not use coloured log outputs.",
+                    "fa_icon": "fas fa-palette",
+                    "hidden": true,
+                    "help_text": "Set to disable colourful command line output and live life in monochrome."
+                },
+                "tracedir": {
+                    "type": "string",
+                    "description": "Directory to keep pipeline Nextflow logs and reports.",
+                    "default": "${params.outdir}/pipeline_info",
+                    "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                }
+            }
+        },
+        "max_job_request_options": {
+            "title": "Max job request options",
+            "type": "object",
+            "fa_icon": "fab fa-acquisitions-incorporated",
+            "description": "Set the top limit for requested resources for any single job.",
+            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
+            "properties": {
+                "max_cpus": {
+                    "type": "integer",
+                    "description": "Maximum number of CPUs that can be requested    for any single job.",
+                    "default": 16,
+                    "fa_icon": "fas fa-microchip",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
+                },
+                "max_memory": {
+                    "type": "string",
+                    "description": "Maximum amount of memory that can be requested for any single job.",
+                    "default": "128.GB",
+                    "fa_icon": "fas fa-memory",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
+                },
+                "max_time": {
+                    "type": "string",
+                    "description": "Maximum amount of time that can be requested for any single job.",
+                    "default": "240.h",
+                    "fa_icon": "far fa-clock",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
+                }
+            }
+        },
+        "institutional_config_options": {
+            "title": "Institutional config options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to describe centralised config profiles. These should not be edited.",
+            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline.",
+            "properties": {
+                "custom_config_version": {
+                    "type": "string",
+                    "description": "Git commit id for Institutional configs.",
+                    "default": "master",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": "Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default: `master`.\n\n```bash\n## Download and use config file with following git commit id\n--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96\n```"
+                },
+                "custom_config_base": {
+                    "type": "string",
+                    "description": "Base directory for Institutional configs.",
+                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
+                    "hidden": true,
+                    "help_text": "If you're running offline, nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell nextflow where to find them with the `custom_config_base` option. For example:\n\n```bash\n## Download and unzip the config files\ncd /path/to/my/configs\nwget https://github.com/nf-core/configs/archive/master.zip\nunzip master.zip\n\n## Run the pipeline\ncd /path/to/my/data\nnextflow run /path/to/pipeline/ --custom_config_base /path/to/my/configs/configs-master/\n```\n\n> Note that the nf-core/tools helper package has a `download` command to download all required pipeline files + singularity containers + institutional configs in one go for you, to make this process easier.",
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "hostnames": {
+                    "type": "string",
+                    "description": "Institutional configs hostname.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_description": {
+                    "type": "string",
+                    "description": "Institutional config description.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_contact": {
+                    "type": "string",
+                    "description": "Institutional config contact information.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_url": {
+                    "type": "string",
+                    "description": "Institutional config URL link.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                }
+            }
         }
     },
     "allOf": [
         {
-            "$ref": "#/definitions/control_parameters"
+            "$ref": "#/definitions/global_options"
         },
         {
-            "$ref": "#/definitions/quantification_input_files"
+            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_negative_mode"
         },
         {
-            "$ref": "#/definitions/identification_input_files"
+            "$ref": "#/definitions/internal_library_parameters_negative_mode"
         },
         {
-            "$ref": "#/definitions/openms_setting_files"
-        },
-        {
-            "$ref": "#/definitions/quantification_parameter_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/filtering_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/adduct_and_isotope_annotation_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/global_identification_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/cfm_id_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/metfrag_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/csi_fingerid_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/library_controls_and_files_negative_mode"
-        },
-        {
-            "$ref": "#/definitions/library_controls_and_files_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/internal_library_parameters_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/output_preparation_positive_mode"
-        },
-        {
-            "$ref": "#/definitions/quantification_parameter_negative_mode"
-        },
-        {
-            "$ref": "#/definitions/filtering_parameters_negative_mode"
-        },
-        {
-            "$ref": "#/definitions/adduct_and_isotope_annotation_negative_mode"
-        },
-        {
-            "$ref": "#/definitions/global_identification_parameters_negative_mode"
+            "$ref": "#/definitions/output_preparation_negative_mode"
         },
         {
             "$ref": "#/definitions/cfm_id_parameters_negative_mode"
@@ -2707,19 +2677,73 @@
             "$ref": "#/definitions/csi_fingerid_parameters_negative_mode"
         },
         {
-            "$ref": "#/definitions/library_controls_and_files_negative_mode"
+            "$ref": "#/definitions/global_identification_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/adduct_and_isotope_annotation_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/filtering_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/quantification_parameter_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/internal_library_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/output_preparation_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/cfm_id_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/metfrag_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/csi_fingerid_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/global_identification_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/adduct_and_isotope_annotation_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/filtering_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/quantification_parameter_positive_mode"
         },
         {
             "$ref": "#/definitions/library_controls_and_files_negative_mode"
         },
         {
-            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_negative_mode"
+            "$ref": "#/definitions/library_controls_and_files_positive_mode"
         },
         {
-            "$ref": "#/definitions/internal_library_parameters_negative_mode"
+            "$ref": "#/definitions/identification_input_files"
         },
         {
-            "$ref": "#/definitions/output_preparation_negative_mode"
+            "$ref": "#/definitions/control_parameters"
+        },
+        {
+            "$ref": "#/definitions/openms_setting_files"
+        },
+        {
+            "$ref": "#/definitions/quantification_input_files"
+        },
+        {
+            "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/max_job_request_options"
+        },
+        {
+            "$ref": "#/definitions/institutional_config_options"
         }
     ]
 }

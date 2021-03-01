@@ -6,14 +6,15 @@
 [![GitHub Actions Linting Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
 
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/metaboigniter.svg)](https://hub.docker.com/r/nfcore/metaboigniter)
+[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23metaboigniter-4A154B?logo=slack)](https://nfcore.slack.com/channels/metaboigniter)
 
 [![Gitter chat](https://badges.gitter.im/MetaboIGNITER/gitter.png)](https://gitter.im/MetaboIGNITER/community)
 
 ## Introduction
 
-**metaboigniter** is bioinformatics pipeline for pre-processing of mass spectrometry-based metabolomics data.
+**nf-core/metaboigniter** is bioinformatics pipeline for pre-processing of mass spectrometry-based metabolomics data.
 It can be used to perform quantification and identification based on MS1 and MS2 data.
 The backbone of pipeline is based on XCMS, OpenMS, CAMERA, MSnbase, MetFrag, CSIFingerID, CFM-ID, and several other customized tools to noise filtering, quantification and identification both for library and in-silico identification. **Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
 
@@ -39,7 +40,7 @@ We highly recommend that you use the parameter file located in conf/parameters.c
 **Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
 
 ```bash
-nextflow run nf-core/metaboigniter -profile analysis,<docker/singularity/conda/institute>
+nextflow run nf-core/metaboigniter -profile <docker/singularity/conda/institute>
 ```
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
@@ -48,20 +49,13 @@ See [usage docs](docs/usage.md) for all of the available options when running th
 
 The nf-core/metaboigniter pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
-1. [Installation](https://nf-co.re/usage/installation)
-2. Pipeline configuration
-    * [Local installation](https://nf-co.re/usage/local_installation)
-    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
-3. [Running the pipeline](docs/usage.md)
-4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+The nf-core/metaboigniter pipeline comes with documentation about the pipeline: [usage](https://nf-co.re/metaboigniter/usage) and [output](https://nf-co.re/metaboigniter/output).
 
 MetaboIGNITER is a comprehensive pipeline of several independent tools used to pre-process liquid chromatography-mass spectrometry (LCMS) data. We use Nextflow and nf-core to build and run the workflow but parts of this pipeline have also been implemented using Galaxy as part of [PhenoMeNal](https://github.com/phnmnl/) and [Pachyderm](https://github.com/pharmbio/LC-MS-Pachyderm).
 
 ## Credits
 
-MetaboIGNITER was originally written by Payam Emami. This work has been supported by ELIXIR and PhenoMeNal.
+nf-core/metaboigniter was originally written by Payam Emami.
 
 ## Contributions and Support
 
