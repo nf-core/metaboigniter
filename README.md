@@ -1,6 +1,6 @@
 # ![nf-core/metaboigniter](docs/images/nf-core-metaboigniter_logo.png)
 
-**Get your metabolomics analysis up and running**.
+**Pre-processing of mass spectrometry-based metabolomics data with quantification and identification based on MS1 and MS2 data**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
@@ -15,8 +15,16 @@
 ## Introduction
 
 **nf-core/metaboigniter** is bioinformatics pipeline for pre-processing of mass spectrometry-based metabolomics data.
-It can be used to perform quantification and identification based on MS1 and MS2 data.
-The backbone of pipeline is based on XCMS, OpenMS, CAMERA, MSnbase, MetFrag, CSIFingerID, CFM-ID, and several other customized tools to noise filtering, quantification and identification both for library and in-silico identification. **Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
+
+The workflow performs MS1 based quantification and MS2 based identification using combination of different modules. The following steps can be performed using the workflow:
+
+- Centroiding (optional): Also referred to as peak pickering is a step that reduce the distribution of ions derived from a single mass to the peak of the distribution.
+- parameter tuning using IPO: MS1 quantification and library characterization parameters can be tuned using IPO
+- mass trace detection: The ions derived from the same analytes are clustered together forming a mass trace. These are the entities that will be used for quantification.
+- mass trace matching and retention time (RT) correction: The mass traces across different samples will be match against each other and  RT shift between the samples will be adjusted.
+- filtering (optional): The mass traces will be filtered out based on the QC samples.
+- Annotation: The isotopes and adducts will be annotated in this step.
+- MS2 (identification): At the moment we support two types of identification: in-silico and identificaiton based on internal library. This will be expanded in the corresponding section. At the moment we do not support MS1-based identification.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
@@ -37,7 +45,6 @@ nextflow run nf-core/metaboigniter -profile test,<docker/singularity/conda/insti
 iv. Start running your own analysis!
 We highly recommend that you use the parameter file located in conf/parameters.config. Since the number of parameters is large, it's going to be a fairly complex bash command to run the workflow. Nevertheless, the parameters can always be passed to the workflow as argument using two dashes "--".
 
-**Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
 
 ```bash
 nextflow run nf-core/metaboigniter -profile <docker/singularity/conda/institute>

@@ -11,7 +11,7 @@
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
   * [`-profile`](#-profile)
-  * [metabolomics specific parameters (**how to run the workflow**)](#parameters-file)
+  * [metabolomics specific parameters (**how to run the workflow**)](#how-to-run-the-workflow)
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -86,11 +86,428 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 
 Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Conda) - see below.
 
-### `parameters file`
+### `How to run the workflow`
 
-We highly recommend that you use the parameter file located in conf/parameters.config. Since the number of parameters is large, it's going to be a fairly complex bash command to run the workflow. Nevertheless, the parameters can always be passed to the workflow as argument using two dashes "--".
+#### Where to start
 
-**Please go on to [this page](metaboigniter_guide.md) to learn how to use the workflow**
+This depends on what type of data you have available. Here we describe three scenarios where 1) you only have MS1 data, 2) you have MS1 and MS2 data (in-silico identification), and 3) you have MS1, MS2, and an internal library.
+The flow of the pipeline is controlled using several parameters that should be set using **nf-core schemas**
+
+#### Convert your data
+
+Before proceeding with the analysis you need to convert your data to open source format (mzML). You can do this using **[msconvert](http://proteowizard.sourceforge.net/tools/msconvert.html)** package in **[ProteoWizard](http://proteowizard.sourceforge.net/index.shtml)**. This must be done for all the raw files you have including MS1, MS2 and library files.
+
+**Senario 1) you only have MS1 data:**
+
+Please open the parameter file and set the following parameter to "false"
+
+    perform_identification=false
+
+This will prevent the workflow to perform the identification. So you will not need to change the parameters related to identification
+
+#### Organize you mzML files
+
+If you only have MS1 data and you wish to perform quantification, you should first organize your mzML files into a folder structure. An example of such structure can be seen [here](https://github.com/nf-core/test-datasets/tree/metaboigniter). You don't have to follow the folder tree in the example. You just have to make sure that mzML files from different ionization are placed in different folders. If you only have one ionization mode (positive or negative), just put all the files in a single folder. If you have both, then create two folders, one for each of the ionization modes. For example if you want to follow our example, we create to folders called mzML_NEG_Quant and mzML_POS_Quant. Then the correponding files will be placed in each directory.
+
+    Mydata
+    ├── mzML_NEG_Quant
+    │   ├── Blank_1.mzML
+    │   ├── Blank_2.mzML
+    │   ├── Blank_3.mzML
+    │   ├── D1.mzML
+    │   ├── D2.mzML
+    │   ├── D3.mzML
+    │   ├── D4.mzML
+    │   ├── QC_1.mzML
+    │   ├── QC_2.mzML
+    │   ├── QC_3.mzML
+    │   ├── X1_Rep1.mzML
+    │   ├── X2_Rep1.mzML
+    │   ├── X3_Rep1.mzML
+    │   ├── X6_Rep1.mzML
+    │   ├── X7_Rep1.mzML
+    │   └── X8_Rep1.mzML
+    ├── mzML_POS_Quant
+    │   ├── Blank_1.mzML
+    │   ├── Blank_2.mzML
+    │   ├── Blank_3.mzML
+    │   ├── D1.mzML
+    │   ├── D2.mzML
+    │   ├── D3.mzML
+    │   ├── D4.mzML
+    │   ├── QC_1.mzML
+    │   ├── QC_2.mzML
+    │   ├── QC_3.mzML
+    │   ├── X1_Rep1.mzML
+    │   ├── X2_Rep1.mzML
+    │   ├── X3_Rep1.mzML
+    │   ├── X6_Rep1.mzML
+    │   ├── X7_Rep1.mzML
+    │   └── X8_Rep1.mzML
+
+When you are ready with your folder structure you will need to set the parameters needed:
+a glob path to a folder containing mzML files used for doing quantification (MS1 data in positive ionization method)
+
+```nextflow
+    input
+```
+
+a glob path to a folder containing mzML files used for doing quantification (MS1 data in negative ionization method)
+
+```nextflow
+    quant_mzml_files_neg
+```
+
+for example:
+
+```nextflow
+    input =/User/XXX/myfiles/pos_quant_data/*mzML
+```
+
+#### Make phenotype file
+
+A phenotype is a CSV (comma separated file) representing a table showing metadata of the samples. Each row is one sample and each column is a meta field (columns are separated by comma). An example of such file can be found [here](https://raw.githubusercontent.com/MetaboIGNITER/test-datasets/master/phenotype_positive.csv). MetaboIGNITER expects a separate phenotype file for each ionization model. So if you have two ionization you will need to create two phenotype file.
+This file is used to set class of the samples being analyzed. The file should have at least two column: the first column is showing the raw file name and extension (for example sample1.mzML) and the second column should show it's phenotype type. This file is a comma separated file and should container header (see the example):
+
+| RawFile        | Class    | Groups    | Type     | rename     | Technical repl   | Age   | Gender   |
+|--|--|--|--|--|--|--|--|
+| Sample1.mzML   | Sample   | Disease   | keep     | Disease1   | 1                | 35    | M        |
+| Sample2.mzML   | Sample   | Disease   | keep     | Disease2   | 1                | 35    | M        |
+| Sample3.mzML   | Sample   | Control   | keep     | Control1   | 2                | 37    | F        |
+| Sample4.mzML   | Sample   | Control   | keep     | Control2   | 2                | 37    | F        |
+| Blank1.mzML    | Blank    | NA        | remove   | NA         | NA               | NA    | NA       |
+| Blank2.mzML    | Blank    | NA        | remove   | NA         | NA               | NA    | NA       |
+| Blank3.mzML    | Blank    | NA        | remove   | NA         | NA               | NA    | NA       |
+| D1.mzML        | D1       | NA        | remove   | NA         | NA               | NA    | NA       |
+| D2.mzML        | D2       | NA        | remove   | NA         | NA               | NA    | NA       |
+| D3.mzML        | D3       | NA        | remove   | NA         | NA               | NA    | NA       |
+
+The first column of this table must show the raw data file name (for example sample1.mzML). The file must have a header. Other information can also be added to this table such as age, gender, time etc. One can plan ahead and add even more information. In the example, we have added rename, technical replace and type. This information will be used later in the workflow to pre-process the samples. For example, Type can be used to filter out the samples not needed further down the pipeline. Rename can be us to rename the samples in the output file. Technical replicates can be used to average the samples that have been injected more than two times etc. The minimum number of columns is two showing the raw file name and class of the samples.
+
+Please take your time and design the phenotype file so that you don't have to change it later. Pretty much all the steps of the workflow will depend on the correct designing of this file.
+
+We included two examples of phenotype file in the [test data](https://github.com/nf-core/test-datasets/tree/metaboigniter). The files are called *phenotype_positive.csv* and *phenotype_negative.csv*. The example design, includes six biological samples, three blank samples (e.g, only the buffer were run), dilution samples (D1, D2 etc), in which a different dilution of samples have been run. QC samples that are the same replicate that was repeatedly run throughout the MS experiment.
+
+After fixing the phenotype files, please set the following parameters
+
+ Set what type of ionization you have. You can either set to 'pos' (only positive), 'neg' (only negative), 'both' (both positive and negative):
+
+```nextflow
+      type_of_ionization
+```
+
+**Remember to set the path to required parameters for the selected ionization. Otherwise the workflow will fail!**
+
+Set absolute path to your ionization phenotype files:
+
+Path to a csv file containing the experimental design (MS1 data in positive ionization method)
+
+```nextflow
+    phenotype_design_pos=""
+```
+
+Path to a csv file containing the experimental design (MS1 data in negative ionization method)
+
+```nextflow
+    phenotype_design_neg=""
+```
+
+*for example you have only positive data. Create you phenotype file and set "phenotype_design_pos" to absolute path of your file line (this is just an example!):*
+
+```nextflow
+    phenotype_design_pos="/User/XX/mydata/pos_phenotype.csv"
+```
+
+In the rest of the document we will describe the overall flow of the pipeline. You can set specific parameters using nf-core schemas
+
+```nextflow
+    peakwidthlow_quant_pos_xcms
+    peakwidthlow_quant_neg_xcms
+```
+
+but you only have positive data. Take peakwidthlow_quant_pos_xcms, search it in the parameters file and set its value with your desired parameter like peakwidthlow_quant_pos_xcms=5. You can ignore the neg part.
+
+There will be a lot of different files generated by the workflow, if you are interested only in the final output part and identification information, please set this flag to false
+
+```nextflow
+    publishDir_intermediate
+```
+
+#### Quantification specific parameters
+
+**Data Centroiding:**
+
+We recommend inputting already centroided files. You can achieve this at the conversion steps in msconvert. However, if your data is not centroided, you can let the workflow doing that for you. We use OpenMS "PeakPickHiRes" tool to perform that. Set the following parameter to *true* to perform the centroiding:
+
+```nextflow
+    need_centroiding
+```
+
+Please be aware that setting need_centroiding to true will do centroiding on all of your data including both ionizations, identification etc.
+
+If you want non-defualt values, to control the parameters centroiding you can edit *openms_peak_picker_ini_pos.ini* and *openms_peak_picker_ini_neg.ini* files located under *metaboigniter/assets/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_PeakPickerHiRes.html).
+
+**Mass Trace Detection (quantification):**
+
+MetaboIGNITER can perform quantification either using XCMS (default) or OpenMS (experimental). **We only support OpenMS 2.4.0 at this stage**
+This behaviour is controlled using two parameters for positive and negative ionization:
+
+set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in positive ionization:
+
+```nextflow
+    quantification_openms_xcms_pos
+```
+
+set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) for negative ionization:
+
+```nextflow
+    quantification_openms_xcms_neg="xcms"
+```
+
+**Quantification using OpenMS:**
+
+If you choose to perform the quantification using OpenMS, you should consider changing the parameters for OpenMS only. You can edit *openms_feature_finder_metabo_ini_pos.ini* and *openms_feature_finder_metabo_ini_neg.ini* files located under *metaboigniter/assets/openms*. The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_FeatureFinderMetabo.html). **When tuning the OpenMS parameters make sure that "report_convex_hulls" is set to true**
+
+**Quantification using XCMS:**
+
+MetaboIGNITER supports parameter detection using IPO. MetaboIGNITER can run IPO on pos, neg and library separately. Here we demonstrate the usage for positive ionization method.
+The same principles apply to negative and library mode. If you decided to go with full IPO, you won't need to set other parameters.
+In order to turn this parameter on, one should use:
+
+```nextflow
+    performIPO_pos="none"
+```
+
+The default parameter sets IPO to off, you can control how to perform IPO using possible values: "none": don't perform IPO, "global": performs IPO on all or selected number of samples. "global_quant": perform IPO only for quantification (not retention time correction and grouping), "local": performs IPO on individual samples one at the time. "local_quant": performs IPO on individual samples only for quantification, "local_RT": performs IPO only for retention time correction and grouping.
+
+There are several parameters that need to be set for IPO to optimize. If you don't want do optimize a parameter, set its higher and lower boundaries to the same value.
+
+If you don't want to do the parameter optimization, set IPO to off and set the XCMS parameters. This includes the parameters for xcms mass trace detection, grouping and retention time correction.
+
+**Signal filtering:**
+
+As described above, currently we support three time of signal filtering. You can turn them on and off depending on availability the data, experimental design or if you wish to do the manually later.
+
+The first method is *blank filtering*. This module filters out the signals that have higher abundance in non-biological samples (e.g. blank) compared to biological samples.
+
+The *dilution filtering* module filters out the signals that do not correlate with a specified dilution trend.
+
+The *CV filtering* module filters out the signals that do not show desired coefficient of variation.
+If you don't want to perform the CV filtering. Set the following to *false* and go to the next step of the workflow (no need to set the parameters for this step!):
+
+**Annotation (CAMERA):**
+
+MetaboIGNITER performs annotation using CAMERA package in R. We first do FWHM grouping, then perform adduct detection followed by isotope finding. The specific details of this can be found on [CAMERA webpage](http://bioconductor.org/packages/release/bioc/html/CAMERA.html).
+
+#### Identification Specific Parameters
+
+Currently, MetaboIGNITER supports two types of identification. One is based on in-silico (database) approach and the other is based on internal library.
+
+If you would like to perform identification, please set the following parameters to true:
+
+```nextflow
+    perform_identification=true
+```
+
+Please also remember that we only perform identification for the ionization modes that you have quantification data for.
+
+**Senario 2) In-silico identification in MetaboIGNITER:**
+
+MetaboIGNITER has a specific design for performing identification. After performing quantification and annotation of MS1 data, the results will be fed into the identification sub-pipeline this part of the workflow, will first extract the MS2 information from the identification mzML files and map them to the quantification data. If a parent ion was matched against a feature that was successfully annotated, we then estimate the neutral mass for that parent ion. By doing that, the number of searches needed for identification will significantly decrease. The rest of the ions that were matched against features without annotation will be searched using different adduct rules and charges. The resulting scores from metabolite spectrum matches will be transformed into posterior error probability and re-matched to the features at the later step.
+
+#### Organize you mzML files
+
+Before proceeding with setting the parameters for identification you need to complete the mzMl folder structure.
+
+This basically follows the same design as the MS1 data preparation. You need to create separate directories for mzML files that contain MS2 information. So if you have MS2 files both positive and negative mode, you need to create two more folders. For example, mzML_NEG_ID and mzML_POS_ID containing, negative and positive MS2 data respectively. The following file tree shows an example of such structure. In this example, we have both positive and negative ionization. The files have been placed in different folders depending on the ionization and pre-processing needed.
+
+    Mydata
+    ├── hmdb_2017-07-23.csv
+    ├── mzML_NEG_ID
+    │   ├── Pilot_MS_Control_2_Neg_peakpicked.mzML
+    │   └── Pilot_MS_Pool_2_Neg_peakpicked.mzML
+    ├── mzML_NEG_Quant
+    │   ├── Blank_1.mzML
+    │   ├── Blank_2.mzML
+    │   ├── Blank_3.mzML
+    │   ├── D1.mzML
+    │   ├── D2.mzML
+    │   ├── D3.mzML
+    │   ├── D4.mzML
+    │   ├── QC_1.mzML
+    │   ├── QC_2.mzML
+    │   ├── QC_3.mzML
+    │   ├── X1_Rep1.mzML
+    │   ├── X2_Rep1.mzML
+    │   ├── X3_Rep1.mzML
+    │   ├── X6_Rep1.mzML
+    │   ├── X7_Rep1.mzML
+    │   └── X8_Rep1.mzML
+    ├── mzML_POS_ID
+    │   ├── Pilot_MS_Control_2_peakpicked.mzML
+    │   └── Pilot_MS_Pool_2_peakpicked.mzML
+    ├── mzML_POS_Quant
+    │   ├── Blank_1.mzML
+    │   ├── Blank_2.mzML
+    │   ├── Blank_3.mzML
+    │   ├── D1.mzML
+    │   ├── D2.mzML
+    │   ├── D3.mzML
+    │   ├── D4.mzML
+    │   ├── QC_1.mzML
+    │   ├── QC_2.mzML
+    │   ├── QC_3.mzML
+    │   ├── X1_Rep1.mzML
+    │   ├── X2_Rep1.mzML
+    │   ├── X3_Rep1.mzML
+    │   ├── X6_Rep1.mzML
+    │   ├── X7_Rep1.mzML
+    │   └── X8_Rep1.mzML
+    ├── phenotype_negative.csv
+    ├── phenotype_positive.csv
+
+When you are ready with the folder structure you will need to set the parameters needed:
+A glob path to a folder containing mzML files used for doing identification (MS2 data in positive ionization method)
+
+```nextflow
+    id_mzml_files_pos =""
+```
+
+A glob path to a folder containing mzML files used for doing identification (MS2 data in negative ionization method)
+
+```nextflow
+    id_mzml_files_neg=""
+```
+
+for example:
+
+```nextflow
+        input ="/User/XXX/myfiles/id_mzml_files_pos/*mzML"
+```
+
+If you quantification files also includes MS2 data, you can set *id_mzml_files_pos* and *id_mzml_files_neg* to the path of MS1 data (of course to respective ionization modes)
+
+**Select your search engine:**
+
+Currently, MetaboIGNITER supports three search engines, [MetFrag](https://ipb-halle.github.io/MetFrag/), [CSI:FingerID](https://bio.informatik.uni-jena.de/software/sirius/), and [CFM-ID](https://cfmid.wishartlab.com/) for performing identification. These engines share some global parameters but also each of these will need specific set of parameters. The user can select multiple search engines to do the identification. In the case of multiple search engines, the workflow will have multiple final output, one for each search engine and ionization.
+
+**Senario 3) Characterize your own library:**
+
+This part of the workflow is used to create and characterize in-house library. This is how it works: we assume that the library consists of one or more mzML files, each containing a number of compounds. A possible scenario is when the users have several standard metabolites that can have overlapping masses with unknown retention times. The standards with overlapping masses can be run separately using MS, resulting in different runs. MetaboIGNITER will help you to characterize this type of internal libraries. You will need to construct the Characterization file (see below) that shows which standards are present in which mzML file. The workflow will then do mass trace detection, MS2 extraction and mapping of parent ions to mass traces. Doing so will result in finding the retention time and empirical m/z of each standard. This will then be used to create identification parameters and search the biological MS2 files.
+
+Set the library parameter to true if you would like to perform library search:
+
+```nextflow
+    perform_identification_internal_library=true
+```
+
+#### Create your folder structure
+
+The directory structure will be similar to those describe above. You will need to place positive and negative files in different folders. In the following example, we provide the complete folder structure used for doing quantification, in-silico and library identification. In this example, we have plcaed the library files in mzML_NEG_Lib and mzML_POS_Lib folders.
+
+    Mydata
+    ├── hmdb_2017-07-23.csv
+    ├── library_charac_neg.csv
+    ├── library_charac_pos.csv
+    ├── mzML_NEG_ID
+    │   ├── Pilot_MS_Control_2_Neg_peakpicked.mzML
+    │   └── Pilot_MS_Pool_2_Neg_peakpicked.mzML
+    ├── mzML_NEG_Lib
+    │   ├── P1rA_NEG.mzML
+    │   ├── P1rB_NEG.mzML
+    │   ├── P1rC_NEG.mzML
+    │   └── P1rD_NEG.mzML
+    ├── mzML_NEG_Quant
+    │   ├── Blank_1.mzML
+    │   ├── Blank_2.mzML
+    │   ├── Blank_3.mzML
+    │   ├── D1.mzML
+    │   ├── D2.mzML
+    │   ├── D3.mzML
+    │   ├── D4.mzML
+    │   ├── QC_1.mzML
+    │   ├── QC_2.mzML
+    │   ├── QC_3.mzML
+    │   ├── X1_Rep1.mzML
+    │   ├── X2_Rep1.mzML
+    │   ├── X3_Rep1.mzML
+    │   ├── X6_Rep1.mzML
+    │   ├── X7_Rep1.mzML
+    │   └── X8_Rep1.mzML
+    ├── mzML_POS_ID
+    │   ├── Pilot_MS_Control_2_peakpicked.mzML
+    │   └── Pilot_MS_Pool_2_peakpicked.mzML
+    ├── mzML_POS_Lib
+    │   ├── P1rA_POS_180522155214.mzML
+    │   ├── P1rB_POS_180522163438.mzML
+    │   ├── P1rC_POS_180522171703.mzML
+    │   └── P1rD_POS_180522175927.mzML
+    ├── mzML_POS_Quant
+    │   ├── Blank_1.mzML
+    │   ├── Blank_2.mzML
+    │   ├── Blank_3.mzML
+    │   ├── D1.mzML
+    │   ├── D2.mzML
+    │   ├── D3.mzML
+    │   ├── D4.mzML
+    │   ├── QC_1.mzML
+    │   ├── QC_2.mzML
+    │   ├── QC_3.mzML
+    │   ├── X1_Rep1.mzML
+    │   ├── X2_Rep1.mzML
+    │   ├── X3_Rep1.mzML
+    │   ├── X6_Rep1.mzML
+    │   ├── X7_Rep1.mzML
+    │   └── X8_Rep1.mzML
+    ├── phenotype_negative.csv
+    ├── phenotype_positive.csv
+
+Now set the folder paths to the library files.
+a glob path to a folder containing library mzML files used for doing adduct calculation. If you don't have separate quantification data for the library, set this to path of the library file:
+
+```nextflow
+    quant_library_mzml_files_pos=""
+    quant_library_mzml_files_neg=""
+```
+
+a glob path to a folder containing mzML files (for library) used for doing identification (as described above):
+
+```nextflow
+    id_library_mzml_files_pos=""
+    id_library_mzml_files_neg=""
+```
+
+For example, considering the structure above, we can set *quant_library_mzml_files_pos* and *id_library_mzml_files_pos* to "mydata/mzML_POS_Lib/\*.mzML" and *quant_library_mzml_files_neg* and *id_library_mzml_files_neg* to "mydata/mzML_NEG_Lib/\*.mzML".
+
+#### Create your library description files
+
+You need to fix for each of the ionization mode, a separate library description file. An example of such file is provided [here](https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/library_charac_pos.csv). This file must contain the following information in a comma separate file:
+
+- Name of the mzML file containing the compound
+
+- ID of the compound e.g. HMDB ID
+
+- Name of the compound
+
+- Theoretical m/z of the compound
+
+Here is an example of the expected table format:
+
+| raw.File| HMDB.ID      | Name               | m.z           |
+|--|--|--|--|
+| a1.mzML | HMDB0000044  | Ascorbic acid      | 177.032087988 |
+| a1.mzML | HMDB0000001  | 1-Methylhistidine  | 170.085126611 |
+| a2.mzML | HMDB0000002  | 1,3-Diaminopropane | 75.08439833   |
+
+Absolute path to a csv file containing description of the library:
+
+```nextflow
+    library_description_pos=""
+    library_description_neg=""
+```
+The rest of the parameters are described in the nf-core parameter schema.
+
+
 
 ## Job resources
 
