@@ -98,13 +98,11 @@ The flow of the pipeline is controlled using several parameters that should be s
 Before proceeding with the analysis you need to convert your data to open source format (mzML). You can do this using **[msconvert](http://proteowizard.sourceforge.net/tools/msconvert.html)** package in **[ProteoWizard](http://proteowizard.sourceforge.net/index.shtml)**. This must be done for all the raw files you have including MS1, MS2 and library files.
 
 **Senario 1) you only have MS1 data:**
-
 Please open the parameter file and set the following parameter to "false"
 
 ```nextflow
 perform_identification=false
 ```
-
 
 This will prevent the workflow to perform the identification. So you will not need to change the parameters related to identification
 
@@ -491,13 +489,13 @@ For example, considering the structure above, we can set quant_library_mzml_file
 
 You need to fix for each of the ionisation mode, a separate library description file. An example of such file is provided [here](https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/library_charac_pos.csv). This file must contain the following information in a comma separate file:
 
-- Name of the mzML file containing the compound
+* Name of the mzML file containing the compound
 
-- ID of the compound e.g. HMDB ID
+* ID of the compound e.g. HMDB ID
 
-- Name of the compound
+* Name of the compound
 
-- Theoretical m/z of the compound
+* Theoretical m/z of the compound
 
 Here is an example of the expected table format:
 
@@ -515,9 +513,8 @@ Absolute path to a csv file containing description of the library:
 library_description_pos=""
 library_description_neg=""
 ```
+
 The rest of the parameters are described in the nf-core parameter schema.
-
-
 
 ## Job resources
 
