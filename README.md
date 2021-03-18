@@ -45,7 +45,6 @@ nextflow run nf-core/metaboigniter -profile test,<docker/singularity/conda/insti
 iv. Start running your own analysis!
 We highly recommend that you use the parameter file located in conf/parameters.config. Since the number of parameters is large, it's going to be a fairly complex bash command to run the workflow. Nevertheless, the parameters can always be passed to the workflow as argument using two dashes "--".
 
-
 ```bash
 nextflow run nf-core/metaboigniter -profile <docker/singularity/conda/institute>
 ```
