@@ -61,6 +61,7 @@
                 },
                 "ipo_noise_l_library_neg": {
                     "type": "integer",
+                    "default": 1000,
                     "description": "lowest level of noise"
                 },
                 "ipo_noise_h_library_neg": {
@@ -90,7 +91,8 @@
                 },
                 "ipo_fitgauss_library_neg": {
                     "type": "boolean",
-                    "description": "logical, if TRUE a Gaussian is fitte"
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitted"
                 },
                 "ipo_min_peakwidth_l_library_neg": {
                     "type": "integer",
@@ -169,6 +171,7 @@
                 },
                 "ipo_gapInit_l_library_neg": {
                     "type": "integer",
+                    "default": 0,
                     "description": "lower Penalty for Gap opening"
                 },
                 "ipo_gapInit_h_library_neg": {
@@ -228,6 +231,7 @@
                 },
                 "ipo_localAlignment_library_neg": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Local rather than global alignment"
                 },
                 "ipo_bw_l_library_neg": {
@@ -342,6 +346,7 @@
                 },
                 "fitgauss_quant_library_neg_xcms": {
                     "type": "boolean",
+                    "default": false,
                     "description": "logical, if TRUE a Gaussian is fitted"
                 },
                 "phenodatacolumn_quant_library_neg": {
@@ -494,15 +499,18 @@
                 },
                 "only_report_with_id_output_neg_camera": {
                     "type": "boolean",
+                    "default": false,
                     "description": "do only want to see the identified mass traces or everything?"
                 },
                 "combine_replicate_output_neg_camera": {
                     "type": "boolean",
+                    "default": false,
                     "description": "do you have technical replicates you want to average ?"
                 },
                 "combine_replicate_column_output_neg_camera": {
                     "type": "string",
                     "default": "rep",
+                    "default": false,
                     "description": "which column of the phenotype file show the technical replicates"
                 },
                 "log_output_neg_camera": {
@@ -725,6 +733,7 @@
             "properties": {
                 "blank_filter_neg": {
                     "type": "boolean",
+                    "default": false,
                     "description": "set to true if you want to remove signal from blank"
                 },
                 "method_blankfilter_neg_xcms": {
@@ -753,7 +762,8 @@
                 },
                 "dilution_filter_neg": {
                     "type": "boolean",
-                    "description": "the sequence of you dilution serie. For example if you have been adding double the concentration every time. This has to be separated by comma!"
+                    "default": false,
+                    "description": "Whether blank filtereing should be done or not?"
                 },
                 "corto_dilutionfilter_neg_xcms": {
                     "type": "string",
@@ -786,6 +796,7 @@
                 },
                 "cv_filter_neg": {
                     "type": "boolean",
+                    "default": false,
                     "description": "select to whether perfrom cv filtering or not"
                 },
                 "qc_cvfilter_neg_xcms": {
@@ -831,6 +842,7 @@
                 },
                 "ipo_allSamples_neg": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Performs IPO on all the samples irrespective of the class they have"
                 },
                 "ipo_columnToSelect_neg": {
@@ -850,10 +862,12 @@
                 },
                 "ipo_noise_l_neg": {
                     "type": "integer",
+                    "default": 0,
                     "description": "lowest level of noise"
                 },
                 "ipo_noise_h_neg": {
                     "type": "integer",
+                    "default": 0,
                     "description": "highest level of noise"
                 },
                 "ipo_snthresh_l_neg": {
@@ -878,6 +892,7 @@
                 },
                 "ipo_fitgauss_neg": {
                     "type": "boolean",
+                    "default": false,
                     "description": "logical, if TRUE a Gaussian is fitte"
                 },
                 "ipo_min_peakwidth_l_neg": {
@@ -957,6 +972,7 @@
                 },
                 "ipo_gapInit_l_neg": {
                     "type": "integer",
+                    "default": 0,
                     "description": "lower Penalty for Gap opening"
                 },
                 "ipo_gapInit_h_neg": {
@@ -1016,6 +1032,7 @@
                 },
                 "ipo_localAlignment_neg": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Local rather than global alignment"
                 },
                 "ipo_bw_l_neg": {
@@ -1130,6 +1147,7 @@
                 },
                 "fitgauss_quant_neg_xcms": {
                     "type": "boolean",
+                    "default": false,
                     "description": "logical, if TRUE a Gaussian is fitted"
                 },
                 "phenodatacolumn_quant_neg": {
@@ -1258,6 +1276,7 @@
                 },
                 "ipo_noise_l_library_pos": {
                     "type": "integer",
+                    "default": 0,
                     "description": "lowest level of noise"
                 },
                 "ipo_noise_h_library_pos": {
@@ -1286,6 +1305,7 @@
                 },
                 "ipo_fitgauss_library_pos": {
                     "type": "boolean",
+                    "default": false,
                     "description": "logical, if TRUE a Gaussian is fitte"
                 },
                 "ipo_min_peakwidth_l_library_pos": {
@@ -1365,6 +1385,7 @@
                 },
                 "ipo_gapInit_l_library_pos": {
                     "type": "integer",
+                    "default": 0,
                     "description": "lower Penalty for Gap opening"
                 },
                 "ipo_gapInit_h_library_pos": {
@@ -1424,6 +1445,7 @@
                 },
                 "ipo_localAlignment_library_pos": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Local rather than global alignment"
                 },
                 "ipo_bw_l_library_pos": {
@@ -1545,6 +1567,7 @@
                 },
                 "fitgauss_quant_library_pos_xcms": {
                     "type": "boolean",
+                    "default": false,
                     "description": "logical, if TRUE a Gaussian is fitted"
                 },
                 "phenodatacolumn_quant_library_pos": {
@@ -1698,10 +1721,12 @@
                 },
                 "only_report_with_id_output_pos_camera": {
                     "type": "boolean",
+                    "default": false,
                     "description": "do only want to see the identified mass traces or everything?"
                 },
                 "combine_replicate_output_pos_camera": {
                     "type": "boolean",
+                    "default": false,
                     "description": "do you have technical replicates you want to average ?"
                 },
                 "combine_replicate_column_output_pos_camera": {
@@ -1929,6 +1954,7 @@
             "properties": {
                 "blank_filter_pos": {
                     "type": "boolean",
+                    "default": false,
                     "description": "set to true if you want to remove signal from blank"
                 },
                 "method_blankfilter_pos_xcms": {
@@ -1953,6 +1979,7 @@
                 },
                 "dilution_filter_pos": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Select whether you want to do dilution filtering"
                 },
                 "corto_dilutionfilter_pos_xcms": {
@@ -1986,6 +2013,7 @@
                 },
                 "cv_filter_pos": {
                     "type": "boolean",
+                    "default": false,
                     "description": "select to whether perfrom cv filtering or not"
                 },
                 "qc_cvfilter_pos_xcms": {
@@ -2031,6 +2059,7 @@
                 },
                 "ipo_allSamples_pos": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Performs IPO on all the samples irrespective of the class they have"
                 },
                 "ipo_columnToSelect_pos": {
@@ -2050,10 +2079,12 @@
                 },
                 "ipo_noise_l_pos": {
                     "type": "integer",
+                    "default": 0,
                     "description": "lowest level of noise"
                 },
                 "ipo_noise_h_pos": {
                     "type": "integer",
+                    "default": 0,
                     "description": "highest level of noise"
                 },
                 "ipo_snthresh_l_pos": {
@@ -2078,6 +2109,7 @@
                 },
                 "ipo_fitgauss_pos": {
                     "type": "boolean",
+                    "default": false,
                     "description": "logical, if TRUE a Gaussian is fitte"
                 },
                 "ipo_min_peakwidth_l_pos": {
@@ -2157,6 +2189,7 @@
                 },
                 "ipo_gapInit_l_pos": {
                     "type": "integer",
+                    "default": 0,
                     "description": "lower Penalty for Gap opening"
                 },
                 "ipo_gapInit_h_pos": {
@@ -2216,6 +2249,7 @@
                 },
                 "ipo_localAlignment_pos": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Local rather than global alignment"
                 },
                 "ipo_bw_l_pos": {
@@ -2330,6 +2364,7 @@
                 },
                 "fitgauss_quant_pos_xcms": {
                     "type": "boolean",
+                    "default": false,
                     "description": "logical, if TRUE a Gaussian is fitted"
                 },
                 "phenodatacolumn_quant_pos": {
@@ -2396,6 +2431,7 @@
                 },
                 "localAlignment_align_N1_pos_xcms": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Local rather than global alignment"
                 },
                 "bandwidth_group_N1_pos_xcms": {
@@ -2434,6 +2470,7 @@
             "properties": {
                 "library_charactrized_neg": {
                     "type": "boolean",
+                    "default": false,
                     "description": "if you have already charaztrized your negative library set this to true and specify the path for library_charactrization_file_neg"
                 },
                 "library_charactrization_file_neg": {
@@ -2463,6 +2500,7 @@
             "properties": {
                 "library_charactrized_pos": {
                     "type": "boolean",
+                    "default": false,
                     "description": "if you have already charaztrized your positive library set this to true and specify the path for library_charactrization_file_pos"
                 },
                 "library_charactrization_file_pos": {
@@ -2509,26 +2547,32 @@
             "properties": {
                 "publishDir_intermediate": {
                     "type": "boolean",
+                    "default": false,
                     "description": "set to true to publish all the middle stages"
                 },
                 "perform_identification": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Set to false if you don't want to do identification. You will not require to set MS2 related parameters if you set this to false"
                 },
                 "perform_identification_metfrag": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Should Metfrag be used for doing identification?"
                 },
                 "perform_identification_csifingerid": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Should CSI:FingerID be used for doing identification?"
                 },
                 "perform_identification_cfmid": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Should CFM-ID be used for doing identification?"
                 },
                 "perform_identification_internal_library": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Should an internal library be used for doing identification?"
                 },
                 "type_of_ionization": {

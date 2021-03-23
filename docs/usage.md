@@ -1,5 +1,7 @@
 # nf-core/metaboigniter: Usage
 
+Please read this documentation on the nf-core website: https://nf-co.re/metaboigniter/usage
+
 ## Table of contents
 
 <!-- Install Atom plugin markdown-toc-auto for this ToC to auto-update on save -->
