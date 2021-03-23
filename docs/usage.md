@@ -1,6 +1,6 @@
 # nf-core/metaboigniter: Usage
 
-Please read this documentation on the nf-core website: https://nf-co.re/metaboigniter/usage
+Please read this documentation on the nf-core website: [MetaboIGNITER documentation page](https://nf-co.re/metaboigniter/usage)
 
 ## Table of contents
 
@@ -46,7 +46,7 @@ Nextflow handles job submissions on SLURM or other environments, and supervises 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run MetaboIGNITER/metaboigniter -profile docker
+nextflow run nf-core/metaboigniter -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -65,14 +65,14 @@ results         # Finished results (configurable, see below)
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull MetaboIGNITER/metaboigniter
+nextflow pull nf-core/metaboigniter
 ```
 
 ### Reproducibility
 
 It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [MetaboIGNITER/metaboigniter releases page](https://github.com/MetaboIGNITER/metaboigniter/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
+First, go to the [nf-core/metaboigniter releases page](https://github.com/nf-core/metaboigniter/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
@@ -171,7 +171,7 @@ input =/User/XXX/myfiles/pos_quant_data/*mzML
 
 #### Make phenotype file
 
-A phenotype is a CSV (comma separated file) representing a table showing metadata of the samples. Each row is one sample and each column is a meta field (columns are separated by comma). An example of such file can be found [here](https://raw.githubusercontent.com/MetaboIGNITER/test-datasets/master/phenotype_positive.csv). MetaboIGNITER expects a separate phenotype file for each ionization model. So if you have two ionization you will need to create two phenotype file.
+A phenotype is a CSV (comma separated file) representing a table showing metadata of the samples. Each row is one sample and each column is a meta field (columns are separated by comma). An example of such file can be found [here](https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/phenotype_positive.csv). MetaboIGNITER expects a separate phenotype file for each ionization model. So if you have two ionization you will need to create two phenotype file.
 This file is used to set class of the samples being analyzed. The file should have at least two column: the first column is showing the raw file name and extension (for example sample1.mzML) and the second column should show it's phenotype type. This file is a comma separated file and should container header (see the example):
 
 | RawFile        | Class    | Groups    | Type     | rename     | Technical repl   | Age   | Gender   |
