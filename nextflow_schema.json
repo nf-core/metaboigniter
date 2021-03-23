@@ -510,7 +510,6 @@
                 "combine_replicate_column_output_neg_camera": {
                     "type": "string",
                     "default": "rep",
-                    "default": false,
                     "description": "which column of the phenotype file show the technical replicates"
                 },
                 "log_output_neg_camera": {
