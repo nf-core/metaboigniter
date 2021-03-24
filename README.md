@@ -36,16 +36,17 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 3. Download the pipeline and test it on a minimal dataset with a single command
 
-```bash
-nextflow run nf-core/metaboigniter -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
-```
+    ```bash
+    nextflow run nf-core/metaboigniter -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
+    ```
 
-> Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
+    > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
 4. Start running your own analysis!
-We highly recommend that you follow our usage [documentation](https://nf-co.re/metaboigniter/usage). Since the number of parameters is large, it's going to be a fairly complex bash command to run the workflow. Nevertheless, the parameters can always be passed to the workflow as argument using two dashes "--".
 
-See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
+    We highly recommend that you follow our usage [documentation](https://nf-co.re/metaboigniter/usage). Since the number of parameters is large, it's going to be a fairly complex bash command to run the workflow. Nevertheless, the parameters can always be passed to the workflow as argument using two dashes "--".
+
+    See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 
 ## Documentation
 
