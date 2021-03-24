@@ -8,32 +8,14 @@
  https://github.com/nf-core/metaboigniter
 ----------------------------------------------------------------------------------------
 */
+def json_schema = "$baseDir/nextflow_schema.json"
 
-log.info nfcoreHeader()
+log.info Headers.nf_core(workflow, params.monochrome_logs)
 
-def helpMessage() {
-    log.info"""
-
-    Usage:
-
-    The typical command for running the pipeline is as follows:
-
-    nextflow run MetaboIGNITER/metaboigniter -profile docker
-
-    We highly recommend you edit the parameter file (conf/parameters.config) as the number of parameters is large. You can then run the workflow without specifying any parameters
-
-    Please do remember than if you would like to use OpenMS tools (PeakPickerHiRes or FeatureFinderMetabo) you need to edit the OpenMS parameters in the "conf/params" folder.
-
-    Other options:
-      --outdir                      The output directory where the results will be saved
-      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
-
-    AWSBatch options:
-      --awsqueue [str]                The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion [str]               The AWS Region for your AWS Batch job to run on
-      --awscli [str]                  Path to the AWS CLI tool
-    """.stripIndent()
+if (params.help) {
+    def command = "nextflow run nf-core/metaboigniter --input '*.mzML' -profile docker"
+    log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
+    exit 0
 }
 
 // Show help emssage
@@ -45,7 +27,7 @@ if (params.help){
 ////////////////////////////////////////////////////
 /* --         VALIDATE PARAMETERS              -- */
 ////////////////////////////////////////////////////+
-def json_schema = "$baseDir/nextflow_schema.json"
+
 def unexpectedParams = []
 if (params.validate_params) {
     unexpectedParams = NfcoreSchema.validateParameters(params, json_schema, log)
