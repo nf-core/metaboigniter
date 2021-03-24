@@ -8,32 +8,14 @@
  https://github.com/nf-core/metaboigniter
 ----------------------------------------------------------------------------------------
 */
+def json_schema = "$baseDir/nextflow_schema.json"
 
-log.info nfcoreHeader()
+log.info Headers.nf_core(workflow, params.monochrome_logs)
 
-def helpMessage() {
-    log.info"""
-
-    Usage:
-
-    The typical command for running the pipeline is as follows:
-
-    nextflow run MetaboIGNITER/metaboigniter -profile docker
-
-    We highly recommend you edit the parameter file (conf/parameters.config) as the number of parameters is large. You can then run the workflow without specifying any parameters
-
-    Please do remember than if you would like to use OpenMS tools (PeakPickerHiRes or FeatureFinderMetabo) you need to edit the OpenMS parameters in the "conf/params" folder.
-
-    Other options:
-      --outdir                      The output directory where the results will be saved
-      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
-
-    AWSBatch options:
-      --awsqueue [str]                The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion [str]               The AWS Region for your AWS Batch job to run on
-      --awscli [str]                  Path to the AWS CLI tool
-    """.stripIndent()
+if (params.help) {
+    def command = "nextflow run nf-core/metaboigniter --input '*.mzML' -profile docker"
+    log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
+    exit 0
 }
 
 // Show help emssage
@@ -45,7 +27,7 @@ if (params.help){
 ////////////////////////////////////////////////////
 /* --         VALIDATE PARAMETERS              -- */
 ////////////////////////////////////////////////////+
-def json_schema = "$baseDir/nextflow_schema.json"
+
 def unexpectedParams = []
 if (params.validate_params) {
     unexpectedParams = NfcoreSchema.validateParameters(params, json_schema, log)
@@ -67,12 +49,12 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 // Check AWS batch settings
 if (workflow.profile.contains('awsbatch')) {
     // AWSBatch sanity checking
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+    if (!params.awsqueue || !params.awsregion) exit 1, 'Specify correct --awsqueue and --awsregion parameters on AWSBatch!'
     // Check outdir paths to be S3 buckets if running on AWSBatch
     // related: https://github.com/nextflow-io/nextflow/issues/813
-    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+    if (!params.outdir.startsWith('s3:')) exit 1, 'Outdir not on S3 - specify S3 Bucket to run on AWSBatch!'
     // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+    if (params.tracedir.startsWith('s3:')) exit 1, 'Specify a local tracedir or run without trace! S3 cannot be used for tracefiles.'
 }
 
 
@@ -388,11 +370,15 @@ if (params.type_of_ionization in (['neg', 'both'])) {
     }
 }
 
+////////////////////////////////////////////////////
+/* --         PRINT PARAMETER SUMMARY          -- */
+////////////////////////////////////////////////////
+log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
+
 // Header log info
-log.info nfcoreHeader()
 def summary = [:]
 if (workflow.revision) summary['Pipeline Release'] = workflow.revision
-summary['Run Name']         = custom_runName ?: workflow.runName
+summary['Run Name']         = workflow.runName
 // TODO nf-core: Report custom parameters here
 summary['Type of ionization'] =  params.type_of_ionization
 if (params.type_of_ionization in (['pos', 'both'])) {
@@ -431,8 +417,6 @@ if (params.email || params.email_on_fail) {
     summary['E-mail Address']    = params.email
     summary['E-mail on failure'] = params.email_on_fail
 }
-log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
-log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
 checkHostname()
@@ -457,15 +441,15 @@ Channel.from(summary.collect{ [it.key, it.value] })
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate,
-    saveAs: {filename ->
-        if (filename.indexOf(".csv") > 0) filename
-        else null
-    }
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf('.csv') > 0) filename
+                      else null
+        }
 
     output:
     file 'software_versions_mqc.yaml' into ch_software_versions_yaml
-    file "software_versions.csv"
+    file 'software_versions.csv'
 
 
     script:
@@ -4174,10 +4158,9 @@ workflow.onComplete {
     email_fields['summary']['Date Completed'] = workflow.complete
     email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
     email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
+    if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
@@ -4251,28 +4234,9 @@ workflow.onComplete {
     }
 }
 
-
-def nfcoreHeader() {
-    // Log colors ANSI codes
-    c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_white = params.monochrome_logs ? '' : "\033[0;37m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
-
-    return """    -${c_dim}--------------------------------------------------${c_reset}-
-                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
-    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
-    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
-    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
-                                            ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/metaboigniter v${workflow.manifest.version}${c_reset}
-    -${c_dim}--------------------------------------------------${c_reset}-
-    """.stripIndent()
+workflow.onError {
+    // Print unexpected parameters - easiest is to just rerun validation
+    NfcoreSchema.validateParameters(params, json_schema, log)
 }
 
 def checkHostname() {
@@ -4281,15 +4245,15 @@ def checkHostname() {
     def c_red = params.monochrome_logs ? '' : "\033[1;91m"
     def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
     if (params.hostnames) {
-        def hostname = "hostname".execute().text.trim()
+        def hostname = 'hostname'.execute().text.trim()
         params.hostnames.each { prof, hnames ->
             hnames.each { hname ->
                 if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
-                    log.error "====================================================\n" +
+                    log.error '====================================================\n' +
                             "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
                             "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
                             "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
-                            "============================================================"
+                            '============================================================'
                 }
             }
         }
