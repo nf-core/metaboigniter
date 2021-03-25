@@ -1,6 +1,6 @@
 # ![nf-core/metaboigniter](docs/images/nf-core-metaboigniter_logo.png)
 
-**Get your metabolomics analysis up and running**.
+**Pre-processing of mass spectrometry-based metabolomics data with quantification and identification based on MS1 and MS2 data**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
