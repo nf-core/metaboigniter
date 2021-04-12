@@ -455,8 +455,16 @@ process get_software_versions {
     script:
     // TODO nf-core: Get all tools to print their version number here fastqc --version > v_fastqc.txt
     """
+
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
+    Rscript -e "cat(as.character(packageVersion('CAMERA')),'\\n')" &> v_camera.txt
+    Rscript -e "cat(as.character(packageVersion('xcms')),'\\n')" &> v_xcms.txt
+    Rscript -e "cat(as.character(packageVersion('MSnbase')),'\\n')" &> v_msnbase.txt
+    Rscript -e "cat(as.character(packageVersion('IPO')),'\\n')" &> v_ipo.txt
+    OpenMSInfo |  grep -oP -m 1 '([0-9][.][0-9][.][0-9])' &> v_openms.txt
+    sh /usr/local/bin/CSI/bin/sirius.sh --loglevel=OFF --version 2>1 | grep -oP -m 1 '([0-9][.][0-9][.][0-9])' &> v_sirius.txt
+
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -476,7 +484,7 @@ if(params.type_of_ionization in (["pos","both"]))
   {
     process process_peak_picker_pos_openms{
         label 'openms'
-        tag "$name"
+        tag "$mzMLFile"
         publishDir "${params.outdir}/process_peak_picker_pos_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
         stageInMode 'copy'
 
@@ -488,10 +496,10 @@ if(params.type_of_ionization in (["pos","both"]))
         output:
         file "${mzMLFile}" into masstrace_detection_process_pos, param_detection_process_pos
 
-        shell:
-        '''
-        PeakPickerHiRes -in !{mzMLFile} -out !{mzMLFile} -ini !{setting_file}
-        '''
+
+        """
+        PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
+        """
     }
 
 
@@ -504,7 +512,7 @@ if(params.type_of_ionization in (["pos","both"]))
    {
      process process_masstrace_detection_pos_openms_centroided {
         label 'openms'
-         tag "$name"
+         tag "$mzMLFile"
          publishDir "${params.outdir}/process_masstrace_detection_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -516,17 +524,17 @@ if(params.type_of_ionization in (["pos","both"]))
          output:
          file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion
 
-         shell:
-         '''
-         FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-         '''
+
+         """
+         FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
+         """
      }
      /*
       * STEP 2.5 - convert openms to xcms
       */
      process process_openms_to_xcms_conversion_pos_centroided {
          label 'xcmsconvert'
-         tag "$name"
+         tag "$mzMLFile"
          publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -538,12 +546,12 @@ if(params.type_of_ionization in (["pos","both"]))
          output:
          file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
 
-         shell:
-         '''
-          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file} \
-          phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
 
-         '''
+         """
+          /usr/local/bin/featurexmlToCamera.r input=$mzMLFile realFileName=$mzMLFile polarity=positive output=${mzMLFile.baseName}.rdata phenoFile=$phenotype_file \\
+          phenoDataColumn=$params.phenodatacolumn_quant_pos sampleClass=$params.sampleclass_quant_pos_xcms changeNameTO=${mzMLFile.baseName}.mzML
+
+         """
      }
    }else{
      /*
@@ -555,7 +563,7 @@ if(params.type_of_ionization in (["pos","both"]))
 
       process process_ipo_param_pos_ipo_centroided{
           label 'ipo'
-          tag "$name"
+          tag "A collection of files"
           publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -568,24 +576,24 @@ if(params.type_of_ionization in (["pos","both"]))
 
           script:
             def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-          shell:
+
           """
           touch quant_params_pos.json
           touch rt_params_pos.json
-            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_pos_globalAvoidRT} allSamples=!{params.ipo_allSamples_pos} columnToSelect=!{params.ipo_columnToSelect_pos} \
-             valueToSelect=!{params.ipo_valueToSelect_pos} phenoFile=!{phenotype_file} \
-            methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos} \
-             noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
-            prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos} \
-             snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos} mzCenterFun=!{params.ipo_mzCenterFun_pos} \
-              integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos} \
-               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos} \
-             ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos} \
-             response_l=!{params.ipo_response_l_pos} response_h=!{params.ipo_response_h_pos} distFunc=!{params.ipo_distFunc_pos} factorDiag_l=!{params.ipo_factorDiag_l_pos} factorDiag_h=!{params.ipo_factorDiag_h_pos} factorGap_l=!{params.ipo_factorGap_l_pos} \
-             factorGap_h=!{params.ipo_factorGap_h_pos} localAlignment=!{params.ipo_localAlignment_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_pos} \
-             ipo_gapExtend_h=!{params.ipo_gapExtend_h_pos} ipo_profStep_l=!{params.ipo_profStep_l_pos} ipo_profStep_h=!{params.ipo_profStep_h_pos} bw_l=!{params.ipo_bw_l_pos} bw_h=!{params.ipo_bw_h_pos} minfrac_l=!{params.ipo_minfrac_l_pos} \
-              minfrac_h=!{params.ipo_minfrac_h_pos} mzwid_l=!{params.ipo_mzwid_l_pos} mzwid_h=!{params.ipo_mzwid_h_pos} minsamp_l=!{params.ipo_minsamp_l_pos} \
-               minsamp_h=!{params.ipo_minsamp_h_pos} max_l=!{params.ipo_max_l_pos} max_h=!{params.ipo_max_h_pos} ncores=!{params.ipo_ncores_pos} outputxset=quant_params_pos.json outputrt=rt_params_pos.json
+            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=$ipo_pos_globalAvoidRT allSamples=$params.ipo_allSamples_pos columnToSelect=$params.ipo_columnToSelect_pos \\
+             valueToSelect=$params.ipo_valueToSelect_pos phenoFile=$phenotype_file \\
+            methodXset=$params.ipo_methodXset_pos methodRT=$params.ipo_methodRT_pos noise_l=$params.ipo_noise_l_pos \\
+             noise_h=$params.ipo_noise_h_pos prefilter_l_l=$params.ipo_prefilter_l_l_pos prefilter_l_h=$params.ipo_prefilter_l_h_pos \\
+            prefilter_h_l=$params.ipo_prefilter_h_l_pos prefilter_h_h=$params.ipo_prefilter_h_h_pos \\
+             snthresh_l=$params.ipo_snthresh_l_pos snthresh_h=$params.ipo_snthresh_h_pos mzCenterFun=$params.ipo_mzCenterFun_pos \\
+              integrate=$params.ipo_integrate_pos fitgauss=$params.ipo_fitgauss_pos ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos \\
+               ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos ipo_ppm_l=$params.ipo_ppm_l_pos \\
+             ipo_ppm_h=$params.ipo_ppm_h_pos ipo_mzdiff_l=$params.ipo_mzdiff_l_pos ipo_mzdiff_h=$params.ipo_mzdiff_h_pos ipo_charge_camera=$params.ipo_charge_camera_pos ipo_max_ppm_camera=$params.ipo_max_ppm_camera_pos \\
+             response_l=$params.ipo_response_l_pos response_h=$params.ipo_response_h_pos distFunc=$params.ipo_distFunc_pos factorDiag_l=$params.ipo_factorDiag_l_pos factorDiag_h=$params.ipo_factorDiag_h_pos factorGap_l=$params.ipo_factorGap_l_pos \\
+             factorGap_h=$params.ipo_factorGap_h_pos localAlignment=$params.ipo_localAlignment_pos ipo_gapInit_l=$params.ipo_gapInit_l_pos ipo_gapInit_h=$params.ipo_gapInit_h_pos ipo_gapExtend_l=$params.ipo_gapExtend_l_pos \\
+             ipo_gapExtend_h=$params.ipo_gapExtend_h_pos ipo_profStep_l=$params.ipo_profStep_l_pos ipo_profStep_h=$params.ipo_profStep_h_pos bw_l=$params.ipo_bw_l_pos bw_h=$params.ipo_bw_h_pos minfrac_l=$params.ipo_minfrac_l_pos \\
+              minfrac_h=$params.ipo_minfrac_h_pos mzwid_l=$params.ipo_mzwid_l_pos mzwid_h=$params.ipo_mzwid_h_pos minsamp_l=$params.ipo_minsamp_l_pos \\
+               minsamp_h=$params.ipo_minsamp_h_pos max_l=$params.ipo_max_l_pos max_h=$params.ipo_max_h_pos ncores=$params.ipo_ncores_pos outputxset=quant_params_pos.json outputrt=rt_params_pos.json
           """
       }
       }
@@ -599,7 +607,7 @@ if(params.type_of_ionization in (["pos","both"]))
 
      process process_masstrace_detection_pos_xcms_centroided{
        label 'xcms'
-       tag "$name"
+       tag "$mzMLFile"
        publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -613,20 +621,20 @@ if(params.type_of_ionization in (["pos","both"]))
        file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
        file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
 
-       shell:
+       script:
         def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
        """
-    /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} \
-    peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file}  \
-   phenoDataColumn=!{params.phenodatacolumn_quant_pos} sampleClass=!{params.sampleclass_quant_pos_xcms} mzdiff=!{params.mzdiff_quant_pos_xcms} snthresh=!{params.snthresh_quant_pos_xcms}  \
-  prefilter_l=!{params.prefilter_quant_pos_xcms} prefilter_h=!{params.value_of_prefilter_quant_pos_xcms} mzCenterFun=!{params.mzCenterFun_quant_pos_xcms} integrate=!{params.integrate_quant_pos_xcms}  \
- fitgauss=!{params.fitgauss_quant_pos_xcms} methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos} \
-   noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
-  prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos} snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos}  \
- mzCenterFun=!{params.ipo_mzCenterFun_pos} integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos} \
-     ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos} \
-   ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos} \
-   ipo_inv=!{ipo_pos_localQ}  ${filter_argument}
+    /usr/local/bin/findPeaks.r input=\$PWD/$mzMLFile output=\$PWD/${mzMLFile.baseName}.rdata ppm=$params.masstrace_ppm_pos_xcms peakwidthLow=$params.peakwidthlow_quant_pos_xcms \\
+    peakwidthHigh=$params.peakwidthhigh_quant_pos_xcms noise=$params.noise_quant_pos_xcms polarity=positive realFileName=$mzMLFile phenoFile=$phenotype_file  \\
+   phenoDataColumn=$params.phenodatacolumn_quant_pos sampleClass=$params.sampleclass_quant_pos_xcms mzdiff=$params.mzdiff_quant_pos_xcms snthresh=$params.snthresh_quant_pos_xcms  \\
+  prefilter_l=$params.prefilter_quant_pos_xcms prefilter_h=$params.value_of_prefilter_quant_pos_xcms mzCenterFun=$params.mzCenterFun_quant_pos_xcms integrate=$params.integrate_quant_pos_xcms  \\
+ fitgauss=$params.fitgauss_quant_pos_xcms methodXset=$params.ipo_methodXset_pos methodRT=$params.ipo_methodRT_pos noise_l=$params.ipo_noise_l_pos \\
+   noise_h=$params.ipo_noise_h_pos prefilter_l_l=$params.ipo_prefilter_l_l_pos prefilter_l_h=$params.ipo_prefilter_l_h_pos \\
+  prefilter_h_l=$params.ipo_prefilter_h_l_pos prefilter_h_h=$params.ipo_prefilter_h_h_pos snthresh_l=$params.ipo_snthresh_l_pos snthresh_h=$params.ipo_snthresh_h_pos  \\
+ mzCenterFun=$params.ipo_mzCenterFun_pos integrate=$params.ipo_integrate_pos fitgauss=$params.ipo_fitgauss_pos ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos \\
+     ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos ipo_ppm_l=$params.ipo_ppm_l_pos \\
+   ipo_ppm_h=$params.ipo_ppm_h_pos ipo_mzdiff_l=$params.ipo_mzdiff_l_pos ipo_mzdiff_h=$params.ipo_mzdiff_h_pos ipo_charge_camera=$params.ipo_charge_camera_pos ipo_max_ppm_camera=$params.ipo_max_ppm_camera_pos \\
+   ipo_inv=$ipo_pos_localQ  ${filter_argument}
        """
      }
    }
@@ -639,7 +647,7 @@ if(params.type_of_ionization in (["pos","both"]))
  {
    process process_masstrace_detection_pos_openms_noncentroided {
        label 'openms'
-       tag "$name"
+       tag "$mzMLFile"
        publishDir "${params.outdir}/process_masstrace_detection_pos_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -651,17 +659,17 @@ if(params.type_of_ionization in (["pos","both"]))
        output:
        file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_pos_noncentroided
 
-       shell:
-       '''
-       FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-       '''
+
+       """
+       FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
+       """
    }
    /*
     * STEP 2.5 - convert openms to xcms
     */
    process process_openms_to_xcms_conversion_pos_noncentroided {
        label 'xcmsconvert'
-       tag "$name"
+       tag "$mzMLFile"
        publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -673,12 +681,12 @@ if(params.type_of_ionization in (["pos","both"]))
        output:
        file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
 
-       shell:
-       '''
-        /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos}  \
-       sampleClass=!{params.sampleclass_quant_pos_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
 
-       '''
+       """
+        /usr/local/bin/featurexmlToCamera.r input=$mzMLFile realFileName=$mzMLFile polarity=positive output=${mzMLFile.baseName}.rdata phenoFile=$phenotype_file phenoDataColumn=$params.phenodatacolumn_quant_pos  \\
+       sampleClass=$params.sampleclass_quant_pos_xcms changeNameTO=${mzMLFile.baseName}.mzML
+
+       """
    }
  }else{
    /*
@@ -690,7 +698,7 @@ if(params.type_of_ionization in (["pos","both"]))
 
     process process_ipo_param_pos_ipo_noncentroided{
         label 'ipo'
-        tag "$name"
+        tag "A collection of files"
         publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -703,24 +711,24 @@ if(params.type_of_ionization in (["pos","both"]))
 
         script:
           def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-        shell:
+
         """
         touch quant_params_pos.json
         touch rt_params_pos.json
-        /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_pos_globalAvoidRT} allSamples=!{params.ipo_allSamples_pos} columnToSelect=!{params.ipo_columnToSelect_pos} \
-           valueToSelect=!{params.ipo_valueToSelect_pos} phenoFile=!{phenotype_file} \
-          methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos} \
-           noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
-          prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos} \
-           snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos} mzCenterFun=!{params.ipo_mzCenterFun_pos} \
-            integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos} \
-             ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos} \
-           ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos} \
-           response_l=!{params.ipo_response_l_pos} response_h=!{params.ipo_response_h_pos} distFunc=!{params.ipo_distFunc_pos} factorDiag_l=!{params.ipo_factorDiag_l_pos} factorDiag_h=!{params.ipo_factorDiag_h_pos} factorGap_l=!{params.ipo_factorGap_l_pos} \
-           factorGap_h=!{params.ipo_factorGap_h_pos} localAlignment=!{params.ipo_localAlignment_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_pos} \
-           ipo_gapExtend_h=!{params.ipo_gapExtend_h_pos} ipo_profStep_l=!{params.ipo_profStep_l_pos} ipo_profStep_h=!{params.ipo_profStep_h_pos} bw_l=!{params.ipo_bw_l_pos} bw_h=!{params.ipo_bw_h_pos} minfrac_l=!{params.ipo_minfrac_l_pos} \
-            minfrac_h=!{params.ipo_minfrac_h_pos} mzwid_l=!{params.ipo_mzwid_l_pos} mzwid_h=!{params.ipo_mzwid_h_pos} minsamp_l=!{params.ipo_minsamp_l_pos} \
-             minsamp_h=!{params.ipo_minsamp_h_pos} max_l=!{params.ipo_max_l_pos} max_h=!{params.ipo_max_h_pos} ncores=!{params.ipo_ncores_pos} outputxset=quant_params_pos.json outputrt=rt_params_pos.json
+        /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=$ipo_pos_globalAvoidRT allSamples=$params.ipo_allSamples_pos columnToSelect=$params.ipo_columnToSelect_pos \\
+           valueToSelect=$params.ipo_valueToSelect_pos phenoFile=$phenotype_file \\
+          methodXset=$params.ipo_methodXset_pos methodRT=$params.ipo_methodRT_pos noise_l=$params.ipo_noise_l_pos \\
+           noise_h=$params.ipo_noise_h_pos prefilter_l_l=$params.ipo_prefilter_l_l_pos prefilter_l_h=$params.ipo_prefilter_l_h_pos \\
+          prefilter_h_l=$params.ipo_prefilter_h_l_pos prefilter_h_h=$params.ipo_prefilter_h_h_pos \\
+           snthresh_l=$params.ipo_snthresh_l_pos snthresh_h=$params.ipo_snthresh_h_pos mzCenterFun=$params.ipo_mzCenterFun_pos \\
+            integrate=$params.ipo_integrate_pos fitgauss=$params.ipo_fitgauss_pos ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos \\
+             ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos ipo_ppm_l=$params.ipo_ppm_l_pos \\
+           ipo_ppm_h=$params.ipo_ppm_h_pos ipo_mzdiff_l=$params.ipo_mzdiff_l_pos ipo_mzdiff_h=$params.ipo_mzdiff_h_pos ipo_charge_camera=$params.ipo_charge_camera_pos ipo_max_ppm_camera=$params.ipo_max_ppm_camera_pos \\
+           response_l=$params.ipo_response_l_pos response_h=$params.ipo_response_h_pos distFunc=$params.ipo_distFunc_pos factorDiag_l=$params.ipo_factorDiag_l_pos factorDiag_h=$params.ipo_factorDiag_h_pos factorGap_l=$params.ipo_factorGap_l_pos \\
+           factorGap_h=$params.ipo_factorGap_h_pos localAlignment=$params.ipo_localAlignment_pos ipo_gapInit_l=$params.ipo_gapInit_l_pos ipo_gapInit_h=$params.ipo_gapInit_h_pos ipo_gapExtend_l=$params.ipo_gapExtend_l_pos \\
+           ipo_gapExtend_h=$params.ipo_gapExtend_h_pos ipo_profStep_l=$params.ipo_profStep_l_pos ipo_profStep_h=$params.ipo_profStep_h_pos bw_l=$params.ipo_bw_l_pos bw_h=$params.ipo_bw_h_pos minfrac_l=$params.ipo_minfrac_l_pos \\
+            minfrac_h=$params.ipo_minfrac_h_pos mzwid_l=$params.ipo_mzwid_l_pos mzwid_h=$params.ipo_mzwid_h_pos minsamp_l=$params.ipo_minsamp_l_pos \\
+             minsamp_h=$params.ipo_minsamp_h_pos max_l=$params.ipo_max_l_pos max_h=$params.ipo_max_h_pos ncores=$params.ipo_ncores_pos outputxset=quant_params_pos.json outputrt=rt_params_pos.json
         """
     }
     }
@@ -734,7 +742,7 @@ if(params.type_of_ionization in (["pos","both"]))
                                 :  param_to_rt_process_pos)
    process process_masstrace_detection_pos_xcms_noncentroided{
      label 'xcms'
-     tag "$name"
+     tag "$mzMLFile"
      publishDir "${params.outdir}/process_masstrace_detection_pos_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -748,21 +756,21 @@ if(params.type_of_ionization in (["pos","both"]))
      file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
      file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
 
-     shell:
+script:
       def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
      """
-/usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_pos_xcms} peakwidthHigh=!{params.peakwidthhigh_quant_pos_xcms} \
- noise=!{params.noise_quant_pos_xcms} polarity=positive realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_pos}  \
-sampleClass=!{params.sampleclass_quant_pos_xcms}  mzdiff=!{params.mzdiff_quant_pos_xcms} snthresh=!{params.snthresh_quant_pos_xcms} prefilter_l=!{params.prefilter_quant_pos_xcms}  \
-prefilter_h=!{params.value_of_prefilter_quant_pos_xcms} mzCenterFun=!{params.mzCenterFun_quant_pos_xcms} integrate=!{params.integrate_quant_pos_xcms}  \
-fitgauss=!{params.fitgauss_quant_pos_xcms} methodXset=!{params.ipo_methodXset_pos} methodRT=!{params.ipo_methodRT_pos} noise_l=!{params.ipo_noise_l_pos} \
- noise_h=!{params.ipo_noise_h_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_pos} \
-prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_pos} \
- snthresh_l=!{params.ipo_snthresh_l_pos} snthresh_h=!{params.ipo_snthresh_h_pos} mzCenterFun=!{params.ipo_mzCenterFun_pos} \
-  integrate=!{params.ipo_integrate_pos} fitgauss=!{params.ipo_fitgauss_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_pos} \
-   ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_pos} ipo_ppm_l=!{params.ipo_ppm_l_pos} \
- ipo_ppm_h=!{params.ipo_ppm_h_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_pos} ipo_charge_camera=!{params.ipo_charge_camera_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_pos} \
- ipo_inv=!{ipo_pos_localQ} ${filter_argument}
+/usr/local/bin/findPeaks.r input=\$PWD/$mzMLFile output=\$PWD/${mzMLFile.baseName}.rdata ppm=$params.masstrace_ppm_pos_xcms peakwidthLow=$params.peakwidthlow_quant_pos_xcms peakwidthHigh=$params.peakwidthhigh_quant_pos_xcms \\
+ noise=$params.noise_quant_pos_xcms polarity=positive realFileName=$mzMLFile phenoFile=$phenotype_file phenoDataColumn=$params.phenodatacolumn_quant_pos  \\
+sampleClass=$params.sampleclass_quant_pos_xcms  mzdiff=$params.mzdiff_quant_pos_xcms snthresh=$params.snthresh_quant_pos_xcms prefilter_l=$params.prefilter_quant_pos_xcms  \\
+prefilter_h=$params.value_of_prefilter_quant_pos_xcms mzCenterFun=$params.mzCenterFun_quant_pos_xcms integrate=$params.integrate_quant_pos_xcms  \\
+fitgauss=$params.fitgauss_quant_pos_xcms methodXset=$params.ipo_methodXset_pos methodRT=$params.ipo_methodRT_pos noise_l=$params.ipo_noise_l_pos \\
+ noise_h=$params.ipo_noise_h_pos prefilter_l_l=$params.ipo_prefilter_l_l_pos prefilter_l_h=$params.ipo_prefilter_l_h_pos \\
+prefilter_h_l=$params.ipo_prefilter_h_l_pos prefilter_h_h=$params.ipo_prefilter_h_h_pos \\
+ snthresh_l=$params.ipo_snthresh_l_pos snthresh_h=$params.ipo_snthresh_h_pos mzCenterFun=$params.ipo_mzCenterFun_pos \\
+  integrate=$params.ipo_integrate_pos fitgauss=$params.ipo_fitgauss_pos ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos \\
+   ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos ipo_ppm_l=$params.ipo_ppm_l_pos \\
+ ipo_ppm_h=$params.ipo_ppm_h_pos ipo_mzdiff_l=$params.ipo_mzdiff_l_pos ipo_mzdiff_h=$params.ipo_mzdiff_h_pos ipo_charge_camera=$params.ipo_charge_camera_pos ipo_max_ppm_camera=$params.ipo_max_ppm_camera_pos \\
+ ipo_inv=$ipo_pos_localQ ${filter_argument}
      """
    }
  }
@@ -776,7 +784,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
 
   process  process_collect_rdata_pos_xcms{
     label 'xcms'
-    tag "$name"
+    tag "A collection of files"
     publishDir "${params.outdir}/process_collect_rdata_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -790,7 +798,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
 
   script:
     def inputs_aggregated = rdata_files.collect{ "$it" }.join(",")
-  shell:
+
 
      """
       nextFlowDIR=\$PWD
@@ -804,7 +812,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
    */
   process  process_align_peaks_pos_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_align_peaks_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -819,18 +827,18 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
 
   script:
     def inputs_aggregated = rd.collect{ "$it" }.join(",")
-    shell:
+
       def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=${paramsRT}" : ''
       """
-    /usr/local/bin/retCor.r input=\$PWD/!{rdata_files} output=RTcorrected_pos.rdata method=obiwarp  response_l=!{params.ipo_response_l_pos} response_h=!{params.ipo_response_h_pos} distFunc=!{params.ipo_distFunc_pos}  \
-   factorDiag_l=!{params.ipo_factorDiag_l_pos} factorDiag_h=!{params.ipo_factorDiag_h_pos} factorGap_l=!{params.ipo_factorGap_l_pos} \
-      factorGap_h=!{params.ipo_factorGap_h_pos} localAlignment=!{params.ipo_localAlignment_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_pos} \
-      ipo_gapExtend_h=!{params.ipo_gapExtend_h_pos} ipo_profStep_l=!{params.ipo_profStep_l_pos} ipo_profStep_h=!{params.ipo_profStep_h_pos} bw_l=!{params.ipo_bw_l_pos} bw_h=!{params.ipo_bw_h_pos} minfrac_l=!{params.ipo_minfrac_l_pos} \
-       minfrac_h=!{params.ipo_minfrac_h_pos} mzwid_l=!{params.ipo_mzwid_l_pos} mzwid_h=!{params.ipo_mzwid_h_pos} minsamp_l=!{params.ipo_minsamp_l_pos} \
-        minsamp_h=!{params.ipo_minsamp_h_pos} max_l=!{params.ipo_max_l_pos} max_h=!{params.ipo_max_h_pos} ipo_inv=!{ipo_pos_localRT} ncores=!{params.ipo_ncores_pos} \
-        profStep=!{params.profStep_align_N1_pos_xcms} center=!{params.center_align_N1_pos_xcms} response=!{params.response_align_N1_pos_xcms} \
-        distFunc=!{params.distFunc_align_N1_pos_xcms} gapInit=!{params.gapInit_align_N1_pos_xcms} gapExtend=!{params.gapExtend_align_N1_pos_xcms} \
-        factorDiag=!{params.factorDiag_align_N1_pos_xcms} factorGap=!{params.factorDiag_align_N1_pos_xcms} localAlignment=!{params.localAlignment_align_N1_pos_xcms} ${filter_argument} inputraw=${inputs_aggregated}
+    /usr/local/bin/retCor.r input=\$PWD/$rdata_files output=RTcorrected_pos.rdata method=obiwarp  response_l=$params.ipo_response_l_pos response_h=$params.ipo_response_h_pos distFunc=$params.ipo_distFunc_pos  \\
+   factorDiag_l=$params.ipo_factorDiag_l_pos factorDiag_h=$params.ipo_factorDiag_h_pos factorGap_l=$params.ipo_factorGap_l_pos \\
+      factorGap_h=$params.ipo_factorGap_h_pos localAlignment=$params.ipo_localAlignment_pos ipo_gapInit_l=$params.ipo_gapInit_l_pos ipo_gapInit_h=$params.ipo_gapInit_h_pos ipo_gapExtend_l=$params.ipo_gapExtend_l_pos \\
+      ipo_gapExtend_h=$params.ipo_gapExtend_h_pos ipo_profStep_l=$params.ipo_profStep_l_pos ipo_profStep_h=$params.ipo_profStep_h_pos bw_l=$params.ipo_bw_l_pos bw_h=$params.ipo_bw_h_pos minfrac_l=$params.ipo_minfrac_l_pos \\
+       minfrac_h=$params.ipo_minfrac_h_pos mzwid_l=$params.ipo_mzwid_l_pos mzwid_h=$params.ipo_mzwid_h_pos minsamp_l=$params.ipo_minsamp_l_pos \\
+        minsamp_h=$params.ipo_minsamp_h_pos max_l=$params.ipo_max_l_pos max_h=$params.ipo_max_h_pos ipo_inv=$ipo_pos_localRT ncores=$params.ipo_ncores_pos \\
+        profStep=$params.profStep_align_N1_pos_xcms center=$params.center_align_N1_pos_xcms response=$params.response_align_N1_pos_xcms \\
+        distFunc=$params.distFunc_align_N1_pos_xcms gapInit=$params.gapInit_align_N1_pos_xcms gapExtend=$params.gapExtend_align_N1_pos_xcms \\
+        factorDiag=$params.factorDiag_align_N1_pos_xcms factorGap=$params.factorDiag_align_N1_pos_xcms localAlignment=$params.localAlignment_align_N1_pos_xcms ${filter_argument} inputraw=${inputs_aggregated}
 
     """
   }
@@ -842,7 +850,7 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
 
   process  process_group_peaks_pos_N1_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_group_peaks_pos_N1_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
     input:
@@ -851,11 +859,11 @@ prefilter_h_l=!{params.ipo_prefilter_h_l_pos} prefilter_h_h=!{params.ipo_prefilt
   output:
   file "groupN1_pos.rdata" into temp_unfiltered_channel_pos_1
 
-    shell:
-      '''
-      /usr/local/bin/group.r input=!{rdata_files} output=groupN1_pos.rdata bandwidth=!{params.bandwidth_group_N1_pos_xcms} minfrac=!{params.minfrac_group_N1_pos_xcms} minsamp=!{params.minsamp_group_N1_pos_xcms} max=!{params.max_group_N1_pos_xcms} \
-      mzwid=!{params.mzwid_group_N1_pos_xcms}
-      '''
+
+      """
+      /usr/local/bin/group.r input=$rdata_files output=groupN1_pos.rdata bandwidth=$params.bandwidth_group_N1_pos_xcms minfrac=$params.minfrac_group_N1_pos_xcms minsamp=$params.minsamp_group_N1_pos_xcms max=$params.max_group_N1_pos_xcms \\
+      mzwid=$params.mzwid_group_N1_pos_xcms
+      """
   }
 
 
@@ -869,7 +877,7 @@ if(params.blank_filter_pos)
 
   process  process_blank_filter_pos_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_blank_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -880,10 +888,10 @@ if(params.blank_filter_pos)
   output:
   file "blankFiltered_pos.rdata" into temp_unfiltered_channel_pos_2
 
-    shell:
-      '''
-    /usr/local/bin/blankfilter.r input=!{rdata_files} output=blankFiltered_pos.rdata method=!{params.method_blankfilter_pos_xcms} blank=!{params.blank_blankfilter_pos_xcms} sample=!{params.sample_blankfilter_pos_xcms} rest=!{params.rest_blankfilter_pos_xcms}
-      '''
+
+      """
+    /usr/local/bin/blankfilter.r input=$rdata_files output=blankFiltered_pos.rdata method=$params.method_blankfilter_pos_xcms blank=$params.blank_blankfilter_pos_xcms sample=$params.sample_blankfilter_pos_xcms rest=$params.rest_blankfilter_pos_xcms
+      """
   }
 }else{
 temp_unfiltered_channel_pos_2=temp_unfiltered_channel_pos_1
@@ -898,7 +906,7 @@ if(params.dilution_filter_pos==true)
   dilutionfilter_rdata_pos_xcms=temp_unfiltered_channel_pos_2
   process  process_dilution_filter_pos_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_dilution_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -909,11 +917,11 @@ if(params.dilution_filter_pos==true)
   output:
   file "dilutionFiltered_pos.rdata" into temp_unfiltered_channel_pos_3
 
-    shell:
-      '''
-    /usr/local/bin/dilutionfilter.r input=!{rdata_files} output=dilutionFiltered_pos.rdata Corto=!{params.corto_dilutionfilter_pos_xcms} \
-    dilution=!{params.dilution_dilutionfilter_pos_xcms} pvalue=!{params.pvalue_dilutionfilter_pos_xcms} corcut=!{params.corcut_dilutionfilter_pos_xcms} abs=!{params.abs_dilutionfilter_pos_xcms}
-      '''
+
+      """
+    /usr/local/bin/dilutionfilter.r input=$rdata_files output=dilutionFiltered_pos.rdata Corto=$params.corto_dilutionfilter_pos_xcms \\
+    dilution=$params.dilution_dilutionfilter_pos_xcms pvalue=$params.pvalue_dilutionfilter_pos_xcms corcut=$params.corcut_dilutionfilter_pos_xcms abs=$params.abs_dilutionfilter_pos_xcms
+      """
   }
 }else{
 
@@ -928,7 +936,7 @@ if(params.cv_filter_pos==true)
   cvfilter_rdata_pos_xcms=temp_unfiltered_channel_pos_3
   process  process_cv_filter_pos_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_cv_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -939,10 +947,10 @@ if(params.cv_filter_pos==true)
   output:
   file "cvFiltered_pos.rdata" into temp_unfiltered_channel_pos_4
 
-    shell:
-      '''
-    /usr/local/bin/cvfilter.r input=!{rdata_files} output=cvFiltered_pos.rdata qc=!{params.qc_cvfilter_pos_xcms} cvcut=!{params.cvcut_cvfilter_pos_xcms}
-    '''
+
+      """
+    /usr/local/bin/cvfilter.r input=$rdata_files output=cvFiltered_pos.rdata qc=$params.qc_cvfilter_pos_xcms cvcut=$params.cvcut_cvfilter_pos_xcms
+    """
   }
 }else{
 temp_unfiltered_channel_pos_4=temp_unfiltered_channel_pos_3
@@ -957,7 +965,7 @@ annotation_rdata_pos_camera=temp_unfiltered_channel_pos_4
 
 process  process_annotate_peaks_pos_camera{
   label 'camera'
-  tag "$name"
+  tag "$rdata_files"
   publishDir "${params.outdir}/process_annotate_peaks_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -968,10 +976,10 @@ process  process_annotate_peaks_pos_camera{
 output:
 file "CameraAnnotatePeaks_pos.rdata" into group_rdata_pos_camera
 
-  shell:
-    '''
-    /usr/local/bin/xsAnnotate.r  input=!{rdata_files} output=CameraAnnotatePeaks_pos.rdata
-    '''
+
+    """
+    /usr/local/bin/xsAnnotate.r  input=$rdata_files output=CameraAnnotatePeaks_pos.rdata
+    """
 }
 
 /*
@@ -980,7 +988,7 @@ file "CameraAnnotatePeaks_pos.rdata" into group_rdata_pos_camera
 
 process  process_group_peaks_pos_camera{
   label 'camera'
-  tag "$name"
+  tag "$rdata_files"
   publishDir "${params.outdir}/process_group_peaks_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -991,10 +999,10 @@ process  process_group_peaks_pos_camera{
 output:
 file "CameraGroup_pos.rdata" into findaddcuts_rdata_pos_camera
 
-  shell:
-    '''
-    /usr/local/bin/groupFWHM.r input=!{rdata_files} output=CameraGroup_pos.rdata sigma=!{params.sigma_group_pos_camera} perfwhm=!{params.perfwhm_group_pos_camera} intval=!{params.intval_group_pos_camera}
-    '''
+
+    """
+    /usr/local/bin/groupFWHM.r input=$rdata_files output=CameraGroup_pos.rdata sigma=$params.sigma_group_pos_camera perfwhm=$params.perfwhm_group_pos_camera intval=$params.intval_group_pos_camera
+    """
 }
 
 /*
@@ -1003,7 +1011,7 @@ file "CameraGroup_pos.rdata" into findaddcuts_rdata_pos_camera
 
 process  process_find_addcuts_pos_camera{
   label 'camera'
-  tag "$name"
+  tag "$rdata_files"
   publishDir "${params.outdir}/process_find_addcuts_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1014,10 +1022,10 @@ process  process_find_addcuts_pos_camera{
 output:
 file "CameraFindAdducts_pos.rdata" into findisotopes_rdata_pos_camera
 
-  shell:
-    '''
-    /usr/local/bin/findAdducts.r input=!{rdata_files} output=CameraFindAdducts_pos.rdata ppm=!{params.ppm_findaddcuts_pos_camera} polarity=!{params.polarity_findaddcuts_pos_camera}
-    '''
+
+    """
+    /usr/local/bin/findAdducts.r input=$rdata_files output=CameraFindAdducts_pos.rdata ppm=$params.ppm_findaddcuts_pos_camera polarity=$params.polarity_findaddcuts_pos_camera
+    """
 }
 
 /*
@@ -1026,7 +1034,7 @@ file "CameraFindAdducts_pos.rdata" into findisotopes_rdata_pos_camera
 
 process  process_find_isotopes_pos_camera{
   label 'camera'
-  tag "$name"
+  tag "$rdata_files"
   publishDir "${params.outdir}/process_find_isotopes_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1037,10 +1045,10 @@ process  process_find_isotopes_pos_camera{
 output:
 file "CameraFindIsotopes_pos.rdata" into mapmsmstocamera_rdata_pos_camera,mapmsmstoparam_rdata_pos_camera,prepareoutput_rdata_pos_camera_csifingerid, prepareoutput_rdata_pos_camera_cfmid, prepareoutput_rdata_pos_camera_metfrag, prepareoutput_rdata_pos_camera_library, prepareoutput_rdata_pos_camera_noid
 
-  shell:
-    '''
-    /usr/local/bin/findIsotopes.r input=!{rdata_files} output=CameraFindIsotopes_pos.rdata maxcharge=!{params.maxcharge_findisotopes_pos_camera}
-    '''
+
+    """
+    /usr/local/bin/findIsotopes.r input=$rdata_files output=CameraFindIsotopes_pos.rdata maxcharge=$params.maxcharge_findisotopes_pos_camera
+    """
 }
 
 /*
@@ -1059,7 +1067,7 @@ if(params.perform_identification==true)
 
   process  process_read_MS2_pos_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$mzMLFile"
     publishDir "${params.outdir}/process_read_MS2_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1070,10 +1078,10 @@ if(params.perform_identification==true)
   output:
   file "${mzMLFile.baseName}.rdata" into mapmsmstocamera_rdata_pos_msnbase
 
-    shell:
-    '''
-      /usr/local/bin/readMS2MSnBase.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata inputname=!{mzMLFile.baseName}
-      '''
+
+    """
+      /usr/local/bin/readMS2MSnBase.r input=$mzMLFile output=${mzMLFile.baseName}.rdata inputname=${mzMLFile.baseName}
+      """
   }
 
   /*
@@ -1082,7 +1090,7 @@ if(params.perform_identification==true)
 
   process  process_mapmsms_tocamera_pos_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "A collection of files"
     publishDir "${params.outdir}/process_mapmsms_tocamera_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1096,9 +1104,9 @@ if(params.perform_identification==true)
 
     script:
     def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
-    shell:
+
     """
-      /usr/local/bin/mapMS2ToCamera.r inputCAMERA=!{rdata_files_ms1} inputMS2=$input_args output=MapMsms2Camera_pos.rdata ppm=!{params.ppm_mapmsmstocamera_pos_msnbase} rt=!{params.rt_mapmsmstocamera_pos_msnbase}
+      /usr/local/bin/mapMS2ToCamera.r inputCAMERA=$rdata_files_ms1 inputMS2=$input_args output=MapMsms2Camera_pos.rdata ppm=$params.ppm_mapmsmstocamera_pos_msnbase rt=$params.rt_mapmsmstocamera_pos_msnbase
       """
   }
 
@@ -1109,7 +1117,7 @@ if(params.perform_identification==true)
 
   process  process_mapmsms_toparam_pos_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$rdata_files_ms1"
     publishDir "${params.outdir}/process_mapmsms_toparam_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1120,16 +1128,16 @@ if(params.perform_identification==true)
 
   output:
   file "*.zip" into csifingerid_txt_pos_msnbase, addcutremove_txt_pos_msnbase, metfrag_txt_pos_msnbase, cfmidin_txt_pos_msnbase
-    shell:
-      '''
+
+      """
       mkdir out
-      /usr/local/bin/MS2ToMetFrag.r inputCAMERA=!{rdata_files_ms1} inputMS2=!{rdata_files_ms2} output=out \
-       precursorppm=!{params.precursorppm_msmstoparam_pos_msnbase} fragmentppm=!{params.fragmentppm_msmstoparam_pos_msnbase} fragmentabs=!{params.fragmentabs_msmstoparam_pos_msnbase} \
-        database=!{params.database_msmstoparam_pos_msnbase} mode=!{params.mode_msmstoparam_pos_msnbase} adductRules=!{params.adductRules_msmstoparam_pos_msnbase} minPeaks=!{params.minPeaks_msmstoparam_pos_msnbase}
+      /usr/local/bin/MS2ToMetFrag.r inputCAMERA=$rdata_files_ms1 inputMS2=$rdata_files_ms2 output=out \\
+       precursorppm=$params.precursorppm_msmstoparam_pos_msnbase fragmentppm=$params.fragmentppm_msmstoparam_pos_msnbase fragmentabs=$params.fragmentabs_msmstoparam_pos_msnbase \\
+        database=$params.database_msmstoparam_pos_msnbase mode=$params.mode_msmstoparam_pos_msnbase adductRules=$params.adductRules_msmstoparam_pos_msnbase minPeaks=$params.minPeaks_msmstoparam_pos_msnbase
     ls out/ -A -1  | cut -d'_' -f4- | tr ' ' '\n' | sort -u | xargs -I %  find out/ -type f -iname *% -exec zip %.zip {} +
 
 
-      '''
+      """
   }
 
 /*
@@ -1148,7 +1156,7 @@ csifingerid_txt_pos_msnbase_flatten=csifingerid_txt_pos_msnbase.flatten()
 
 process  process_ms2_identification_pos_csifingerid{
   label 'csifingerid'
-  tag "$name"
+  tag "$parameters"
   publishDir "${params.outdir}/process_ms2_identification_pos_csifingerid", mode: params.publish_dir_mode
 
 
@@ -1159,18 +1167,18 @@ process  process_ms2_identification_pos_csifingerid{
   file "${parameters.baseName}_Csifingerid_pos.zip" into aggregateID_csv_pos_csifingerid
   file "${parameters.baseName}_class_Csifingerid_pos.csv" into aggregateClass_csv_pos_csifingerid
 
-  shell:
-    '''
+
+    """
     mkdir inputs
     mkdir outputs
-    unzip  -j !{parameters} -d inputs/
-    touch !{parameters.baseName}_class_Csifingerid_pos.csv
-  /usr/local/bin/fingerID.r input=$PWD/inputs database=!{params.database_csifingerid_pos_csifingerid} tryOffline=T  \
- output=$PWD/outputs/ ncores=!{params.ncore_csifingerid_pos_csifingerid}  timeout=!{params.timeout_csifingerid_pos_csifingerid} canopus=T canopusOutput=$PWD/!{parameters.baseName}_class_Csifingerid_pos.csv
+    unzip  -j $parameters -d inputs/
+    touch ${parameters.baseName}_class_Csifingerid_pos.csv
+  /usr/local/bin/fingerID.r input=\$PWD/inputs database=$params.database_csifingerid_pos_csifingerid tryOffline=T  \\
+ output=\$PWD/outputs/ ncores=$params.ncore_csifingerid_pos_csifingerid  timeout=$params.timeout_csifingerid_pos_csifingerid canopus=T canopusOutput=\$PWD/${parameters.baseName}_class_Csifingerid_pos.csv
 
-   zip -j -r !{parameters.baseName}_Csifingerid_pos.zip outputs/*.csv
+   zip -j -r ${parameters.baseName}_Csifingerid_pos.zip outputs/*.csv
 
-    '''
+    """
 }
 /*
  * STEP 19 - aggregate ids from CSI
@@ -1178,7 +1186,7 @@ process  process_ms2_identification_pos_csifingerid{
 
 process  process_identification_aggregate_pos_csifingerid{
   label 'msnbase'
-  tag "$name"
+  tag "A collection of files"
   publishDir "${params.outdir}/process_identification_aggregate_pos_csifingerid", mode: params.publish_dir_mode
 
 
@@ -1188,15 +1196,15 @@ process  process_identification_aggregate_pos_csifingerid{
 output:
 file "aggregated_identification_csifingerid_pos.csv" into csifingerid_tsv_pos_passatutto
 
-  shell:
-    '''
+
+    """
     ulimit -s unlimited
   mkdir all
-  for x in *.zip ; do unzip -d all -o -u $x ; done
+  for x in *.zip ; do unzip -d all -o -u \$x ; done
   zip -r Csifingerid_pos.zip all
     /usr/local/bin/aggregateMetfrag.r inputs=Csifingerid_pos.zip realNames=Csifingerid_pos.zip output=aggregated_identification_csifingerid_pos.csv filetype=zip outTable=T
-sed -i '/^$/d' aggregated_identification_csifingerid_pos.csv
-    '''
+sed -i '/^\$/d' aggregated_identification_csifingerid_pos.csv
+    """
 }
 /*
  * STEP 20 - calculate pep from CSI results
@@ -1204,7 +1212,7 @@ sed -i '/^$/d' aggregated_identification_csifingerid_pos.csv
 
 process process_pepcalculation_csifingerid_pos_passatutto{
   label 'passatutto'
-  tag "$name"
+  tag "$identification_result"
   publishDir "${params.outdir}/process_pepcalculation_csifingerid_pos_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1214,25 +1222,25 @@ process process_pepcalculation_csifingerid_pos_passatutto{
 output:
 file "pep_identification_csifingerid_pos.csv" into csifingerid_tsv_pos_output
 
-shell:
-  '''
-  if [ -s !{identification_result} ]
+
+  """
+  if [ -s $identification_result ]
 then
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_csifingerid_pos.csv readTable=T
+/usr/local/bin/metfragPEP.r input=$identification_result score=score output=pep_identification_csifingerid_pos.csv readTable=T
 else
 touch pep_identification_csifingerid_pos.csv
 
 fi
 
 
-'''
+"""
 }
 /*
  * STEP 21 - output the results
  */
 process  process_output_quantid_pos_camera_csifingerid{
   label 'camera'
-  tag "$name"
+  tag "$camera_input_quant"
   publishDir "${params.outdir}/process_output_quantid_pos_camera_csifingerid", mode: params.publish_dir_mode
 
 
@@ -1244,28 +1252,28 @@ process  process_output_quantid_pos_camera_csifingerid{
 
 output:
 file "*.txt" into csifingerid_pos_finished
-  shell:
-'''
-if [ -s !{csifingerid_input_identification} ]
+
+"""
+if [ -s $csifingerid_input_identification ]
 then
 
-    /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{csifingerid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} \
-    rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera}  \
-   selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera}  \
-  onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera}  \
- combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera}  \
-outputPeakTable=peaktablePOSout_pos_csifingerid.txt outputVariables=varsPOSout_pos_csifingerid.txt outputMetaData=metadataPOSout_pos_csifingerid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+    /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputscores=$csifingerid_input_identification inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera \\
+    rt=$params.rt_output_pos_camera higherTheBetter=true scoreColumn=score impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera  \\
+   selectedType=$params.selected_type_output_pos_camera rename=$params.rename_output_pos_camera renameCol=$params.rename_col_output_pos_camera  \\
+  onlyReportWithID=$params.only_report_with_id_output_pos_camera combineReplicate=$params.combine_replicate_output_pos_camera  \\
+ combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera sampleCoverage=$params.sample_coverage_output_pos_camera  \\
+outputPeakTable=peaktablePOSout_pos_csifingerid.txt outputVariables=varsPOSout_pos_csifingerid.txt outputMetaData=metadataPOSout_pos_csifingerid.txt Ifnormalize=$params.normalize_output_pos_camera
 
 else
 
-    /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera}  \
-   higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera}  \
-  rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera} \
-  combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_csifingerid.txt \
-  outputVariables=varsPOSout_pos_csifingerid.txt outputMetaData=metadataPOSout_pos_csifingerid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+    /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera rt=$params.rt_output_pos_camera  \\
+   higherTheBetter=true scoreColumn=score impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera selectedType=$params.selected_type_output_pos_camera  \\
+  rename=$params.rename_output_pos_camera renameCol=$params.rename_col_output_pos_camera onlyReportWithID=$params.only_report_with_id_output_pos_camera combineReplicate=$params.combine_replicate_output_pos_camera \\
+  combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera sampleCoverage=$params.sample_coverage_output_pos_camera outputPeakTable=peaktablePOSout_pos_csifingerid.txt \\
+  outputVariables=varsPOSout_pos_csifingerid.txt outputMetaData=metadataPOSout_pos_csifingerid.txt Ifnormalize=$params.normalize_output_pos_camera
 
 fi
-    '''
+    """
 }
 }
 
@@ -1301,7 +1309,7 @@ metfrag_txt_pos_msnbase_flatten=metfrag_txt_pos_msnbase.flatten()
 
 process  process_ms2_identification_pos_metfrag{
   label 'metfrag'
-  tag "$name"
+  tag "$parameters"
   publishDir "${params.outdir}/process_ms2_identification_pos_metfrag", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1314,16 +1322,16 @@ process  process_ms2_identification_pos_metfrag{
   file "${parameters.baseName}_metfrag_pos.zip" into aggregateID_csv_pos_metfrag
 
 
-  shell:
-    '''
+
+    """
     mkdir inputs
     mkdir outputs
-    unzip  -j !{parameters} -d inputs/
-  touch !{parameters.baseName}.csv
-  find "$PWD/inputs" -type f | parallel -j !{params.ncore_pos_metfrag} /usr/local/bin/run_metfrag.sh -p {} -f $PWD/outputs/{/.}.csv -l "$PWD/!{metfrag_database}" -s "OfflineMetFusionScore"
-   zip -j -r !{parameters.baseName}_metfrag_pos.zip outputs/*.csv
+    unzip  -j $parameters -d inputs/
+  touch ${{parameters.baseName}}.csv
+  find "\$PWD/inputs" -type f | parallel -j $params.ncore_pos_metfrag /usr/local/bin/run_metfrag.sh -p {} -f \$PWD/outputs/{/.}.csv -l "\$PWD/$metfrag_database" -s "OfflineMetFusionScore"
+   zip -j -r ${{parameters.baseName}}_metfrag_pos.zip outputs/*.csv
 
-    '''
+    """
 }
 
 /*
@@ -1332,7 +1340,7 @@ process  process_ms2_identification_pos_metfrag{
 
 process  process_identification_aggregate_pos_metfrag{
   label 'msnbase'
-  tag "$name"
+  tag "A collection of files"
   publishDir "${params.outdir}/process_identification_aggregate_pos_metfrag", mode: params.publish_dir_mode
 
 
@@ -1342,16 +1350,16 @@ process  process_identification_aggregate_pos_metfrag{
 output:
 file "aggregated_identification_metfrag_pos.csv" into metfrag_tsv_pos_passatutto
 
-  shell:
-    '''
+
+    """
     ulimit -s unlimited
     mkdir all
-    for x in *.zip ; do unzip -d all -o -u $x ; done
+    for x in *.zip ; do unzip -d all -o -u \$x ; done
     zip -r metfrag_pos.zip all
     /usr/local/bin/aggregateMetfrag.r inputs=metfrag_pos.zip realNames=metfrag_pos.zip output=aggregated_identification_metfrag_pos.csv filetype=zip outTable=T
-  sed -i '/^$/d' aggregated_identification_metfrag_pos.csv
+  sed -i '/^\$/d' aggregated_identification_metfrag_pos.csv
 
-    '''
+    """
 }
 
 /*
@@ -1359,7 +1367,7 @@ file "aggregated_identification_metfrag_pos.csv" into metfrag_tsv_pos_passatutto
  */
 process process_pepcalculation_metfrag_pos_passatutto{
   label 'passatutto'
-  tag "$name"
+  tag "$identification_result"
   publishDir "${params.outdir}/process_pepcalculation_metfrag_pos_passatutto", mode: params.publish_dir_mode
 
 
@@ -1369,19 +1377,19 @@ process process_pepcalculation_metfrag_pos_passatutto{
 output:
 file "pep_identification_metfrag_pos.csv" into metfrag_tsv_pos_output
 
-shell:
-  '''
 
-  if [ -s !{identification_result} ]
+  """
+
+  if [ -s $identification_result ]
 then
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=FragmenterScore output=pep_identification_metfrag_pos.csv readTable=T
+/usr/local/bin/metfragPEP.r input=$identification_result score=FragmenterScore output=pep_identification_metfrag_pos.csv readTable=T
 else
 touch pep_identification_metfrag_pos.csv
 
 fi
 
 
-'''
+"""
 }
 
 
@@ -1391,7 +1399,7 @@ fi
 
 process  process_output_quantid_pos_camera_metfrag{
   label 'camera'
-  tag "$name"
+  tag "$camera_input_quant"
   publishDir "${params.outdir}/process_output_quantid_pos_camera_metfrag", mode: params.publish_dir_mode
 
 
@@ -1403,26 +1411,26 @@ process  process_output_quantid_pos_camera_metfrag{
 
 output:
 file "*.txt" into metfrag_pos_finished
-  shell:
-'''
-if [ -s !{metfrag_input_identification} ]
+
+"""
+if [ -s $metfrag_input_identification ]
 then
-/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{metfrag_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera}  \
-rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=FragmenterScore impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera}  \
-selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera}  \
-combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera}  \
-outputPeakTable=peaktablePOSout_pos_metfrag.txt outputVariables=varsPOSout_pos_metfrag.txt outputMetaData=metadataPOSout_pos_metfrag.txt Ifnormalize=!{params.normalize_output_pos_camera}
+/usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputscores=$metfrag_input_identification inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera  \\
+rt=$params.rt_output_pos_camera higherTheBetter=true scoreColumn=FragmenterScore impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera  \\
+selectedType=$params.selected_type_output_pos_camera rename=$params.rename_output_pos_camera renameCol=$params.rename_col_output_pos_camera onlyReportWithID=$params.only_report_with_id_output_pos_camera  \\
+combineReplicate=$params.combine_replicate_output_pos_camera combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera sampleCoverage=$params.sample_coverage_output_pos_camera  \\
+outputPeakTable=peaktablePOSout_pos_metfrag.txt outputVariables=varsPOSout_pos_metfrag.txt outputMetaData=metadataPOSout_pos_metfrag.txt Ifnormalize=$params.normalize_output_pos_camera
 
 else
-/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=FragmenterScore  \
-impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera}  \
-renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera}  \
-combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera}  \
-outputPeakTable=peaktablePOSout_pos_metfrag.txt outputVariables=varsPOSout_pos_metfrag.txt outputMetaData=metadataPOSout_pos_metfrag.txt Ifnormalize=!{params.normalize_output_pos_camera}
+/usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera rt=$params.rt_output_pos_camera higherTheBetter=true scoreColumn=FragmenterScore  \\
+impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera selectedType=$params.selected_type_output_pos_camera rename=$params.rename_output_pos_camera  \\
+renameCol=$params.rename_col_output_pos_camera onlyReportWithID=$params.only_report_with_id_output_pos_camera combineReplicate=$params.combine_replicate_output_pos_camera  \\
+combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera sampleCoverage=$params.sample_coverage_output_pos_camera  \\
+outputPeakTable=peaktablePOSout_pos_metfrag.txt outputVariables=varsPOSout_pos_metfrag.txt outputMetaData=metadataPOSout_pos_metfrag.txt Ifnormalize=$params.normalize_output_pos_camera
 
 
 fi
-    '''
+    """
 }
 }
 
@@ -1449,7 +1457,7 @@ cfmid_txt_pos_msnbase_flatten=cfmidin_txt_pos_msnbase.flatten()
  */
 process  process_ms2_identification_pos_cfmid{
   label 'cfmid'
-  tag "$name"
+  tag "$parameters"
   publishDir "${params.outdir}/process_ms2_identification_pos_cfmid", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1463,17 +1471,17 @@ process  process_ms2_identification_pos_cfmid{
  file "${parameters.baseName}_cfmid_pos.zip" into aggregateID_csv_pos_cfmid
 
 
- shell:
-   '''
+
+   """
    mkdir inputs
    mkdir outputs
-   unzip  -j !{parameters} -d inputs/
- touch !{parameters.baseName}.csv
- find "$PWD/inputs" -type f | parallel -j !{params.ncore_pos_cfmid} /usr/local/bin/cfmid.r input={} realName={/} databaseFile=$PWD/!{cfmid_database}  output=$PWD/outputs/{/.}.csv candidate_id=!{params.candidate_id_identification_pos_cfmid} candidate_inchi_smiles=!{params.candidate_inchi_smiles_identification_pos_cfmid} candidate_mass=!{params.candidate_mass_identification_pos_cfmid} databaseNameColumn=!{params.database_name_column_identification_pos_cfmid} databaseInChIColumn=!{params.database_inchI_column_identification_pos_cfmid} scoreType=Jaccard
+   unzip  -j $parameters -d inputs/
+ touch ${{parameters.baseName}}.csv
+ find "\$PWD/inputs" -type f | parallel -j $params.ncore_pos_cfmid /usr/local/bin/cfmid.r input={} realName={/} databaseFile=\$PWD/$cfmid_database  output=\$PWD/outputs/{/.}.csv candidate_id=$params.candidate_id_identification_pos_cfmid candidate_inchi_smiles=$params.candidate_inchi_smiles_identification_pos_cfmid candidate_mass=$params.candidate_mass_identification_pos_cfmid databaseNameColumn=$params.database_name_column_identification_pos_cfmid databaseInChIColumn=$params.database_inchI_column_identification_pos_cfmid scoreType=Jaccard
 
-  zip -j -r !{parameters.baseName}_cfmid_pos.zip outputs/*.csv
+  zip -j -r ${{parameters.baseName}}_cfmid_pos.zip outputs/*.csv
 
- '''
+ """
 }
 
 /*
@@ -1482,7 +1490,7 @@ process  process_ms2_identification_pos_cfmid{
 
 process  process_identification_aggregate_pos_cfmid{
   label 'msnbase'
-  tag "$name"
+  tag "A collection of files"
   publishDir "${params.outdir}/process_identification_aggregate_pos_cfmid", mode: params.publish_dir_mode
 
 
@@ -1492,15 +1500,15 @@ process  process_identification_aggregate_pos_cfmid{
 output:
 file "aggregated_identification_cfmid_pos.csv" into cfmid_tsv_pos_passatutto
 
-  shell:
-    '''
+
+    """
     ulimit -s unlimited
     mkdir all
-    for x in *.zip ; do unzip -d all -o -u $x ; done
+    for x in *.zip ; do unzip -d all -o -u \$x ; done
     zip -r cfmid_pos.zip all
     /usr/local/bin/aggregateMetfrag.r inputs=cfmid_pos.zip realNames=cfmid_pos.zip output=aggregated_identification_cfmid_pos.csv filetype=zip outTable=T
-  sed -i '/^$/d' aggregated_identification_cfmid_pos.csv
-    '''
+  sed -i '/^\$/d' aggregated_identification_cfmid_pos.csv
+    """
 }
 
 /*
@@ -1510,7 +1518,7 @@ file "aggregated_identification_cfmid_pos.csv" into cfmid_tsv_pos_passatutto
 
 process process_pepcalculation_cfmid_pos_passatutto{
   label 'passatutto'
-  tag "$name"
+  tag "$identification_result"
   publishDir "${params.outdir}/process_pepcalculation_cfmid_pos_passatutto", mode: params.publish_dir_mode
 
 
@@ -1520,17 +1528,17 @@ process process_pepcalculation_cfmid_pos_passatutto{
 output:
 file "pep_identification_cfmid_pos.csv" into cfmid_tsv_pos_output
 
-shell:
-  '''
 
-if [ -s !{identification_result} ]
+  """
+
+if [ -s $identification_result ]
 then
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=Jaccard_Score output=pep_identification_cfmid_pos.csv readTable=T
+/usr/local/bin/metfragPEP.r input=$identification_result score=Jaccard_Score output=pep_identification_cfmid_pos.csv readTable=T
 else
 touch pep_identification_cfmid_pos.csv
 
 fi
-'''
+"""
 }
 
 /*
@@ -1540,7 +1548,7 @@ fi
 
 process  process_output_quantid_pos_camera_cfmid{
   label 'camera'
-  tag "$name"
+  tag "$camera_input_quant"
   publishDir "${params.outdir}/process_output_quantid_pos_camera_cfmid", mode: params.publish_dir_mode
 
 
@@ -1552,27 +1560,27 @@ process  process_output_quantid_pos_camera_cfmid{
 
 output:
 file "*.txt" into cfmid_pos_finished
-  shell:
-'''
 
-if [ -s !{cfmid_input_identification} ]
+"""
+
+if [ -s $cfmid_input_identification ]
 then
-/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{cfmid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera}  \
-higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera}  \
-rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera}  \
-combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera}  \
-outputPeakTable=peaktablePOSout_pos_cfmid.txt outputVariables=varsPOSout_pos_cfmid.txt outputMetaData=metadataPOSout_pos_cfmid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+/usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputscores=$cfmid_input_identification inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera rt=$params.rt_output_pos_camera  \\
+higherTheBetter=true scoreColumn=Jaccard_Score impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera selectedType=$params.selected_type_output_pos_camera  \\
+rename=$params.rename_output_pos_camera renameCol=$params.rename_col_output_pos_camera onlyReportWithID=$params.only_report_with_id_output_pos_camera combineReplicate=$params.combine_replicate_output_pos_camera  \\
+combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera sampleCoverage=$params.sample_coverage_output_pos_camera  \\
+outputPeakTable=peaktablePOSout_pos_cfmid.txt outputVariables=varsPOSout_pos_cfmid.txt outputMetaData=metadataPOSout_pos_cfmid.txt Ifnormalize=$params.normalize_output_pos_camera
 
 else
-/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera}  \
-higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera}  \
-rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera}  \
-combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_cfmid.txt  \
-outputVariables=varsPOSout_pos_cfmid.txt outputMetaData=metadataPOSout_pos_cfmid.txt Ifnormalize=!{params.normalize_output_pos_camera}
+/usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera rt=$params.rt_output_pos_camera  \\
+higherTheBetter=true scoreColumn=Jaccard_Score impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera selectedType=$params.selected_type_output_pos_camera  \\
+rename=$params.rename_output_pos_camera renameCol=$params.rename_col_output_pos_camera onlyReportWithID=$params.only_report_with_id_output_pos_camera combineReplicate=$params.combine_replicate_output_pos_camera  \\
+combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera sampleCoverage=$params.sample_coverage_output_pos_camera outputPeakTable=peaktablePOSout_pos_cfmid.txt  \\
+outputVariables=varsPOSout_pos_cfmid.txt outputMetaData=metadataPOSout_pos_cfmid.txt Ifnormalize=$params.normalize_output_pos_camera
 
 
 fi
-    '''
+    """
 }
 }
 
@@ -1597,7 +1605,7 @@ if(params.library_charactrized_pos==false){
 
     process process_peak_picker_library_pos_openms_centroided {
       label 'openms'
-        tag "$name"
+        tag "$mzMLFile"
         publishDir "${params.outdir}/process_peak_picker_library_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
         stageInMode 'copy'
 
@@ -1609,10 +1617,10 @@ if(params.library_charactrized_pos==false){
         output:
         file "${mzMLFile}" into masstrace_detection_process_library_pos, param_detection_process_library_pos
 
-        shell:
-        '''
-        PeakPickerHiRes -in !{mzMLFile} -out !{mzMLFile} -ini !{setting_file}
-        '''
+
+        """
+        PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
+        """
     }
 
    if(params.quantification_openms_xcms_library_pos=="openms")
@@ -1622,7 +1630,7 @@ if(params.library_charactrized_pos==false){
       */
      process process_masstrace_detection_library_pos_openms_centroided {
        label 'openms'
-         tag "$name"
+         tag "$mzMLFile"
          publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1634,10 +1642,10 @@ if(params.library_charactrized_pos==false){
          output:
          file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion
 
-         shell:
-         '''
-         FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-         '''
+
+         """
+         FeatureFinderMetabo -in $mzMLFile -out ${{mzMLFile.baseName}}.featureXML -ini $setting_file
+         """
      }
 
      /*
@@ -1646,7 +1654,7 @@ if(params.library_charactrized_pos==false){
 
      process process_openms_to_xcms_conversion_library_pos_centroided {
        label 'xcmsconvert'
-         tag "$name"
+         tag "$mzMLFile"
          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1658,11 +1666,11 @@ if(params.library_charactrized_pos==false){
          output:
          file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
-         shell:
-         '''
-          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata sampleClass=library changeNameTO=!{mzMLFile.baseName}.mzML
 
-         '''
+         """
+          /usr/local/bin/featurexmlToCamera.r input=$mzMLFile realFileName=$mzMLFile polarity=positive output=${{mzMLFile.baseName}}.rdata sampleClass=library changeNameTO=${{mzMLFile.baseName}}.mzML
+
+         """
      }
    }else{
 
@@ -1675,7 +1683,7 @@ if(params.library_charactrized_pos==false){
 
       process process_ipo_param_library_pos_ipo_centroided{
           label 'ipo'
-          tag "$name"
+          tag "A collection of files"
           publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1687,23 +1695,23 @@ if(params.library_charactrized_pos==false){
 
           script:
             def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-          shell:
+
           """
           touch quant_params_library_pos.json
           touch rt_params_library_pos.json
-            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \
-            methodXset=!{params.ipo_methodXset_library_pos} methodRT=!{params.ipo_methodRT_library_pos} noise_l=!{params.ipo_noise_l_library_pos} \
-             noise_h=!{params.ipo_noise_h_library_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_library_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_library_pos} \
-            prefilter_h_l=!{params.ipo_prefilter_h_l_library_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_library_pos} \
-             snthresh_l=!{params.ipo_snthresh_l_library_pos} snthresh_h=!{params.ipo_snthresh_h_library_pos} mzCenterFun=!{params.ipo_mzCenterFun_library_pos} \
-              integrate=!{params.ipo_integrate_library_pos} fitgauss=!{params.ipo_fitgauss_library_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_pos} \
-               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_pos} ipo_ppm_l=!{params.ipo_ppm_l_library_pos} \
-             ipo_ppm_h=!{params.ipo_ppm_h_library_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_pos} ipo_charge_camera=!{params.ipo_charge_camera_library_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_pos} \
-             response_l=!{params.ipo_response_l_library_pos} response_h=!{params.ipo_response_h_library_pos} distFunc=!{params.ipo_distFunc_library_pos} factorDiag_l=!{params.ipo_factorDiag_l_library_pos} factorDiag_h=!{params.ipo_factorDiag_h_library_pos} factorGap_l=!{params.ipo_factorGap_l_library_pos} \
-             factorGap_h=!{params.ipo_factorGap_h_library_pos} localAlignment=!{params.ipo_localAlignment_library_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_library_pos} ipo_gapInit_h=!{params.ipo_gapInit_h_library_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_library_pos} \
-             ipo_gapExtend_h=!{params.ipo_gapExtend_h_library_pos} ipo_profStep_l=!{params.ipo_profStep_l_library_pos} ipo_profStep_h=!{params.ipo_profStep_h_library_pos} bw_l=!{params.ipo_bw_l_library_pos} bw_h=!{params.ipo_bw_h_library_pos} minfrac_l=!{params.ipo_minfrac_l_library_pos} \
-              minfrac_h=!{params.ipo_minfrac_h_library_pos} mzwid_l=!{params.ipo_mzwid_l_library_pos} mzwid_h=!{params.ipo_mzwid_h_library_pos} minsamp_l=!{params.ipo_minsamp_l_library_pos} \
-               minsamp_h=!{params.ipo_minsamp_h_library_pos} max_l=!{params.ipo_max_l_library_pos} max_h=!{params.ipo_max_h_library_pos} ncores=!{params.ipo_ncores_library_pos} outputxset=quant_params_library_pos.json outputrt=rt_params_library_pos.json
+            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \\
+            methodXset=$params.ipo_methodXset_library_pos methodRT=$params.ipo_methodRT_library_pos noise_l=$params.ipo_noise_l_library_pos \\
+             noise_h=$params.ipo_noise_h_library_pos prefilter_l_l=$params.ipo_prefilter_l_l_library_pos prefilter_l_h=$params.ipo_prefilter_l_h_library_pos \\
+            prefilter_h_l=$params.ipo_prefilter_h_l_library_pos prefilter_h_h=$params.ipo_prefilter_h_h_library_pos \\
+             snthresh_l=$params.ipo_snthresh_l_library_pos snthresh_h=$params.ipo_snthresh_h_library_pos mzCenterFun=$params.ipo_mzCenterFun_library_pos \\
+              integrate=$params.ipo_integrate_library_pos fitgauss=$params.ipo_fitgauss_library_pos ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos \\
+               ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos ipo_ppm_l=$params.ipo_ppm_l_library_pos \\
+             ipo_ppm_h=$params.ipo_ppm_h_library_pos ipo_mzdiff_l=$params.ipo_mzdiff_l_library_pos ipo_mzdiff_h=$params.ipo_mzdiff_h_library_pos ipo_charge_camera=$params.ipo_charge_camera_library_pos ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_pos \\
+             response_l=$params.ipo_response_l_library_pos response_h=$params.ipo_response_h_library_pos distFunc=$params.ipo_distFunc_library_pos factorDiag_l=$params.ipo_factorDiag_l_library_pos factorDiag_h=$params.ipo_factorDiag_h_library_pos factorGap_l=$params.ipo_factorGap_l_library_pos \\
+             factorGap_h=$params.ipo_factorGap_h_library_pos localAlignment=$params.ipo_localAlignment_library_pos ipo_gapInit_l=$params.ipo_gapInit_l_library_pos ipo_gapInit_h=$params.ipo_gapInit_h_library_pos ipo_gapExtend_l=$params.ipo_gapExtend_l_library_pos \\
+             ipo_gapExtend_h=$params.ipo_gapExtend_h_library_pos ipo_profStep_l=$params.ipo_profStep_l_library_pos ipo_profStep_h=$params.ipo_profStep_h_library_pos bw_l=$params.ipo_bw_l_library_pos bw_h=$params.ipo_bw_h_library_pos minfrac_l=$params.ipo_minfrac_l_library_pos \\
+              minfrac_h=$params.ipo_minfrac_h_library_pos mzwid_l=$params.ipo_mzwid_l_library_pos mzwid_h=$params.ipo_mzwid_h_library_pos minsamp_l=$params.ipo_minsamp_l_library_pos \\
+               minsamp_h=$params.ipo_minsamp_h_library_pos max_l=$params.ipo_max_l_library_pos max_h=$params.ipo_max_h_library_pos ncores=$params.ipo_ncores_library_pos outputxset=quant_params_library_pos.json outputrt=rt_params_library_pos.json
           """
       }
       }
@@ -1715,7 +1723,7 @@ if(params.library_charactrized_pos==false){
 
      process process_masstrace_detection_library_pos_xcms_centroided{
        label 'xcms'
-       tag "$name"
+       tag "$mzMLFile"
        publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1728,22 +1736,22 @@ if(params.library_charactrized_pos==false){
        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
 
-         shell:
+       script:
           def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
          """
-         /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms}  \
-        peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=!{params.sampleclass_quant_library_pos_xcms}  \
-       mzdiff=!{params.mzdiff_quant_library_pos_xcms} snthresh=!{params.snthresh_quant_library_pos_xcms} prefilter_l=!{params.prefilter_quant_library_pos_xcms} prefilter_h=!{params.value_of_prefilter_quant_library_pos_xcms}  \
-      mzCenterFun=!{params.mzCenterFun_quant_library_pos_xcms} integrate=!{params.integrate_quant_library_pos_xcms} fitgauss=!{params.fitgauss_quant_library_pos_xcms} \
-         methodXset=!{params.ipo_methodXset_library_pos} methodRT=!{params.ipo_methodRT_library_pos} noise_l=!{params.ipo_noise_l_library_pos} \
-         noise_h=!{params.ipo_noise_h_library_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_library_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_library_pos} \
-         prefilter_h_l=!{params.ipo_prefilter_h_l_library_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_library_pos} \
-         snthresh_l=!{params.ipo_snthresh_l_library_pos} snthresh_h=!{params.ipo_snthresh_h_library_pos} mzCenterFun=!{params.ipo_mzCenterFun_library_pos} \
-         integrate=!{params.ipo_integrate_library_pos} fitgauss=!{params.ipo_fitgauss_library_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_pos} \
-         ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_pos} ipo_ppm_l=!{params.ipo_ppm_l_library_pos} \
-         ipo_ppm_h=!{params.ipo_ppm_h_library_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_pos} ipo_charge_camera=!{params.ipo_charge_camera_library_pos}  \
-        ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_pos} \
-         ipo_inv=!{ipo_library_pos_localQ}  ${filter_argument}
+         /usr/local/bin/findPeaks.r input=\$PWD/$mzMLFile output=\$PWD/${{mzMLFile.baseName}}.rdata ppm=$params.masstrace_ppm_library_pos_xcms peakwidthLow=$params.peakwidthlow_quant_library_pos_xcms  \\
+        peakwidthHigh=$params.peakwidthhigh_quant_library_pos_xcms noise=$params.noise_quant_library_pos_xcms polarity=positive realFileName=$mzMLFile sampleClass=$params.sampleclass_quant_library_pos_xcms  \\
+       mzdiff=$params.mzdiff_quant_library_pos_xcms snthresh=$params.snthresh_quant_library_pos_xcms prefilter_l=$params.prefilter_quant_library_pos_xcms prefilter_h=$params.value_of_prefilter_quant_library_pos_xcms  \\
+      mzCenterFun=$params.mzCenterFun_quant_library_pos_xcms integrate=$params.integrate_quant_library_pos_xcms fitgauss=$params.fitgauss_quant_library_pos_xcms \\
+         methodXset=$params.ipo_methodXset_library_pos methodRT=$params.ipo_methodRT_library_pos noise_l=$params.ipo_noise_l_library_pos \\
+         noise_h=$params.ipo_noise_h_library_pos prefilter_l_l=$params.ipo_prefilter_l_l_library_pos prefilter_l_h=$params.ipo_prefilter_l_h_library_pos \\
+         prefilter_h_l=$params.ipo_prefilter_h_l_library_pos prefilter_h_h=$params.ipo_prefilter_h_h_library_pos \\
+         snthresh_l=$params.ipo_snthresh_l_library_pos snthresh_h=$params.ipo_snthresh_h_library_pos mzCenterFun=$params.ipo_mzCenterFun_library_pos \\
+         integrate=$params.ipo_integrate_library_pos fitgauss=$params.ipo_fitgauss_library_pos ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos \\
+         ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos ipo_ppm_l=$params.ipo_ppm_l_library_pos \\
+         ipo_ppm_h=$params.ipo_ppm_h_library_pos ipo_mzdiff_l=$params.ipo_mzdiff_l_library_pos ipo_mzdiff_h=$params.ipo_mzdiff_h_library_pos ipo_charge_camera=$params.ipo_charge_camera_library_pos  \\
+        ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_pos \\
+         ipo_inv=$ipo_library_pos_localQ  ${filter_argument}
          """
      }
    }
@@ -1757,7 +1765,7 @@ if(params.library_charactrized_pos==false){
        */
       process process_masstrace_detection_library_pos_openms_noncentroided {
         label 'openms'
-          tag "$name"
+          tag "$mzMLFile"
           publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1769,10 +1777,10 @@ if(params.library_charactrized_pos==false){
           output:
           file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_library_pos_noncentroided
 
-          shell:
-          '''
-          FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-          '''
+
+          """
+          FeatureFinderMetabo -in $mzMLFile -out ${{mzMLFile.baseName}}.featureXML -ini $setting_file
+          """
       }
 
       /*
@@ -1781,7 +1789,7 @@ if(params.library_charactrized_pos==false){
 
       process process_openms_to_xcms_conversion_library_pos_noncentroided {
         label 'xcmsconvert'
-          tag "$name"
+          tag "$mzMLFile"
           publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1793,11 +1801,11 @@ if(params.library_charactrized_pos==false){
           output:
           file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
-          shell:
-          '''
-           /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=positive output=!{mzMLFile.baseName}.rdata sampleClass=library changeNameTO=!{mzMLFile.baseName}.mzML
 
-          '''
+          """
+           /usr/local/bin/featurexmlToCamera.r input=$mzMLFile realFileName=$mzMLFile polarity=positive output=${mzMLFile.baseName}.rdata sampleClass=library changeNameTO=${mzMLFile.baseName}.mzML
+
+          """
       }
     }else{
 
@@ -1812,7 +1820,7 @@ if(params.library_charactrized_pos==false){
 
        process process_ipo_param_library_pos_ipo_noncentroided{
            label 'ipo'
-           tag "$name"
+           tag "$mzMLFile"
            publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1824,27 +1832,27 @@ if(params.library_charactrized_pos==false){
 
            script:
              def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-           shell:
+
            """
            touch quant_params_library_pos.json
            touch rt_params_library_pos.json
-           /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \
-             methodXset=!{params.ipo_methodXset_library_pos} methodRT=!{params.ipo_methodRT_library_pos} noise_l=!{params.ipo_noise_l_library_pos} \
-              noise_h=!{params.ipo_noise_h_library_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_library_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_library_pos} \
-             prefilter_h_l=!{params.ipo_prefilter_h_l_library_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_library_pos} \
-              snthresh_l=!{params.ipo_snthresh_l_library_pos} snthresh_h=!{params.ipo_snthresh_h_library_pos} mzCenterFun=!{params.ipo_mzCenterFun_library_pos} \
-               integrate=!{params.ipo_integrate_library_pos} fitgauss=!{params.ipo_fitgauss_library_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_pos} \
-                ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_pos} ipo_ppm_l=!{params.ipo_ppm_l_library_pos} \
-              ipo_ppm_h=!{params.ipo_ppm_h_library_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_pos}  \
-             ipo_charge_camera=!{params.ipo_charge_camera_library_pos} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_pos} \
-              response_l=!{params.ipo_response_l_library_pos} response_h=!{params.ipo_response_h_library_pos} distFunc=!{params.ipo_distFunc_library_pos}  \
-             factorDiag_l=!{params.ipo_factorDiag_l_library_pos} factorDiag_h=!{params.ipo_factorDiag_h_library_pos} factorGap_l=!{params.ipo_factorGap_l_library_pos} \
-              factorGap_h=!{params.ipo_factorGap_h_library_pos} localAlignment=!{params.ipo_localAlignment_library_pos} ipo_gapInit_l=!{params.ipo_gapInit_l_library_pos}  \
-             ipo_gapInit_h=!{params.ipo_gapInit_h_library_pos} ipo_gapExtend_l=!{params.ipo_gapExtend_l_library_pos} \
-              ipo_gapExtend_h=!{params.ipo_gapExtend_h_library_pos} ipo_profStep_l=!{params.ipo_profStep_l_library_pos} ipo_profStep_h=!{params.ipo_profStep_h_library_pos}  \
-             bw_l=!{params.ipo_bw_l_library_pos} bw_h=!{params.ipo_bw_h_library_pos} minfrac_l=!{params.ipo_minfrac_l_library_pos} \
-               minfrac_h=!{params.ipo_minfrac_h_library_pos} mzwid_l=!{params.ipo_mzwid_l_library_pos} mzwid_h=!{params.ipo_mzwid_h_library_pos} minsamp_l=!{params.ipo_minsamp_l_library_pos} \
-                minsamp_h=!{params.ipo_minsamp_h_library_pos} max_l=!{params.ipo_max_l_library_pos} max_h=!{params.ipo_max_h_library_pos} ncores=!{params.ipo_ncores_library_pos} outputxset=quant_params_library_pos.json outputrt=rt_params_library_pos.json
+           /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \\
+             methodXset=$params.ipo_methodXset_library_pos methodRT=$params.ipo_methodRT_library_pos noise_l=$params.ipo_noise_l_library_pos \\
+              noise_h=$params.ipo_noise_h_library_pos prefilter_l_l=$params.ipo_prefilter_l_l_library_pos prefilter_l_h=$params.ipo_prefilter_l_h_library_pos \\
+             prefilter_h_l=$params.ipo_prefilter_h_l_library_pos prefilter_h_h=$params.ipo_prefilter_h_h_library_pos \\
+              snthresh_l=$params.ipo_snthresh_l_library_pos snthresh_h=$params.ipo_snthresh_h_library_pos mzCenterFun=$params.ipo_mzCenterFun_library_pos \\
+               integrate=$params.ipo_integrate_library_pos fitgauss=$params.ipo_fitgauss_library_pos ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos \\
+                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos ipo_ppm_l=$params.ipo_ppm_l_library_pos \\
+              ipo_ppm_h=$params.ipo_ppm_h_library_pos ipo_mzdiff_l=$params.ipo_mzdiff_l_library_pos ipo_mzdiff_h=$params.ipo_mzdiff_h_library_pos  \\
+             ipo_charge_camera=$params.ipo_charge_camera_library_pos ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_pos \\
+              response_l=$params.ipo_response_l_library_pos response_h=$params.ipo_response_h_library_pos distFunc=$params.ipo_distFunc_library_pos  \\
+             factorDiag_l=$params.ipo_factorDiag_l_library_pos factorDiag_h=$params.ipo_factorDiag_h_library_pos factorGap_l=$params.ipo_factorGap_l_library_pos \\
+              factorGap_h=$params.ipo_factorGap_h_library_pos localAlignment=$params.ipo_localAlignment_library_pos ipo_gapInit_l=$params.ipo_gapInit_l_library_pos  \\
+             ipo_gapInit_h=$params.ipo_gapInit_h_library_pos ipo_gapExtend_l=$params.ipo_gapExtend_l_library_pos \\
+              ipo_gapExtend_h=$params.ipo_gapExtend_h_library_pos ipo_profStep_l=$params.ipo_profStep_l_library_pos ipo_profStep_h=$params.ipo_profStep_h_library_pos  \\
+             bw_l=$params.ipo_bw_l_library_pos bw_h=$params.ipo_bw_h_library_pos minfrac_l=$params.ipo_minfrac_l_library_pos \\
+               minfrac_h=$params.ipo_minfrac_h_library_pos mzwid_l=$params.ipo_mzwid_l_library_pos mzwid_h=$params.ipo_mzwid_h_library_pos minsamp_l=$params.ipo_minsamp_l_library_pos \\
+                minsamp_h=$params.ipo_minsamp_h_library_pos max_l=$params.ipo_max_l_library_pos max_h=$params.ipo_max_h_library_pos ncores=$params.ipo_ncores_library_pos outputxset=quant_params_library_pos.json outputrt=rt_params_library_pos.json
            """
        }
        }
@@ -1854,7 +1862,7 @@ if(params.library_charactrized_pos==false){
 
       process process_masstrace_detection_library_pos_xcms_noncentroided{
         label 'xcms'
-        tag "$name"
+        tag "$mzMLFile"
         publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -1866,22 +1874,22 @@ if(params.library_charactrized_pos==false){
         output:
         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
-        shell:
+script:
         def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
         """
-       /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_pos_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_pos_xcms}  \
-      peakwidthHigh=!{params.peakwidthhigh_quant_library_pos_xcms} noise=!{params.noise_quant_library_pos_xcms} polarity=positive realFileName=!{mzMLFile} sampleClass=!{params.sampleclass_quant_library_pos_xcms}   \
-     mzdiff=!{params.mzdiff_quant_library_pos_xcms} snthresh=!{params.snthresh_quant_library_pos_xcms} prefilter_l=!{params.prefilter_quant_library_pos_xcms} prefilter_h=!{params.value_of_prefilter_quant_library_pos_xcms}  \
-    mzCenterFun=!{params.mzCenterFun_quant_library_pos_xcms} integrate=!{params.integrate_quant_library_pos_xcms} fitgauss=!{params.fitgauss_quant_library_pos_xcms} \
-       methodXset=!{params.ipo_methodXset_library_pos} methodRT=!{params.ipo_methodRT_library_pos} noise_l=!{params.ipo_noise_l_library_pos} \
-       noise_h=!{params.ipo_noise_h_library_pos} prefilter_l_l=!{params.ipo_prefilter_l_l_library_pos} prefilter_l_h=!{params.ipo_prefilter_l_h_library_pos} \
-       prefilter_h_l=!{params.ipo_prefilter_h_l_library_pos} prefilter_h_h=!{params.ipo_prefilter_h_h_library_pos} \
-       snthresh_l=!{params.ipo_snthresh_l_library_pos} snthresh_h=!{params.ipo_snthresh_h_library_pos} mzCenterFun=!{params.ipo_mzCenterFun_library_pos} \
-       integrate=!{params.ipo_integrate_library_pos} fitgauss=!{params.ipo_fitgauss_library_pos} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_pos} \
-       ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_pos} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_pos} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_pos} ipo_ppm_l=!{params.ipo_ppm_l_library_pos} \
-       ipo_ppm_h=!{params.ipo_ppm_h_library_pos} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_pos} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_pos} ipo_charge_camera=!{params.ipo_charge_camera_library_pos}  \
-      ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_pos} \
-       ipo_inv=!{ipo_library_pos_localQ} ${filter_argument}
+       /usr/local/bin/findPeaks.r input=\$PWD/$mzMLFile output=\$PWD/${mzMLFile.baseName}.rdata ppm=$params.masstrace_ppm_library_pos_xcms peakwidthLow=$params.peakwidthlow_quant_library_pos_xcms  \\
+      peakwidthHigh=$params.peakwidthhigh_quant_library_pos_xcms noise=$params.noise_quant_library_pos_xcms polarity=positive realFileName=$mzMLFile sampleClass=$params.sampleclass_quant_library_pos_xcms   \\
+     mzdiff=$params.mzdiff_quant_library_pos_xcms snthresh=$params.snthresh_quant_library_pos_xcms prefilter_l=$params.prefilter_quant_library_pos_xcms prefilter_h=$params.value_of_prefilter_quant_library_pos_xcms  \\
+    mzCenterFun=$params.mzCenterFun_quant_library_pos_xcms integrate=$params.integrate_quant_library_pos_xcms fitgauss=$params.fitgauss_quant_library_pos_xcms \\
+       methodXset=$params.ipo_methodXset_library_pos methodRT=$params.ipo_methodRT_library_pos noise_l=$params.ipo_noise_l_library_pos \\
+       noise_h=$params.ipo_noise_h_library_pos prefilter_l_l=$params.ipo_prefilter_l_l_library_pos prefilter_l_h=$params.ipo_prefilter_l_h_library_pos \\
+       prefilter_h_l=$params.ipo_prefilter_h_l_library_pos prefilter_h_h=$params.ipo_prefilter_h_h_library_pos \\
+       snthresh_l=$params.ipo_snthresh_l_library_pos snthresh_h=$params.ipo_snthresh_h_library_pos mzCenterFun=$params.ipo_mzCenterFun_library_pos \\
+       integrate=$params.ipo_integrate_library_pos fitgauss=$params.ipo_fitgauss_library_pos ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos \\
+       ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos ipo_ppm_l=$params.ipo_ppm_l_library_pos \\
+       ipo_ppm_h=$params.ipo_ppm_h_library_pos ipo_mzdiff_l=$params.ipo_mzdiff_l_library_pos ipo_mzdiff_h=$params.ipo_mzdiff_h_library_pos ipo_charge_camera=$params.ipo_charge_camera_library_pos  \\
+      ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_pos \\
+       ipo_inv=$ipo_library_pos_localQ ${filter_argument}
         """
       }
     }
@@ -1896,7 +1904,7 @@ if(params.library_charactrized_pos==false){
 
   process  process_annotate_peaks_library_pos_camera{
     label 'camera'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_annotate_peaks_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
@@ -1907,10 +1915,10 @@ if(params.library_charactrized_pos==false){
   output:
   file "${rdata_files.baseName}.rdata" into group_rdata_library_pos_camera
 
-    shell:
-      '''
-      /usr/local/bin/xsAnnotate.r  input=!{rdata_files} output=!{rdata_files.baseName}.rdata
-      '''
+
+      """
+      /usr/local/bin/xsAnnotate.r  input=$rdata_files output=${rdata_files.baseName}.rdata
+      """
   }
 
   /*
@@ -1919,7 +1927,7 @@ if(params.library_charactrized_pos==false){
 
   process  process_group_peaks_library_pos_camera{
     label 'camera'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_group_peaks_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
@@ -1930,10 +1938,10 @@ if(params.library_charactrized_pos==false){
   output:
   file "${rdata_files.baseName}.rdata" into findaddcuts_rdata_library_pos_camera
 
-    shell:
-      '''
-      /usr/local/bin/groupFWHM.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata sigma=!{params.sigma_group_library_pos_camera} perfwhm=!{params.perfwhm_group_library_pos_camera} intval=!{params.intval_group_library_pos_camera}
-      '''
+
+      """
+      /usr/local/bin/groupFWHM.r input=$rdata_files output=${rdata_files.baseName}.rdata sigma=$params.sigma_group_library_pos_camera perfwhm=$params.perfwhm_group_library_pos_camera intval=$params.intval_group_library_pos_camera
+      """
   }
 
   /*
@@ -1942,7 +1950,7 @@ if(params.library_charactrized_pos==false){
 
   process  process_find_addcuts_library_pos_camera{
     label 'camera'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_find_addcuts_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
@@ -1953,10 +1961,10 @@ if(params.library_charactrized_pos==false){
   output:
   file "${rdata_files.baseName}.rdata" into findisotopes_rdata_library_pos_camera
 
-    shell:
-      '''
-      /usr/local/bin/findAdducts.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata ppm=!{params.ppm_findaddcuts_library_pos_camera} polarity=!{params.polarity_findaddcuts_library_pos_camera}
-      '''
+
+      """
+      /usr/local/bin/findAdducts.r input=$rdata_files output=${rdata_files.baseName}.rdata ppm=$params.ppm_findaddcuts_library_pos_camera polarity=$params.polarity_findaddcuts_library_pos_camera
+      """
   }
 
   /*
@@ -1965,7 +1973,7 @@ if(params.library_charactrized_pos==false){
 
   process  process_find_isotopes_library_pos_camera{
     label 'camera'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_find_isotopes_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
@@ -1976,10 +1984,10 @@ if(params.library_charactrized_pos==false){
   output:
   file "${rdata_files.baseName}.rdata" into mapmsmstocamera_rdata_library_pos_camera,mapmsmstoparam_rdata_library_pos_camera_tmp, prepareoutput_rdata_library_pos_camera_cfmid
 
-    shell:
-      '''
-      /usr/local/bin/findIsotopes.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata maxcharge=!{params.maxcharge_findisotopes_library_pos_camera}
-      '''
+
+      """
+      /usr/local/bin/findIsotopes.r input=$rdata_files output=${rdata_files.baseName}.rdata maxcharge=$params.maxcharge_findisotopes_library_pos_camera
+      """
   }
 
 
@@ -1990,7 +1998,7 @@ if(params.library_charactrized_pos==false){
 
   process  process_read_MS2_library_pos_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$mzMLFile"
     publishDir "${params.outdir}/process_read_MS2_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2001,10 +2009,10 @@ if(params.library_charactrized_pos==false){
   output:
   file "${mzMLFile.baseName}_ReadMsmsLibrary.rdata" into mapmsmstocamera_rdata_library_pos_msnbase
 
-    shell:
-    '''
-    /usr/local/bin/readMS2MSnBase.r input=!{mzMLFile} output=!{mzMLFile.baseName}_ReadMsmsLibrary.rdata inputname=!{mzMLFile.baseName}
-    '''
+
+    """
+    /usr/local/bin/readMS2MSnBase.r input=$mzMLFile output=${mzMLFile.baseName}_ReadMsmsLibrary.rdata inputname=${mzMLFile.baseName}
+    """
   }
 
 
@@ -2021,7 +2029,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 
   process  process_mapmsms_tocamera_library_pos_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$rdata_files_ms1"
     publishDir "${params.outdir}/process_mapmsms_tocamera_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2036,10 +2044,10 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 
     //  script:
     //def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
-    shell:
+
     """
-    /usr/local/bin/mapMS2ToCamera.r inputCAMERA=!{rdata_files_ms1} inputMS2=!{rdata_files_ms2} output=!{rdata_files_ms1.baseName}_MapMsms2Camera_library_pos.rdata  \
-   ppm=!{params.ppm_mapmsmstocamera_library_pos_msnbase} rt=!{params.rt_mapmsmstocamera_library_pos_msnbase}
+    /usr/local/bin/mapMS2ToCamera.r inputCAMERA=$rdata_files_ms1 inputMS2=$rdata_files_ms2 output=${rdata_files_ms1.baseName}_MapMsms2Camera_library_pos.rdata  \\
+   ppm=$params.ppm_mapmsmstocamera_library_pos_msnbase rt=$params.rt_mapmsmstocamera_library_pos_msnbase
     """
   }
 
@@ -2055,7 +2063,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 
   process  process_create_library_pos_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$rdata_camera"
     publishDir "${params.outdir}/process_create_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2067,14 +2075,14 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
   output:
   file "${rdata_camera.baseName}.csv" into collectlibrary_rdata_library_pos_msnbase
 
-    shell:
-      '''
-      mkdir out
-      /usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} precursorppm=!{params.ppm_create_library_pos_msnbase} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv inputLibrary=!{library_desc}   \
-     rawFileName=!{params.raw_file_name_preparelibrary_pos_msnbase}   compundID=!{params.compund_id_preparelibrary_pos_msnbase}   compoundName=!{params.compound_name_preparelibrary_pos_msnbase}   \
-    mzCol=!{params.mz_col_preparelibrary_pos_msnbase} whichmz=!{params.which_mz_preparelibrary_pos_msnbase}
 
-      '''
+      """
+      mkdir out
+      /usr/local/bin/createLibrary.r inputCAMERA=$rdata_camera precursorppm=$params.ppm_create_library_pos_msnbase inputMS2=$ms2_data output=${rdata_camera.baseName}.csv inputLibrary=$library_desc   \\
+     rawFileName=$params.raw_file_name_preparelibrary_pos_msnbase   compundID=$params.compund_id_preparelibrary_pos_msnbase   compoundName=$params.compound_name_preparelibrary_pos_msnbase   \\
+    mzCol=$params.mz_col_preparelibrary_pos_msnbase whichmz=$params.which_mz_preparelibrary_pos_msnbase
+
+      """
   }
 
   /*
@@ -2084,7 +2092,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 
   process  process_collect_library_pos_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "A collection of files"
     publishDir "${params.outdir}/process_collect_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2109,7 +2117,7 @@ mapmsmstocamera_rdata_library_pos_camerams2=ch1mapmsmsLibrary_pos.join(ch2mapmsm
 
 process process_remove_adducts_library_pos_msnbase{
   label 'msnbase'
-  tag "$name"
+  tag "A collection of files"
   publishDir "${params.outdir}/process_remove_adducts_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2150,7 +2158,7 @@ zip::zip(zipfile="mappedtometfrag_pos.zip",files=files_to_pass)
 
   process  process_search_engine_library_pos_msnbase_nolibcharac{
     label 'msnbase'
-    tag "$name"
+    tag "$parameters"
     publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2161,12 +2169,12 @@ zip::zip(zipfile="mappedtometfrag_pos.zip",files=files_to_pass)
   output:
   file "aggregated_identification_library_pos.csv" into library_tsv_pos_passatutto
 
-    shell:
-    '''
-    /usr/local/bin/librarySearchEngine.r -l !{libraryFile} -i !{parameters} -out aggregated_identification_library_pos.csv -th "-1" -im pos -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_pos_msnbase}
-sed -i '/^$/d' aggregated_identification_library_pos.csv
 
-    '''
+    """
+    /usr/local/bin/librarySearchEngine.r -l $libraryFile -i $parameters -out aggregated_identification_library_pos.csv -th "-1" -im pos -ts Scoredotproduct -rs 1000 -ncore $params.ncore_searchengine_library_pos_msnbase
+sed -i '/^\$/d' aggregated_identification_library_pos.csv
+
+    """
   }
 }else{
 
@@ -2176,7 +2184,7 @@ sed -i '/^$/d' aggregated_identification_library_pos.csv
 
   process  process_search_engine_library_pos_msnbase_libcharac{
     label 'msnbase'
-    tag "$name"
+    tag "$parameters"
     publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2187,13 +2195,13 @@ sed -i '/^$/d' aggregated_identification_library_pos.csv
   output:
   file "aggregated_identification_library_pos.csv" into library_tsv_pos_passatutto
 
-    shell:
-    '''
-    /usr/local/bin/librarySearchEngine.r -l !{libraryFile} -i !{parameters} -out aggregated_identification_library_pos.csv -th "-1" -im pos -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_pos_msnbase}
 
-    sed -i '/^$/d' aggregated_identification_library_pos.csv
+    """
+    /usr/local/bin/librarySearchEngine.r -l $libraryFile -i $parameters -out aggregated_identification_library_pos.csv -th "-1" -im pos -ts Scoredotproduct -rs 1000 -ncore $params.ncore_searchengine_library_pos_msnbase
 
-    '''
+    sed -i '/^\$/d' aggregated_identification_library_pos.csv
+
+    """
   }
 }
 
@@ -2203,7 +2211,7 @@ sed -i '/^$/d' aggregated_identification_library_pos.csv
 
 process process_pepcalculation_library_pos_passatutto{
   label 'passatutto'
-  tag "$name"
+  tag "$identification_result"
   publishDir "${params.outdir}/process_pepcalculation_library_pos_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2213,17 +2221,17 @@ process process_pepcalculation_library_pos_passatutto{
 output:
 file "pep_identification_library_pos.csv" into library_tsv_pos_output
 
-shell:
-  '''
 
-if [ -s !{identification_result} ]
+  """
+
+if [ -s $identification_result ]
 then
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_library_pos.csv readTable=T
+/usr/local/bin/metfragPEP.r input=$identification_result score=score output=pep_identification_library_pos.csv readTable=T
 else
 touch pep_identification_library_pos.csv
 fi
 
-'''
+"""
 }
 
 
@@ -2234,7 +2242,7 @@ fi
 
 process  process_output_quantid_pos_camera_library{
   label 'camera'
-  tag "$name"
+  tag "$camera_input_quant"
   publishDir "${params.outdir}/process_output_quantid_pos_camera_library", mode: params.publish_dir_mode
 
 
@@ -2246,26 +2254,26 @@ process  process_output_quantid_pos_camera_library{
 
 output:
 file "*.txt" into library_pos_finished
-  shell:
-'''
-if [ -s !{library_input_identification} ]
+
+"""
+if [ -s $library_input_identification ]
 then
-    /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{library_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera}  \
-   rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera}  \
-  selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera}  \
- combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera}  \
-sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_pos_library.txt outputVariables=varsPOSout_pos_library.txt outputMetaData=metadataPOSout_pos_library.txt Ifnormalize=!{params.normalize_output_pos_camera}
+    /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputscores=$library_input_identification inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera  \\
+   rt=$params.rt_output_pos_camera higherTheBetter=true scoreColumn=score impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera  \\
+  selectedType=$params.selected_type_output_pos_camera rename=$params.rename_output_pos_camera renameCol=$params.rename_col_output_pos_camera onlyReportWithID=$params.only_report_with_id_output_pos_camera  \\
+ combineReplicate=$params.combine_replicate_output_pos_camera combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera  \\
+sampleCoverage=$params.sample_coverage_output_pos_camera outputPeakTable=peaktablePOSout_pos_library.txt outputVariables=varsPOSout_pos_library.txt outputMetaData=metadataPOSout_pos_library.txt Ifnormalize=$params.normalize_output_pos_camera
   else
-  /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera} higherTheBetter=true scoreColumn=score  \
- impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera} rename=!{params.rename_output_pos_camera}  \
-renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera} combineReplicate=!{params.combine_replicate_output_pos_camera}  \
-combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera} sampleCoverage=!{params.sample_coverage_output_pos_camera}  \
-outputPeakTable=peaktablePOSout_pos_library.txt outputVariables=varsPOSout_pos_library.txt outputMetaData=metadataPOSout_pos_library.txt Ifnormalize=!{params.normalize_output_pos_camera}
+  /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera rt=$params.rt_output_pos_camera higherTheBetter=true scoreColumn=score  \\
+ impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera selectedType=$params.selected_type_output_pos_camera rename=$params.rename_output_pos_camera  \\
+renameCol=$params.rename_col_output_pos_camera onlyReportWithID=$params.only_report_with_id_output_pos_camera combineReplicate=$params.combine_replicate_output_pos_camera  \\
+combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera sampleCoverage=$params.sample_coverage_output_pos_camera  \\
+outputPeakTable=peaktablePOSout_pos_library.txt outputVariables=varsPOSout_pos_library.txt outputMetaData=metadataPOSout_pos_library.txt Ifnormalize=$params.normalize_output_pos_camera
 
   fi
 
 
-  '''
+  """
 }
 }
 }else{
@@ -2275,7 +2283,7 @@ outputPeakTable=peaktablePOSout_pos_library.txt outputVariables=varsPOSout_pos_l
    */
   process  process_output_quantid_pos_camera_noid{
     label 'camera'
-    tag "$name"
+    tag "$camera_input_quant"
     publishDir "${params.outdir}/process_output_quantid_pos_camera_noid", mode: params.publish_dir_mode
 
 
@@ -2286,14 +2294,14 @@ outputPeakTable=peaktablePOSout_pos_library.txt outputVariables=varsPOSout_pos_l
 
   output:
   file "*.txt" into noid_pos_finished
-    shell:
-    '''
-      /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_pos_camera} rt=!{params.rt_output_pos_camera}  \
-     higherTheBetter=true scoreColumn=score impute=!{params.impute_output_pos_camera} typeColumn=!{params.type_column_output_pos_camera} selectedType=!{params.selected_type_output_pos_camera}  \
-    rename=!{params.rename_output_pos_camera} renameCol=!{params.rename_col_output_pos_camera} onlyReportWithID=!{params.only_report_with_id_output_pos_camera}  \
-   combineReplicate=!{params.combine_replicate_output_pos_camera} combineReplicateColumn=!{params.combine_replicate_column_output_pos_camera} log=!{params.log_output_pos_camera}  \
-  sampleCoverage=!{params.sample_coverage_output_pos_camera} outputPeakTable=peaktablePOSout_POS_noid.txt outputVariables=varsPOSout_pos_noid.txt outputMetaData=metadataPOSout_pos_noid.txt Ifnormalize=!{params.normalize_output_pos_camera}
-      '''
+
+    """
+      /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_pos_camera rt=$params.rt_output_pos_camera  \\
+     higherTheBetter=true scoreColumn=score impute=$params.impute_output_pos_camera typeColumn=$params.type_column_output_pos_camera selectedType=$params.selected_type_output_pos_camera  \\
+    rename=$params.rename_output_pos_camera renameCol=$params.rename_col_output_pos_camera onlyReportWithID=$params.only_report_with_id_output_pos_camera  \\
+   combineReplicate=$params.combine_replicate_output_pos_camera combineReplicateColumn=$params.combine_replicate_column_output_pos_camera log=$params.log_output_pos_camera  \\
+  sampleCoverage=$params.sample_coverage_output_pos_camera outputPeakTable=peaktablePOSout_POS_noid.txt outputVariables=varsPOSout_pos_noid.txt outputMetaData=metadataPOSout_pos_noid.txt Ifnormalize=$params.normalize_output_pos_camera
+      """
   }
 }
 }
@@ -2314,7 +2322,7 @@ if(params.type_of_ionization in (["neg","both"]))
   {
     process process_peak_picker_neg_openms{
         label 'openms'
-        tag "$name"
+        tag "$mzMLFile"
         publishDir "${params.outdir}/process_peak_picker_neg_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
         stageInMode 'copy'
 
@@ -2326,10 +2334,10 @@ if(params.type_of_ionization in (["neg","both"]))
         output:
         file "${mzMLFile}" into masstrace_detection_process_neg, param_detection_process_neg
 
-        shell:
-        '''
-        PeakPickerHiRes -in !{mzMLFile} -out !{mzMLFile} -ini !{setting_file}
-        '''
+
+        """
+        PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
+        """
     }
 
 
@@ -2342,7 +2350,7 @@ if(params.type_of_ionization in (["neg","both"]))
    {
      process process_masstrace_detection_neg_openms_centroided {
         label 'openms'
-         tag "$name"
+         tag "$mzMLFile"
          publishDir "${params.outdir}/process_masstrace_detection_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2354,17 +2362,17 @@ if(params.type_of_ionization in (["neg","both"]))
          output:
          file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion
 
-         shell:
-         '''
-         FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-         '''
+
+         """
+         FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
+         """
      }
      /*
       * STEP 2.5 - convert openms to xcms
       */
      process process_openms_to_xcms_conversion_neg_centroided {
          label 'xcmsconvert'
-         tag "$name"
+         tag "$mzMLFile"
          publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2376,12 +2384,12 @@ if(params.type_of_ionization in (["neg","both"]))
          output:
          file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
 
-         shell:
-         '''
-          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=negative output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file}  \
-         phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
 
-         '''
+         """
+          /usr/local/bin/featurexmlToCamera.r input=$mzMLFile realFileName=$mzMLFile polarity=negative output=${mzMLFile.baseName}.rdata phenoFile=$phenotype_file  \\
+         phenoDataColumn=$params.phenodatacolumn_quant_neg sampleClass=$params.sampleclass_quant_neg_xcms changeNameTO=${mzMLFile.baseName}.mzML
+
+         """
      }
    }else{
      /*
@@ -2393,7 +2401,7 @@ if(params.type_of_ionization in (["neg","both"]))
 
       process process_ipo_param_neg_ipo_centroided{
           label 'ipo'
-          tag "$name"
+          tag "A collection of files"
           publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2406,24 +2414,24 @@ if(params.type_of_ionization in (["neg","both"]))
 
           script:
             def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-          shell:
+
           """
           touch quant_params_neg.json
           touch rt_params_neg.json
-          /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_neg_globalAvoidRT} allSamples=!{params.ipo_allSamples_neg} columnToSelect=!{params.ipo_columnToSelect_neg} \
-             valueToSelect=!{params.ipo_valueToSelect_neg} phenoFile=!{phenotype_file} \
-            methodXset=!{params.ipo_methodXset_neg} methodRT=!{params.ipo_methodRT_neg} noise_l=!{params.ipo_noise_l_neg} \
-             noise_h=!{params.ipo_noise_h_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_neg} \
-            prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_neg} \
-             snthresh_l=!{params.ipo_snthresh_l_neg} snthresh_h=!{params.ipo_snthresh_h_neg} mzCenterFun=!{params.ipo_mzCenterFun_neg} \
-              integrate=!{params.ipo_integrate_neg} fitgauss=!{params.ipo_fitgauss_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_neg} \
-               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_neg} ipo_ppm_l=!{params.ipo_ppm_l_neg} \
-             ipo_ppm_h=!{params.ipo_ppm_h_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_neg} ipo_charge_camera=!{params.ipo_charge_camera_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_neg} \
-             response_l=!{params.ipo_response_l_neg} response_h=!{params.ipo_response_h_neg} distFunc=!{params.ipo_distFunc_neg} factorDiag_l=!{params.ipo_factorDiag_l_neg} factorDiag_h=!{params.ipo_factorDiag_h_neg} factorGap_l=!{params.ipo_factorGap_l_neg} \
-             factorGap_h=!{params.ipo_factorGap_h_neg} localAlignment=!{params.ipo_localAlignment_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_neg} \
-             ipo_gapExtend_h=!{params.ipo_gapExtend_h_neg} ipo_profStep_l=!{params.ipo_profStep_l_neg} ipo_profStep_h=!{params.ipo_profStep_h_neg} bw_l=!{params.ipo_bw_l_neg} bw_h=!{params.ipo_bw_h_neg} minfrac_l=!{params.ipo_minfrac_l_neg} \
-              minfrac_h=!{params.ipo_minfrac_h_neg} mzwid_l=!{params.ipo_mzwid_l_neg} mzwid_h=!{params.ipo_mzwid_h_neg} minsamp_l=!{params.ipo_minsamp_l_neg} \
-               minsamp_h=!{params.ipo_minsamp_h_neg} max_l=!{params.ipo_max_l_neg} max_h=!{params.ipo_max_h_neg} ncores=!{params.ipo_ncores_neg} outputxset=quant_params_neg.json outputrt=rt_params_neg.json
+          /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=$ipo_neg_globalAvoidRT allSamples=$params.ipo_allSamples_neg columnToSelect=$params.ipo_columnToSelect_neg \\
+             valueToSelect=$params.ipo_valueToSelect_neg phenoFile=$phenotype_file \\
+            methodXset=$params.ipo_methodXset_neg methodRT=$params.ipo_methodRT_neg noise_l=$params.ipo_noise_l_neg \\
+             noise_h=$params.ipo_noise_h_neg prefilter_l_l=$params.ipo_prefilter_l_l_neg prefilter_l_h=$params.ipo_prefilter_l_h_neg \\
+            prefilter_h_l=$params.ipo_prefilter_h_l_neg prefilter_h_h=$params.ipo_prefilter_h_h_neg \\
+             snthresh_l=$params.ipo_snthresh_l_neg snthresh_h=$params.ipo_snthresh_h_neg mzCenterFun=$params.ipo_mzCenterFun_neg \\
+              integrate=$params.ipo_integrate_neg fitgauss=$params.ipo_fitgauss_neg ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg \\
+               ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg ipo_ppm_l=$params.ipo_ppm_l_neg \\
+             ipo_ppm_h=$params.ipo_ppm_h_neg ipo_mzdiff_l=$params.ipo_mzdiff_l_neg ipo_mzdiff_h=$params.ipo_mzdiff_h_neg ipo_charge_camera=$params.ipo_charge_camera_neg ipo_max_ppm_camera=$params.ipo_max_ppm_camera_neg \\
+             response_l=$params.ipo_response_l_neg response_h=$params.ipo_response_h_neg distFunc=$params.ipo_distFunc_neg factorDiag_l=$params.ipo_factorDiag_l_neg factorDiag_h=$params.ipo_factorDiag_h_neg factorGap_l=$params.ipo_factorGap_l_neg \\
+             factorGap_h=$params.ipo_factorGap_h_neg localAlignment=$params.ipo_localAlignment_neg ipo_gapInit_l=$params.ipo_gapInit_l_neg ipo_gapInit_h=$params.ipo_gapInit_h_neg ipo_gapExtend_l=$params.ipo_gapExtend_l_neg \\
+             ipo_gapExtend_h=$params.ipo_gapExtend_h_neg ipo_profStep_l=$params.ipo_profStep_l_neg ipo_profStep_h=$params.ipo_profStep_h_neg bw_l=$params.ipo_bw_l_neg bw_h=$params.ipo_bw_h_neg minfrac_l=$params.ipo_minfrac_l_neg \\
+              minfrac_h=$params.ipo_minfrac_h_neg mzwid_l=$params.ipo_mzwid_l_neg mzwid_h=$params.ipo_mzwid_h_neg minsamp_l=$params.ipo_minsamp_l_neg \\
+               minsamp_h=$params.ipo_minsamp_h_neg max_l=$params.ipo_max_l_neg max_h=$params.ipo_max_h_neg ncores=$params.ipo_ncores_neg outputxset=quant_params_neg.json outputrt=rt_params_neg.json
           """
       }
       }
@@ -2437,7 +2445,7 @@ if(params.type_of_ionization in (["neg","both"]))
 
      process process_masstrace_detection_neg_xcms_centroided{
        label 'xcms'
-       tag "$name"
+       tag "$mzMLFile"
        publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2451,21 +2459,21 @@ if(params.type_of_ionization in (["neg","both"]))
        file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
        file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
 
-       shell:
+script:
         def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
        """
-    /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_neg_xcms}  \
-   peakwidthHigh=!{params.peakwidthhigh_quant_neg_xcms} noise=!{params.noise_quant_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg}  \
-  sampleClass=!{params.sampleclass_quant_neg_xcms} mzdiff=!{params.mzdiff_quant_neg_xcms} snthresh=!{params.snthresh_quant_neg_xcms} prefilter_l=!{params.prefilter_quant_neg_xcms}  \
- prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzCenterFun_quant_neg_xcms} integrate=!{params.integrate_quant_neg_xcms} fitgauss=!{params.fitgauss_quant_neg_xcms} \
-  methodXset=!{params.ipo_methodXset_neg} methodRT=!{params.ipo_methodRT_neg} noise_l=!{params.ipo_noise_l_neg} \
-   noise_h=!{params.ipo_noise_h_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_neg} \
-  prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_neg} \
-   snthresh_l=!{params.ipo_snthresh_l_neg} snthresh_h=!{params.ipo_snthresh_h_neg} mzCenterFun=!{params.ipo_mzCenterFun_neg} \
-    integrate=!{params.ipo_integrate_neg} fitgauss=!{params.ipo_fitgauss_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_neg} \
-     ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_neg} ipo_ppm_l=!{params.ipo_ppm_l_neg} \
-   ipo_ppm_h=!{params.ipo_ppm_h_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_neg} ipo_charge_camera=!{params.ipo_charge_camera_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_neg} \
-   ipo_inv=!{ipo_neg_localQ}  ${filter_argument}
+    /usr/local/bin/findPeaks.r input=\$PWD/$mzMLFile output=\$PWD/${mzMLFile.baseName}.rdata ppm=$params.masstrace_ppm_neg_xcms peakwidthLow=$params.peakwidthlow_quant_neg_xcms  \\
+   peakwidthHigh=$params.peakwidthhigh_quant_neg_xcms noise=$params.noise_quant_neg_xcms polarity=negative realFileName=$mzMLFile phenoFile=$phenotype_file phenoDataColumn=$params.phenodatacolumn_quant_neg  \\
+  sampleClass=$params.sampleclass_quant_neg_xcms mzdiff=$params.mzdiff_quant_neg_xcms snthresh=$params.snthresh_quant_neg_xcms prefilter_l=$params.prefilter_quant_neg_xcms  \\
+ prefilter_h=$params.value_of_prefilter_quant_neg_xcms mzCenterFun=$params.mzCenterFun_quant_neg_xcms integrate=$params.integrate_quant_neg_xcms fitgauss=$params.fitgauss_quant_neg_xcms \\
+  methodXset=$params.ipo_methodXset_neg methodRT=$params.ipo_methodRT_neg noise_l=$params.ipo_noise_l_neg \\
+   noise_h=$params.ipo_noise_h_neg prefilter_l_l=$params.ipo_prefilter_l_l_neg prefilter_l_h=$params.ipo_prefilter_l_h_neg \\
+  prefilter_h_l=$params.ipo_prefilter_h_l_neg prefilter_h_h=$params.ipo_prefilter_h_h_neg \\
+   snthresh_l=$params.ipo_snthresh_l_neg snthresh_h=$params.ipo_snthresh_h_neg mzCenterFun=$params.ipo_mzCenterFun_neg \\
+    integrate=$params.ipo_integrate_neg fitgauss=$params.ipo_fitgauss_neg ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg \\
+     ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg ipo_ppm_l=$params.ipo_ppm_l_neg \\
+   ipo_ppm_h=$params.ipo_ppm_h_neg ipo_mzdiff_l=$params.ipo_mzdiff_l_neg ipo_mzdiff_h=$params.ipo_mzdiff_h_neg ipo_charge_camera=$params.ipo_charge_camera_neg ipo_max_ppm_camera=$params.ipo_max_ppm_camera_neg \\
+   ipo_inv=$ipo_neg_localQ  ${filter_argument}
        """
      }
    }
@@ -2478,7 +2486,7 @@ if(params.type_of_ionization in (["neg","both"]))
  {
    process process_masstrace_detection_neg_openms_noncentroided {
        label 'openms'
-       tag "$name"
+       tag "$mzMLFile"
        publishDir "${params.outdir}/process_masstrace_detection_neg_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2490,17 +2498,17 @@ if(params.type_of_ionization in (["neg","both"]))
        output:
        file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_neg_noncentroided
 
-       shell:
-       '''
-       FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-       '''
+
+       """
+       FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
+       """
    }
    /*
     * STEP 2.5 - convert openms to xcms
     */
    process process_openms_to_xcms_conversion_neg_noncentroided {
        label 'xcmsconvert'
-       tag "$name"
+       tag "$mzMLFile"
        publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2512,12 +2520,12 @@ if(params.type_of_ionization in (["neg","both"]))
        output:
        file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
 
-       shell:
-       '''
-        /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=negative output=!{mzMLFile.baseName}.rdata phenoFile=!{phenotype_file}  \
-       phenoDataColumn=!{params.phenodatacolumn_quant_neg} sampleClass=!{params.sampleclass_quant_neg_xcms} changeNameTO=!{mzMLFile.baseName}.mzML
 
-       '''
+       """
+        /usr/local/bin/featurexmlToCamera.r input=$mzMLFile realFileName=$mzMLFile polarity=negative output=${mzMLFile.baseName}.rdata phenoFile=$phenotype_file  \\
+       phenoDataColumn=$params.phenodatacolumn_quant_neg sampleClass=$params.sampleclass_quant_neg_xcms changeNameTO=${mzMLFile.baseName}.mzML
+
+       """
    }
  }else{
    /*
@@ -2529,7 +2537,7 @@ if(params.type_of_ionization in (["neg","both"]))
 
     process process_ipo_param_neg_ipo_noncentroided{
         label 'ipo'
-        tag "$name"
+        tag "A collection of files"
         publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2542,24 +2550,24 @@ if(params.type_of_ionization in (["neg","both"]))
 
         script:
           def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-        shell:
+
         """
         touch quant_params_neg.json
         touch rt_params_neg.json
-        /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=!{ipo_neg_globalAvoidRT} allSamples=!{params.ipo_allSamples_neg} columnToSelect=!{params.ipo_columnToSelect_neg} \
-           valueToSelect=!{params.ipo_valueToSelect_neg} phenoFile=!{phenotype_file} \
-          methodXset=!{params.ipo_methodXset_neg} methodRT=!{params.ipo_methodRT_neg} noise_l=!{params.ipo_noise_l_neg} \
-           noise_h=!{params.ipo_noise_h_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_neg} \
-          prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_neg} \
-           snthresh_l=!{params.ipo_snthresh_l_neg} snthresh_h=!{params.ipo_snthresh_h_neg} mzCenterFun=!{params.ipo_mzCenterFun_neg} \
-            integrate=!{params.ipo_integrate_neg} fitgauss=!{params.ipo_fitgauss_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_neg} \
-             ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_neg} ipo_ppm_l=!{params.ipo_ppm_l_neg} \
-           ipo_ppm_h=!{params.ipo_ppm_h_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_neg} ipo_charge_camera=!{params.ipo_charge_camera_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_neg} \
-           response_l=!{params.ipo_response_l_neg} response_h=!{params.ipo_response_h_neg} distFunc=!{params.ipo_distFunc_neg} factorDiag_l=!{params.ipo_factorDiag_l_neg} factorDiag_h=!{params.ipo_factorDiag_h_neg} factorGap_l=!{params.ipo_factorGap_l_neg} \
-           factorGap_h=!{params.ipo_factorGap_h_neg} localAlignment=!{params.ipo_localAlignment_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_neg} \
-           ipo_gapExtend_h=!{params.ipo_gapExtend_h_neg} ipo_profStep_l=!{params.ipo_profStep_l_neg} ipo_profStep_h=!{params.ipo_profStep_h_neg} bw_l=!{params.ipo_bw_l_neg} bw_h=!{params.ipo_bw_h_neg} minfrac_l=!{params.ipo_minfrac_l_neg} \
-            minfrac_h=!{params.ipo_minfrac_h_neg} mzwid_l=!{params.ipo_mzwid_l_neg} mzwid_h=!{params.ipo_mzwid_h_neg} minsamp_l=!{params.ipo_minsamp_l_neg} \
-             minsamp_h=!{params.ipo_minsamp_h_neg} max_l=!{params.ipo_max_l_neg} max_h=!{params.ipo_max_h_neg} ncores=!{params.ipo_ncores_neg} outputxset=quant_params_neg.json outputrt=rt_params_neg.json
+        /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=$ipo_neg_globalAvoidRT allSamples=$params.ipo_allSamples_neg columnToSelect=$params.ipo_columnToSelect_neg \\
+           valueToSelect=$params.ipo_valueToSelect_neg phenoFile=$phenotype_file \\
+          methodXset=$params.ipo_methodXset_neg methodRT=$params.ipo_methodRT_neg noise_l=$params.ipo_noise_l_neg \\
+           noise_h=$params.ipo_noise_h_neg prefilter_l_l=$params.ipo_prefilter_l_l_neg prefilter_l_h=$params.ipo_prefilter_l_h_neg \\
+          prefilter_h_l=$params.ipo_prefilter_h_l_neg prefilter_h_h=$params.ipo_prefilter_h_h_neg \\
+           snthresh_l=$params.ipo_snthresh_l_neg snthresh_h=$params.ipo_snthresh_h_neg mzCenterFun=$params.ipo_mzCenterFun_neg \\
+            integrate=$params.ipo_integrate_neg fitgauss=$params.ipo_fitgauss_neg ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg \\
+             ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg ipo_ppm_l=$params.ipo_ppm_l_neg \\
+           ipo_ppm_h=$params.ipo_ppm_h_neg ipo_mzdiff_l=$params.ipo_mzdiff_l_neg ipo_mzdiff_h=$params.ipo_mzdiff_h_neg ipo_charge_camera=$params.ipo_charge_camera_neg ipo_max_ppm_camera=$params.ipo_max_ppm_camera_neg \\
+           response_l=$params.ipo_response_l_neg response_h=$params.ipo_response_h_neg distFunc=$params.ipo_distFunc_neg factorDiag_l=$params.ipo_factorDiag_l_neg factorDiag_h=$params.ipo_factorDiag_h_neg factorGap_l=$params.ipo_factorGap_l_neg \\
+           factorGap_h=$params.ipo_factorGap_h_neg localAlignment=$params.ipo_localAlignment_neg ipo_gapInit_l=$params.ipo_gapInit_l_neg ipo_gapInit_h=$params.ipo_gapInit_h_neg ipo_gapExtend_l=$params.ipo_gapExtend_l_neg \\
+           ipo_gapExtend_h=$params.ipo_gapExtend_h_neg ipo_profStep_l=$params.ipo_profStep_l_neg ipo_profStep_h=$params.ipo_profStep_h_neg bw_l=$params.ipo_bw_l_neg bw_h=$params.ipo_bw_h_neg minfrac_l=$params.ipo_minfrac_l_neg \\
+            minfrac_h=$params.ipo_minfrac_h_neg mzwid_l=$params.ipo_mzwid_l_neg mzwid_h=$params.ipo_mzwid_h_neg minsamp_l=$params.ipo_minsamp_l_neg \\
+             minsamp_h=$params.ipo_minsamp_h_neg max_l=$params.ipo_max_l_neg max_h=$params.ipo_max_h_neg ncores=$params.ipo_ncores_neg outputxset=quant_params_neg.json outputrt=rt_params_neg.json
         """
     }
     }
@@ -2573,7 +2581,7 @@ if(params.type_of_ionization in (["neg","both"]))
                                 :  param_to_rt_process_neg)
    process process_masstrace_detection_neg_xcms_noncentroided{
      label 'xcms'
-     tag "$name"
+     tag "$mzMLFile"
      publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2587,21 +2595,21 @@ if(params.type_of_ionization in (["neg","both"]))
      file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
      file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
 
-     shell:
+script:
       def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
      """
-/usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_neg_xcms}  \
-peakwidthHigh=!{params.peakwidthhigh_quant_neg_xcms} noise=!{params.noise_quant_neg_xcms} polarity=negative realFileName=!{mzMLFile} phenoFile=!{phenotype_file} phenoDataColumn=!{params.phenodatacolumn_quant_neg}  \
-sampleClass=!{params.sampleclass_quant_neg_xcms}  mzdiff=!{params.mzdiff_quant_neg_xcms} snthresh=!{params.snthresh_quant_neg_xcms} prefilter_l=!{params.prefilter_quant_neg_xcms}  \
-prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzCenterFun_quant_neg_xcms} integrate=!{params.integrate_quant_neg_xcms} fitgauss=!{params.fitgauss_quant_neg_xcms} \
- methodXset=!{params.ipo_methodXset_neg} methodRT=!{params.ipo_methodRT_neg} noise_l=!{params.ipo_noise_l_neg} \
- noise_h=!{params.ipo_noise_h_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_neg} \
- prefilter_h_l=!{params.ipo_prefilter_h_l_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_neg} \
- snthresh_l=!{params.ipo_snthresh_l_neg} snthresh_h=!{params.ipo_snthresh_h_neg} mzCenterFun=!{params.ipo_mzCenterFun_neg} \
-  integrate=!{params.ipo_integrate_neg} fitgauss=!{params.ipo_fitgauss_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_neg} \
-   ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_neg} ipo_ppm_l=!{params.ipo_ppm_l_neg} \
- ipo_ppm_h=!{params.ipo_ppm_h_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_neg} ipo_charge_camera=!{params.ipo_charge_camera_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_neg} \
- ipo_inv=!{ipo_neg_localQ} ${filter_argument}
+/usr/local/bin/findPeaks.r input=\$PWD/$mzMLFile output=\$PWD/${mzMLFile.baseName}.rdata ppm=$params.masstrace_ppm_neg_xcms peakwidthLow=$params.peakwidthlow_quant_neg_xcms  \\
+peakwidthHigh=$params.peakwidthhigh_quant_neg_xcms noise=$params.noise_quant_neg_xcms polarity=negative realFileName=$mzMLFile phenoFile=$phenotype_file phenoDataColumn=$params.phenodatacolumn_quant_neg  \\
+sampleClass=$params.sampleclass_quant_neg_xcms  mzdiff=$params.mzdiff_quant_neg_xcms snthresh=$params.snthresh_quant_neg_xcms prefilter_l=$params.prefilter_quant_neg_xcms  \\
+prefilter_h=$params.value_of_prefilter_quant_neg_xcms mzCenterFun=$params.mzCenterFun_quant_neg_xcms integrate=$params.integrate_quant_neg_xcms fitgauss=$params.fitgauss_quant_neg_xcms \\
+ methodXset=$params.ipo_methodXset_neg methodRT=$params.ipo_methodRT_neg noise_l=$params.ipo_noise_l_neg \\
+ noise_h=$params.ipo_noise_h_neg prefilter_l_l=$params.ipo_prefilter_l_l_neg prefilter_l_h=$params.ipo_prefilter_l_h_neg \\
+ prefilter_h_l=$params.ipo_prefilter_h_l_neg prefilter_h_h=$params.ipo_prefilter_h_h_neg \\
+ snthresh_l=$params.ipo_snthresh_l_neg snthresh_h=$params.ipo_snthresh_h_neg mzCenterFun=$params.ipo_mzCenterFun_neg \\
+  integrate=$params.ipo_integrate_neg fitgauss=$params.ipo_fitgauss_neg ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg \\
+   ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg ipo_ppm_l=$params.ipo_ppm_l_neg \\
+ ipo_ppm_h=$params.ipo_ppm_h_neg ipo_mzdiff_l=$params.ipo_mzdiff_l_neg ipo_mzdiff_h=$params.ipo_mzdiff_h_neg ipo_charge_camera=$params.ipo_charge_camera_neg ipo_max_ppm_camera=$params.ipo_max_ppm_camera_neg \\
+ ipo_inv=$ipo_neg_localQ ${filter_argument}
      """
    }
  }
@@ -2615,7 +2623,7 @@ prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzC
 
   process  process_collect_rdata_neg_xcms{
     label 'xcms'
-    tag "$name"
+    tag "A collection of files"
     publishDir "${params.outdir}/process_collect_rdata_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2629,7 +2637,7 @@ prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzC
 
   script:
     def inputs_aggregated = rdata_files.collect{ "$it" }.join(",")
-  shell:
+
 
      """
       nextFlowDIR=\$PWD
@@ -2643,7 +2651,7 @@ prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzC
    */
   process  process_align_peaks_neg_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_align_peaks_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2658,17 +2666,17 @@ prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzC
 
   script:
     def inputs_aggregated = rd.collect{ "$it" }.join(",")
-    shell:
+
       def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=${paramsRT}" : ''
       """
-    /usr/local/bin/retCor.r input=\$PWD/!{rdata_files} output=RTcorrected_neg.rdata method=obiwarp  response_l=!{params.ipo_response_l_neg} response_h=!{params.ipo_response_h_neg} distFunc=!{params.ipo_distFunc_neg} factorDiag_l=!{params.ipo_factorDiag_l_neg} factorDiag_h=!{params.ipo_factorDiag_h_neg} factorGap_l=!{params.ipo_factorGap_l_neg} \
-      factorGap_h=!{params.ipo_factorGap_h_neg} localAlignment=!{params.ipo_localAlignment_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_neg} \
-      ipo_gapExtend_h=!{params.ipo_gapExtend_h_neg} ipo_profStep_l=!{params.ipo_profStep_l_neg} ipo_profStep_h=!{params.ipo_profStep_h_neg} bw_l=!{params.ipo_bw_l_neg} bw_h=!{params.ipo_bw_h_neg} minfrac_l=!{params.ipo_minfrac_l_neg} \
-       minfrac_h=!{params.ipo_minfrac_h_neg} mzwid_l=!{params.ipo_mzwid_l_neg} mzwid_h=!{params.ipo_mzwid_h_neg} minsamp_l=!{params.ipo_minsamp_l_neg} \
-        minsamp_h=!{params.ipo_minsamp_h_neg} max_l=!{params.ipo_max_l_neg} max_h=!{params.ipo_max_h_neg} ipo_inv=!{ipo_neg_localRT} ncores=!{params.ipo_ncores_neg} \
-        profStep=!{params.profStep_align_N1_neg_xcms} center=!{params.center_align_N1_neg_xcms} response=!{params.response_align_N1_neg_xcms} \
-        distFunc=!{params.distFunc_align_N1_neg_xcms} gapInit=!{params.gapInit_align_N1_neg_xcms} gapExtend=!{params.gapExtend_align_N1_neg_xcms} \
-        factorDiag=!{params.factorDiag_align_N1_neg_xcms} factorGap=!{params.factorDiag_align_N1_neg_xcms} localAlignment=!{params.localAlignment_align_N1_neg_xcms} ${filter_argument} inputraw=${inputs_aggregated}
+    /usr/local/bin/retCor.r input=\$PWD/$rdata_files output=RTcorrected_neg.rdata method=obiwarp  response_l=$params.ipo_response_l_neg response_h=$params.ipo_response_h_neg distFunc=$params.ipo_distFunc_neg factorDiag_l=$params.ipo_factorDiag_l_neg factorDiag_h=$params.ipo_factorDiag_h_neg factorGap_l=$params.ipo_factorGap_l_neg \\
+      factorGap_h=$params.ipo_factorGap_h_neg localAlignment=$params.ipo_localAlignment_neg ipo_gapInit_l=$params.ipo_gapInit_l_neg ipo_gapInit_h=$params.ipo_gapInit_h_neg ipo_gapExtend_l=$params.ipo_gapExtend_l_neg \\
+      ipo_gapExtend_h=$params.ipo_gapExtend_h_neg ipo_profStep_l=$params.ipo_profStep_l_neg ipo_profStep_h=$params.ipo_profStep_h_neg bw_l=$params.ipo_bw_l_neg bw_h=$params.ipo_bw_h_neg minfrac_l=$params.ipo_minfrac_l_neg \\
+       minfrac_h=$params.ipo_minfrac_h_neg mzwid_l=$params.ipo_mzwid_l_neg mzwid_h=$params.ipo_mzwid_h_neg minsamp_l=$params.ipo_minsamp_l_neg \\
+        minsamp_h=$params.ipo_minsamp_h_neg max_l=$params.ipo_max_l_neg max_h=$params.ipo_max_h_neg ipo_inv=$ipo_neg_localRT ncores=$params.ipo_ncores_neg \\
+        profStep=$params.profStep_align_N1_neg_xcms center=$params.center_align_N1_neg_xcms response=$params.response_align_N1_neg_xcms \\
+        distFunc=$params.distFunc_align_N1_neg_xcms gapInit=$params.gapInit_align_N1_neg_xcms gapExtend=$params.gapExtend_align_N1_neg_xcms \\
+        factorDiag=$params.factorDiag_align_N1_neg_xcms factorGap=$params.factorDiag_align_N1_neg_xcms localAlignment=$params.localAlignment_align_N1_neg_xcms ${filter_argument} inputraw=${inputs_aggregated}
 
     """
   }
@@ -2680,7 +2688,7 @@ prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzC
 
   process  process_group_peaks_neg_N1_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_group_peaks_neg_N1_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
     input:
@@ -2689,11 +2697,11 @@ prefilter_h=!{params.value_of_prefilter_quant_neg_xcms} mzCenterFun=!{params.mzC
   output:
   file "groupN1_neg.rdata" into temp_unfiltered_channel_neg_1
 
-    shell:
-      '''
-      /usr/local/bin/group.r input=!{rdata_files} output=groupN1_neg.rdata bandwidth=!{params.bandwidth_group_N1_neg_xcms} minfrac=!{params.minfrac_group_N1_neg_xcms} minsamp=!{params.minsamp_group_N1_neg_xcms} max=!{params.max_group_N1_neg_xcms} \
-      mzwid=!{params.mzwid_group_N1_neg_xcms}
-      '''
+
+      """
+      /usr/local/bin/group.r input=$rdata_files output=groupN1_neg.rdata bandwidth=$params.bandwidth_group_N1_neg_xcms minfrac=$params.minfrac_group_N1_neg_xcms minsamp=$params.minsamp_group_N1_neg_xcms max=$params.max_group_N1_neg_xcms \\
+      mzwid=$params.mzwid_group_N1_neg_xcms
+      """
   }
 
 
@@ -2707,7 +2715,7 @@ if(params.blank_filter_neg)
 
   process  process_blank_filter_neg_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_blank_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2718,10 +2726,10 @@ if(params.blank_filter_neg)
   output:
   file "blankFiltered_neg.rdata" into temp_unfiltered_channel_neg_2
 
-    shell:
-      '''
-    /usr/local/bin/blankfilter.r input=!{rdata_files} output=blankFiltered_neg.rdata method=!{params.method_blankfilter_neg_xcms} blank=!{params.blank_blankfilter_neg_xcms} sample=!{params.sample_blankfilter_neg_xcms} rest=!{params.rest_blankfilter_neg_xcms}
-      '''
+
+      """
+    /usr/local/bin/blankfilter.r input=$rdata_files output=blankFiltered_neg.rdata method=$params.method_blankfilter_neg_xcms blank=$params.blank_blankfilter_neg_xcms sample=$params.sample_blankfilter_neg_xcms rest=$params.rest_blankfilter_neg_xcms
+      """
   }
 }else{
 temp_unfiltered_channel_neg_2=temp_unfiltered_channel_neg_1
@@ -2736,7 +2744,7 @@ if(params.dilution_filter_neg==true)
   dilutionfilter_rdata_neg_xcms=temp_unfiltered_channel_neg_2
   process  process_dilution_filter_neg_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_dilution_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2747,11 +2755,11 @@ if(params.dilution_filter_neg==true)
   output:
   file "dilutionFiltered_neg.rdata" into temp_unfiltered_channel_neg_3
 
-    shell:
-      '''
-    /usr/local/bin/dilutionfilter.r input=!{rdata_files} output=dilutionFiltered_neg.rdata Corto=!{params.corto_dilutionfilter_neg_xcms}  \
-   dilution=!{params.dilution_dilutionfilter_neg_xcms} pvalue=!{params.pvalue_dilutionfilter_neg_xcms} corcut=!{params.corcut_dilutionfilter_neg_xcms} abs=!{params.abs_dilutionfilter_neg_xcms}
-      '''
+
+      """
+    /usr/local/bin/dilutionfilter.r input=$rdata_files output=dilutionFiltered_neg.rdata Corto=$params.corto_dilutionfilter_neg_xcms  \\
+   dilution=$params.dilution_dilutionfilter_neg_xcms pvalue=$params.pvalue_dilutionfilter_neg_xcms corcut=$params.corcut_dilutionfilter_neg_xcms abs=$params.abs_dilutionfilter_neg_xcms
+      """
   }
 }else{
 
@@ -2766,7 +2774,7 @@ if(params.cv_filter_neg==true)
   cvfilter_rdata_neg_xcms=temp_unfiltered_channel_neg_3
   process  process_cv_filter_neg_xcms{
     label 'xcms'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_cv_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2777,10 +2785,10 @@ if(params.cv_filter_neg==true)
   output:
   file "cvFiltered_neg.rdata" into temp_unfiltered_channel_neg_4
 
-    shell:
-      '''
-    /usr/local/bin/cvfilter.r input=!{rdata_files} output=cvFiltered_neg.rdata qc=!{params.qc_cvfilter_neg_xcms} cvcut=!{params.cvcut_cvfilter_neg_xcms}
-    '''
+
+      """
+    /usr/local/bin/cvfilter.r input=$rdata_files output=cvFiltered_neg.rdata qc=$params.qc_cvfilter_neg_xcms cvcut=$params.cvcut_cvfilter_neg_xcms
+    """
   }
 }else{
 temp_unfiltered_channel_neg_4=temp_unfiltered_channel_neg_3
@@ -2795,7 +2803,7 @@ annotation_rdata_neg_camera=temp_unfiltered_channel_neg_4
 
 process  process_annotate_peaks_neg_camera{
   label 'camera'
-  tag "$name"
+  tag "$rdata_files"
   publishDir "${params.outdir}/process_annotate_peaks_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2806,10 +2814,10 @@ process  process_annotate_peaks_neg_camera{
 output:
 file "CameraAnnotatePeaks_neg.rdata" into group_rdata_neg_camera
 
-  shell:
-    '''
-    /usr/local/bin/xsAnnotate.r  input=!{rdata_files} output=CameraAnnotatePeaks_neg.rdata
-    '''
+
+    """
+    /usr/local/bin/xsAnnotate.r  input=$rdata_files output=CameraAnnotatePeaks_neg.rdata
+    """
 }
 
 /*
@@ -2818,7 +2826,7 @@ file "CameraAnnotatePeaks_neg.rdata" into group_rdata_neg_camera
 
 process  process_group_peaks_neg_camera{
   label 'camera'
-  tag "$name"
+  tag "$rdata_files"
   publishDir "${params.outdir}/process_group_peaks_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2829,10 +2837,10 @@ process  process_group_peaks_neg_camera{
 output:
 file "CameraGroup_neg.rdata" into findaddcuts_rdata_neg_camera
 
-  shell:
-    '''
-    /usr/local/bin/groupFWHM.r input=!{rdata_files} output=CameraGroup_neg.rdata sigma=!{params.sigma_group_neg_camera} perfwhm=!{params.perfwhm_group_neg_camera} intval=!{params.intval_group_neg_camera}
-    '''
+
+    """
+    /usr/local/bin/groupFWHM.r input=$rdata_files output=CameraGroup_neg.rdata sigma=$params.sigma_group_neg_camera perfwhm=$params.perfwhm_group_neg_camera intval=$params.intval_group_neg_camera
+    """
 }
 
 /*
@@ -2841,7 +2849,7 @@ file "CameraGroup_neg.rdata" into findaddcuts_rdata_neg_camera
 
 process  process_find_addcuts_neg_camera{
   label 'camera'
-  tag "$name"
+  tag "$rdata_files"
   publishDir "${params.outdir}/process_find_addcuts_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2852,10 +2860,10 @@ process  process_find_addcuts_neg_camera{
 output:
 file "CameraFindAdducts_neg.rdata" into findisotopes_rdata_neg_camera
 
-  shell:
-    '''
-    /usr/local/bin/findAdducts.r input=!{rdata_files} output=CameraFindAdducts_neg.rdata ppm=!{params.ppm_findaddcuts_neg_camera} polarity=!{params.polarity_findaddcuts_neg_camera}
-    '''
+
+    """
+    /usr/local/bin/findAdducts.r input=$rdata_files output=CameraFindAdducts_neg.rdata ppm=$params.ppm_findaddcuts_neg_camera polarity=$params.polarity_findaddcuts_neg_camera
+    """
 }
 
 /*
@@ -2864,7 +2872,7 @@ file "CameraFindAdducts_neg.rdata" into findisotopes_rdata_neg_camera
 
 process  process_find_isotopes_neg_camera{
   label 'camera'
-  tag "$name"
+  tag "$rdata_files"
   publishDir "${params.outdir}/process_find_isotopes_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2875,10 +2883,10 @@ process  process_find_isotopes_neg_camera{
 output:
 file "CameraFindIsotopes_neg.rdata" into mapmsmstocamera_rdata_neg_camera,mapmsmstoparam_rdata_neg_camera,prepareoutput_rdata_neg_camera_csifingerid, prepareoutput_rdata_neg_camera_cfmid, prepareoutput_rdata_neg_camera_metfrag, prepareoutput_rdata_neg_camera_library, prepareoutput_rdata_neg_camera_noid
 
-  shell:
-    '''
-    /usr/local/bin/findIsotopes.r input=!{rdata_files} output=CameraFindIsotopes_neg.rdata maxcharge=!{params.maxcharge_findisotopes_neg_camera}
-    '''
+
+    """
+    /usr/local/bin/findIsotopes.r input=$rdata_files output=CameraFindIsotopes_neg.rdata maxcharge=$params.maxcharge_findisotopes_neg_camera
+    """
 }
 
 /*
@@ -2897,7 +2905,7 @@ if(params.perform_identification==true)
 
   process  process_read_MS2_neg_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$mzMLFile"
     publishDir "${params.outdir}/process_read_MS2_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2908,10 +2916,10 @@ if(params.perform_identification==true)
   output:
   file "${mzMLFile.baseName}.rdata" into mapmsmstocamera_rdata_neg_msnbase
 
-    shell:
-    '''
-      /usr/local/bin/readMS2MSnBase.r input=!{mzMLFile} output=!{mzMLFile.baseName}.rdata inputname=!{mzMLFile.baseName}
-      '''
+
+    """
+      /usr/local/bin/readMS2MSnBase.r input=$mzMLFile output=${mzMLFile.baseName}.rdata inputname=${mzMLFile.baseName}
+      """
   }
 
   /*
@@ -2920,7 +2928,7 @@ if(params.perform_identification==true)
 
   process  process_mapmsms_tocamera_neg_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "A collection of files"
     publishDir "${params.outdir}/process_mapmsms_tocamera_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2934,10 +2942,10 @@ if(params.perform_identification==true)
 
     script:
     def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
-    shell:
+
     """
-      /usr/local/bin/mapMS2ToCamera.r inputCAMERA=!{rdata_files_ms1} inputMS2=$input_args output=MapMsms2Camera_neg.rdata  \
-     ppm=!{params.ppm_mapmsmstocamera_neg_msnbase} rt=!{params.rt_mapmsmstocamera_neg_msnbase}
+      /usr/local/bin/mapMS2ToCamera.r inputCAMERA=$rdata_files_ms1 inputMS2=$input_args output=MapMsms2Camera_neg.rdata  \\
+     ppm=$params.ppm_mapmsmstocamera_neg_msnbase rt=$params.rt_mapmsmstocamera_neg_msnbase
       """
   }
 
@@ -2948,7 +2956,7 @@ if(params.perform_identification==true)
 
   process  process_mapmsms_toparam_neg_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$rdata_files_ms2"
     publishDir "${params.outdir}/process_mapmsms_toparam_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -2959,16 +2967,16 @@ if(params.perform_identification==true)
 
   output:
   file "*.zip" into csifingerid_txt_neg_msnbase, addcutremove_txt_neg_msnbase, metfrag_txt_neg_msnbase, cfmidin_txt_neg_msnbase
-    shell:
-      '''
+
+      """
       mkdir out
-      /usr/local/bin/MS2ToMetFrag.r inputCAMERA=!{rdata_files_ms1} inputMS2=!{rdata_files_ms2} output=out precursorppm=!{params.precursorppm_msmstoparam_neg_msnbase}  \
-     fragmentppm=!{params.fragmentppm_msmstoparam_neg_msnbase} fragmentabs=!{params.fragmentabs_msmstoparam_neg_msnbase} database=!{params.database_msmstoparam_neg_msnbase}  \
-    mode=!{params.mode_msmstoparam_neg_msnbase} adductRules=!{params.adductRules_msmstoparam_neg_msnbase} minPeaks=!{params.minPeaks_msmstoparam_neg_msnbase}
+      /usr/local/bin/MS2ToMetFrag.r inputCAMERA=$rdata_files_ms1 inputMS2=$rdata_files_ms2 output=out precursorppm=$params.precursorppm_msmstoparam_neg_msnbase  \\
+     fragmentppm=$params.fragmentppm_msmstoparam_neg_msnbase fragmentabs=$params.fragmentabs_msmstoparam_neg_msnbase database=$params.database_msmstoparam_neg_msnbase  \\
+    mode=$params.mode_msmstoparam_neg_msnbase adductRules=$params.adductRules_msmstoparam_neg_msnbase minPeaks=$params.minPeaks_msmstoparam_neg_msnbase
     ls out/ -A -1  | cut -d'_' -f4- | tr ' ' '\n' | sort -u | xargs -I %  find out/ -type f -iname *% -exec zip %.zip {} +
 
 
-      '''
+      """
   }
 
 /*
@@ -2987,7 +2995,7 @@ csifingerid_txt_neg_msnbase_flatten=csifingerid_txt_neg_msnbase.flatten()
 
 process  process_ms2_identification_neg_csifingerid{
   label 'csifingerid'
-  tag "$name"
+  tag "$parameters"
   publishDir "${params.outdir}/process_ms2_identification_neg_csifingerid", mode: params.publish_dir_mode
 
 
@@ -2998,18 +3006,18 @@ process  process_ms2_identification_neg_csifingerid{
   file "${parameters.baseName}_Csifingerid_neg.zip" into aggregateID_csv_neg_csifingerid
   file "${parameters.baseName}_class_Csifingerid_neg.csv" into aggregateClass_csv_neg_csifingerid
 
-  shell:
-    '''
+
+    """
     mkdir inputs
     mkdir outputs
-    unzip  -j !{parameters} -d inputs/
-    touch !{parameters.baseName}_class_Csifingerid_neg.csv
-  /usr/local/bin/fingerID.r input=$PWD/inputs database=!{params.database_csifingerid_neg_csifingerid} tryOffline=T output=$PWD/outputs/ ncores=!{params.ncore_csifingerid_neg_csifingerid}    \
- timeout=!{params.timeout_csifingerid_neg_csifingerid} canopus=T canopusOutput=$PWD/!{parameters.baseName}_class_Csifingerid_neg.csv
+    unzip  -j $parameters -d inputs/
+    touch ${parameters.baseName}_class_Csifingerid_neg.csv
+  /usr/local/bin/fingerID.r input=\$PWD/inputs database=$params.database_csifingerid_neg_csifingerid tryOffline=T output=\$PWD/outputs/ ncores=$params.ncore_csifingerid_neg_csifingerid    \\
+ timeout=$params.timeout_csifingerid_neg_csifingerid canopus=T canopusOutput=\$PWD/${parameters.baseName}_class_Csifingerid_neg.csv
 
-   zip -j -r !{parameters.baseName}_Csifingerid_neg.zip outputs/*.csv
+   zip -j -r ${parameters.baseName}_Csifingerid_neg.zip outputs/*.csv
 
-    '''
+    """
 }
 /*
  * STEP 19 - aggregate ids from CSI
@@ -3017,7 +3025,7 @@ process  process_ms2_identification_neg_csifingerid{
 
 process  process_identification_aggregate_neg_csifingerid{
   label 'msnbase'
-  tag "$name"
+  tag "A collection of files"
   publishDir "${params.outdir}/process_identification_aggregate_neg_csifingerid", mode: params.publish_dir_mode
 
 
@@ -3027,15 +3035,15 @@ process  process_identification_aggregate_neg_csifingerid{
 output:
 file "aggregated_identification_csifingerid_neg.csv" into csifingerid_tsv_neg_passatutto
 
-  shell:
-    '''
+
+    """
     ulimit -s unlimited
   mkdir all
-  for x in *.zip ; do unzip -d all -o -u $x ; done
+  for x in *.zip ; do unzip -d all -o -u \$x ; done
   zip -r Csifingerid_neg.zip all
     /usr/local/bin/aggregateMetfrag.r inputs=Csifingerid_neg.zip realNames=Csifingerid_neg.zip output=aggregated_identification_csifingerid_neg.csv filetype=zip outTable=T
-sed -i '/^$/d' aggregated_identification_csifingerid_neg.csv
-    '''
+sed -i '/^\$/d' aggregated_identification_csifingerid_neg.csv
+    """
 }
 /*
  * STEP 20 - calculate pep from CSI results
@@ -3043,7 +3051,7 @@ sed -i '/^$/d' aggregated_identification_csifingerid_neg.csv
 
 process process_pepcalculation_csifingerid_neg_passatutto{
   label 'passatutto'
-  tag "$name"
+  tag "$identification_result"
   publishDir "${params.outdir}/process_pepcalculation_csifingerid_neg_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3053,25 +3061,25 @@ process process_pepcalculation_csifingerid_neg_passatutto{
 output:
 file "pep_identification_csifingerid_neg.csv" into csifingerid_tsv_neg_output
 
-shell:
-  '''
-  if [ -s !{identification_result} ]
+
+  """
+  if [ -s $identification_result ]
 then
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_csifingerid_neg.csv readTable=T
+/usr/local/bin/metfragPEP.r input=$identification_result score=score output=pep_identification_csifingerid_neg.csv readTable=T
 else
 touch pep_identification_csifingerid_neg.csv
 
 fi
 
 
-'''
+"""
 }
 /*
  * STEP 21 - output the results
  */
 process  process_output_quantid_neg_camera_csifingerid{
   label 'camera'
-  tag "$name"
+  tag "$camera_input_quant"
   publishDir "${params.outdir}/process_output_quantid_neg_camera_csifingerid", mode: params.publish_dir_mode
 
 
@@ -3083,27 +3091,27 @@ process  process_output_quantid_neg_camera_csifingerid{
 
 output:
 file "*.txt" into csifingerid_neg_finished
-  shell:
-'''
-if [ -s !{csifingerid_input_identification} ]
+
+"""
+if [ -s $csifingerid_input_identification ]
 then
 
-    /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{csifingerid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera}   \
-   rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera}   \
-  rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera}   \
- combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_csifingerid.txt   \
-outputVariables=varsNEGout_neg_csifingerid.txt outputMetaData=metadataNEGout_neg_csifingerid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+    /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputscores=$csifingerid_input_identification inputpheno=$phenotype_file ppm=$params.ppm_output_neg_camera   \\
+   rt=$params.rt_output_neg_camera higherTheBetter=true scoreColumn=score impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera selectedType=$params.selected_type_output_neg_camera   \\
+  rename=$params.rename_output_neg_camera renameCol=$params.rename_col_output_neg_camera onlyReportWithID=$params.only_report_with_id_output_neg_camera combineReplicate=$params.combine_replicate_output_neg_camera   \\
+ combineReplicateColumn=$params.combine_replicate_column_output_neg_camera log=$params.log_output_neg_camera sampleCoverage=$params.sample_coverage_output_neg_camera outputPeakTable=peaktableNEGout_neg_csifingerid.txt   \\
+outputVariables=varsNEGout_neg_csifingerid.txt outputMetaData=metadataNEGout_neg_csifingerid.txt Ifnormalize=$params.normalize_output_neg_camera
 
 else
 
-    /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score   \
-   impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera}   \
-  onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera}   \
- log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_csifingerid.txt outputVariables=varsNEGout_neg_csifingerid.txt   \
-outputMetaData=metadataNEGout_neg_csifingerid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+    /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_neg_camera rt=$params.rt_output_neg_camera higherTheBetter=true scoreColumn=score   \\
+   impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera selectedType=$params.selected_type_output_neg_camera rename=$params.rename_output_neg_camera renameCol=$params.rename_col_output_neg_camera   \\
+  onlyReportWithID=$params.only_report_with_id_output_neg_camera combineReplicate=$params.combine_replicate_output_neg_camera combineReplicateColumn=$params.combine_replicate_column_output_neg_camera   \\
+ log=$params.log_output_neg_camera sampleCoverage=$params.sample_coverage_output_neg_camera outputPeakTable=peaktableNEGout_neg_csifingerid.txt outputVariables=varsNEGout_neg_csifingerid.txt   \\
+outputMetaData=metadataNEGout_neg_csifingerid.txt Ifnormalize=$params.normalize_output_neg_camera
 
 fi
-    '''
+    """
 }
 }
 
@@ -3139,7 +3147,7 @@ metfrag_txt_neg_msnbase_flatten=metfrag_txt_neg_msnbase.flatten()
 
 process  process_ms2_identification_neg_metfrag{
   label 'metfrag'
-  tag "$name"
+  tag "$parameters"
   publishDir "${params.outdir}/process_ms2_identification_neg_metfrag", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3152,16 +3160,16 @@ process  process_ms2_identification_neg_metfrag{
   file "${parameters.baseName}_metfrag_neg.zip" into aggregateID_csv_neg_metfrag
 
 
-  shell:
-    '''
+
+    """
     mkdir inputs
     mkdir outputs
-    unzip  -j !{parameters} -d inputs/
-  touch !{parameters.baseName}.csv
-  find "$PWD/inputs" -type f | parallel -j !{params.ncore_neg_metfrag} /usr/local/bin/run_metfrag.sh -p {} -f $PWD/outputs/{/.}.csv -l "$PWD/!{metfrag_database}" -s "OfflineMetFusionScore"
-   zip -j -r !{parameters.baseName}_metfrag_neg.zip outputs/*.csv
+    unzip  -j $parameters -d inputs/
+  touch ${parameters.baseName}.csv
+  find "\$PWD/inputs" -type f | parallel -j $params.ncore_neg_metfrag /usr/local/bin/run_metfrag.sh -p {} -f \$PWD/outputs/{/.}.csv -l "\$PWD/$metfrag_database" -s "OfflineMetFusionScore"
+   zip -j -r ${parameters.baseName}_metfrag_neg.zip outputs/*.csv
 
-    '''
+    """
 }
 
 /*
@@ -3170,7 +3178,7 @@ process  process_ms2_identification_neg_metfrag{
 
 process  process_identification_aggregate_neg_metfrag{
   label 'msnbase'
-  tag "$name"
+  tag "A collection of files"
   publishDir "${params.outdir}/process_identification_aggregate_neg_metfrag", mode: params.publish_dir_mode
 
 
@@ -3180,16 +3188,16 @@ process  process_identification_aggregate_neg_metfrag{
 output:
 file "aggregated_identification_metfrag_neg.csv" into metfrag_tsv_neg_passatutto
 
-  shell:
-    '''
+
+    """
     ulimit -s unlimited
     mkdir all
-    for x in *.zip ; do unzip -d all -o -u $x ; done
+    for x in *.zip ; do unzip -d all -o -u \$x ; done
     zip -r metfrag_neg.zip all
     /usr/local/bin/aggregateMetfrag.r inputs=metfrag_neg.zip realNames=metfrag_neg.zip output=aggregated_identification_metfrag_neg.csv filetype=zip outTable=T
-  sed -i '/^$/d' aggregated_identification_metfrag_neg.csv
+  sed -i '/^\$/d' aggregated_identification_metfrag_neg.csv
 
-    '''
+    """
 }
 
 /*
@@ -3197,7 +3205,7 @@ file "aggregated_identification_metfrag_neg.csv" into metfrag_tsv_neg_passatutto
  */
 process process_pepcalculation_metfrag_neg_passatutto{
   label 'passatutto'
-  tag "$name"
+  tag "$identification_result"
   publishDir "${params.outdir}/process_pepcalculation_metfrag_neg_passatutto", mode: params.publish_dir_mode
 
 
@@ -3207,19 +3215,19 @@ process process_pepcalculation_metfrag_neg_passatutto{
 output:
 file "pep_identification_metfrag_neg.csv" into metfrag_tsv_neg_output
 
-shell:
-  '''
 
-  if [ -s !{identification_result} ]
+  """
+
+  if [ -s $identification_result ]
 then
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=FragmenterScore output=pep_identification_metfrag_neg.csv readTable=T
+/usr/local/bin/metfragPEP.r input=$identification_result score=FragmenterScore output=pep_identification_metfrag_neg.csv readTable=T
 else
 touch pep_identification_metfrag_neg.csv
 
 fi
 
 
-'''
+"""
 }
 
 
@@ -3229,7 +3237,7 @@ fi
 
 process  process_output_quantid_neg_camera_metfrag{
   label 'camera'
-  tag "$name"
+  tag "$camera_input_quant"
   publishDir "${params.outdir}/process_output_quantid_neg_camera_metfrag", mode: params.publish_dir_mode
 
 
@@ -3241,25 +3249,25 @@ process  process_output_quantid_neg_camera_metfrag{
 
 output:
 file "*.txt" into metfrag_neg_finished
-  shell:
-'''
-if [ -s !{metfrag_input_identification} ]
+
+"""
+if [ -s $metfrag_input_identification ]
 then
-/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{metfrag_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera}   \
-higherTheBetter=true scoreColumn=FragmenterScore impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera}   \
-rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera}   \
-combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_metfrag.txt   \
-outputVariables=varsNEGout_neg_metfrag.txt outputMetaData=metadataNEGout_neg_metfrag.txt Ifnormalize=!{params.normalize_output_neg_camera}
+/usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputscores=$metfrag_input_identification inputpheno=$phenotype_file ppm=$params.ppm_output_neg_camera rt=$params.rt_output_neg_camera   \\
+higherTheBetter=true scoreColumn=FragmenterScore impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera selectedType=$params.selected_type_output_neg_camera   \\
+rename=$params.rename_output_neg_camera renameCol=$params.rename_col_output_neg_camera onlyReportWithID=$params.only_report_with_id_output_neg_camera combineReplicate=$params.combine_replicate_output_neg_camera   \\
+combineReplicateColumn=$params.combine_replicate_column_output_neg_camera log=$params.log_output_neg_camera sampleCoverage=$params.sample_coverage_output_neg_camera outputPeakTable=peaktableNEGout_neg_metfrag.txt   \\
+outputVariables=varsNEGout_neg_metfrag.txt outputMetaData=metadataNEGout_neg_metfrag.txt Ifnormalize=$params.normalize_output_neg_camera
 
 else
-/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=FragmenterScore   \
-impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera}   \
-onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera}   \
-sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_metfrag.txt outputVariables=varsNEGout_neg_metfrag.txt outputMetaData=metadataNEGout_neg_metfrag.txt Ifnormalize=!{params.normalize_output_neg_camera}
+/usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_neg_camera rt=$params.rt_output_neg_camera higherTheBetter=true scoreColumn=FragmenterScore   \\
+impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera selectedType=$params.selected_type_output_neg_camera rename=$params.rename_output_neg_camera renameCol=$params.rename_col_output_neg_camera   \\
+onlyReportWithID=$params.only_report_with_id_output_neg_camera combineReplicate=$params.combine_replicate_output_neg_camera combineReplicateColumn=$params.combine_replicate_column_output_neg_camera log=$params.log_output_neg_camera   \\
+sampleCoverage=$params.sample_coverage_output_neg_camera outputPeakTable=peaktableNEGout_neg_metfrag.txt outputVariables=varsNEGout_neg_metfrag.txt outputMetaData=metadataNEGout_neg_metfrag.txt Ifnormalize=$params.normalize_output_neg_camera
 
 
 fi
-    '''
+    """
 }
 }
 
@@ -3286,7 +3294,7 @@ cfmid_txt_neg_msnbase_flatten=cfmidin_txt_neg_msnbase.flatten()
  */
 process  process_ms2_identification_neg_cfmid{
   label 'cfmid'
-  tag "$name"
+  tag "$parameters"
   publishDir "${params.outdir}/process_ms2_identification_neg_cfmid", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3300,19 +3308,19 @@ process  process_ms2_identification_neg_cfmid{
  file "${parameters.baseName}_cfmid_neg.zip" into aggregateID_csv_neg_cfmid
 
 
- shell:
-   '''
+
+   """
    mkdir inputs
    mkdir outputs
-   unzip  -j !{parameters} -d inputs/
- touch !{parameters.baseName}.csv
- find "$PWD/inputs" -type f | parallel -j !{params.ncore_neg_cfmid} /usr/local/bin/cfmid.r input={} realName={/} databaseFile=$PWD/!{cfmid_database}   \
- output=$PWD/outputs/{/.}.csv candidate_id=!{params.candidate_id_identification_neg_cfmid} candidate_inchi_smiles=!{params.candidate_inchi_smiles_identification_neg_cfmid}   \
-candidate_mass=!{params.candidate_mass_identification_neg_cfmid} databaseNameColumn=!{params.database_name_column_identification_neg_cfmid} databaseInChIColumn=!{params.database_inchI_column_identification_neg_cfmid} scoreType=Jaccard
+   unzip  -j $parameters -d inputs/
+ touch ${parameters.baseName}.csv
+ find "\$PWD/inputs" -type f | parallel -j $params.ncore_neg_cfmid /usr/local/bin/cfmid.r input={} realName={/} databaseFile=\$PWD/$cfmid_database   \\
+ output=\$PWD/outputs/{/.}.csv candidate_id=$params.candidate_id_identification_neg_cfmid candidate_inchi_smiles=$params.candidate_inchi_smiles_identification_neg_cfmid   \\
+candidate_mass=$params.candidate_mass_identification_neg_cfmid databaseNameColumn=$params.database_name_column_identification_neg_cfmid databaseInChIColumn=$params.database_inchI_column_identification_neg_cfmid scoreType=Jaccard
 
-  zip -j -r !{parameters.baseName}_cfmid_neg.zip outputs/*.csv
+  zip -j -r ${parameters.baseName}_cfmid_neg.zip outputs/*.csv
 
- '''
+ """
 }
 
 /*
@@ -3321,7 +3329,7 @@ candidate_mass=!{params.candidate_mass_identification_neg_cfmid} databaseNameCol
 
 process  process_identification_aggregate_neg_cfmid{
   label 'msnbase'
-  tag "$name"
+  tag "A collection of files"
   publishDir "${params.outdir}/process_identification_aggregate_neg_cfmid", mode: params.publish_dir_mode
 
 
@@ -3331,15 +3339,15 @@ process  process_identification_aggregate_neg_cfmid{
 output:
 file "aggregated_identification_cfmid_neg.csv" into cfmid_tsv_neg_passatutto
 
-  shell:
-    '''
+
+    """
     ulimit -s unlimited
     mkdir all
-    for x in *.zip ; do unzip -d all -o -u $x ; done
+    for x in *.zip ; do unzip -d all -o -u \$x ; done
     zip -r cfmid_neg.zip all
     /usr/local/bin/aggregateMetfrag.r inputs=cfmid_neg.zip realNames=cfmid_neg.zip output=aggregated_identification_cfmid_neg.csv filetype=zip outTable=T
-  sed -i '/^$/d' aggregated_identification_cfmid_neg.csv
-    '''
+  sed -i '/^\$/d' aggregated_identification_cfmid_neg.csv
+    """
 }
 
 /*
@@ -3349,7 +3357,7 @@ file "aggregated_identification_cfmid_neg.csv" into cfmid_tsv_neg_passatutto
 
 process process_pepcalculation_cfmid_neg_passatutto{
   label 'passatutto'
-  tag "$name"
+  tag "$identification_result"
   publishDir "${params.outdir}/process_pepcalculation_cfmid_neg_passatutto", mode: params.publish_dir_mode
 
 
@@ -3359,17 +3367,17 @@ process process_pepcalculation_cfmid_neg_passatutto{
 output:
 file "pep_identification_cfmid_neg.csv" into cfmid_tsv_neg_output
 
-shell:
-  '''
 
-if [ -s !{identification_result} ]
+  """
+
+if [ -s $identification_result ]
 then
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=Jaccard_Score output=pep_identification_cfmid_neg.csv readTable=T
+/usr/local/bin/metfragPEP.r input=$identification_result score=Jaccard_Score output=pep_identification_cfmid_neg.csv readTable=T
 else
 touch pep_identification_cfmid_neg.csv
 
 fi
-'''
+"""
 }
 
 /*
@@ -3379,7 +3387,7 @@ fi
 
 process  process_output_quantid_neg_camera_cfmid{
   label 'camera'
-  tag "$name"
+  tag "$camera_input_quant"
   publishDir "${params.outdir}/process_output_quantid_neg_camera_cfmid", mode: params.publish_dir_mode
 
 
@@ -3391,26 +3399,26 @@ process  process_output_quantid_neg_camera_cfmid{
 
 output:
 file "*.txt" into cfmid_neg_finished
-  shell:
-'''
 
-if [ -s !{cfmid_input_identification} ]
+"""
+
+if [ -s $cfmid_input_identification ]
 then
-/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{cfmid_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera}   \
-higherTheBetter=true scoreColumn=Jaccard_Score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera}   \
-rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera}   \
-combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_cfmid.txt   \
-outputVariables=varsNEGout_neg_cfmid.txt outputMetaData=metadataNEGout_neg_cfmid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+/usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputscores=$cfmid_input_identification inputpheno=$phenotype_file ppm=$params.ppm_output_neg_camera rt=$params.rt_output_neg_camera   \\
+higherTheBetter=true scoreColumn=Jaccard_Score impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera selectedType=$params.selected_type_output_neg_camera   \\
+rename=$params.rename_output_neg_camera renameCol=$params.rename_col_output_neg_camera onlyReportWithID=$params.only_report_with_id_output_neg_camera combineReplicate=$params.combine_replicate_output_neg_camera   \\
+combineReplicateColumn=$params.combine_replicate_column_output_neg_camera log=$params.log_output_neg_camera sampleCoverage=$params.sample_coverage_output_neg_camera outputPeakTable=peaktableNEGout_neg_cfmid.txt   \\
+outputVariables=varsNEGout_neg_cfmid.txt outputMetaData=metadataNEGout_neg_cfmid.txt Ifnormalize=$params.normalize_output_neg_camera
 
 else
-/usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=Jaccard_Score   \
-impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera}   \
-onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera} combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera}  \
- sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_cfmid.txt outputVariables=varsNEGout_neg_cfmid.txt outputMetaData=metadataNEGout_neg_cfmid.txt Ifnormalize=!{params.normalize_output_neg_camera}
+/usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_neg_camera rt=$params.rt_output_neg_camera higherTheBetter=true scoreColumn=Jaccard_Score   \\
+impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera selectedType=$params.selected_type_output_neg_camera rename=$params.rename_output_neg_camera renameCol=$params.rename_col_output_neg_camera   \\
+onlyReportWithID=$params.only_report_with_id_output_neg_camera combineReplicate=$params.combine_replicate_output_neg_camera combineReplicateColumn=$params.combine_replicate_column_output_neg_camera log=$params.log_output_neg_camera  \\
+ sampleCoverage=$params.sample_coverage_output_neg_camera outputPeakTable=peaktableNEGout_neg_cfmid.txt outputVariables=varsNEGout_neg_cfmid.txt outputMetaData=metadataNEGout_neg_cfmid.txt Ifnormalize=$params.normalize_output_neg_camera
 
 
 fi
-    '''
+    """
 }
 }
 
@@ -3435,7 +3443,7 @@ if(params.library_charactrized_neg==false){
 
     process process_peak_picker_library_neg_openms_centroided {
       label 'openms'
-        tag "$name"
+        tag "$mzMLFile"
         publishDir "${params.outdir}/process_peak_picker_library_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
         stageInMode 'copy'
 
@@ -3447,10 +3455,10 @@ if(params.library_charactrized_neg==false){
         output:
         file "${mzMLFile}" into masstrace_detection_process_library_neg, param_detection_process_library_neg
 
-        shell:
-        '''
-        PeakPickerHiRes -in !{mzMLFile} -out !{mzMLFile} -ini !{setting_file}
-        '''
+
+        """
+        PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
+        """
     }
 
    if(params.quantification_openms_xcms_library_neg=="openms")
@@ -3460,7 +3468,7 @@ if(params.library_charactrized_neg==false){
       */
      process process_masstrace_detection_library_neg_openms_centroided {
        label 'openms'
-         tag "$name"
+         tag "$mzMLFile"
          publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3472,10 +3480,10 @@ if(params.library_charactrized_neg==false){
          output:
          file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion
 
-         shell:
-         '''
-         FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-         '''
+
+         """
+         FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
+         """
      }
 
      /*
@@ -3484,7 +3492,7 @@ if(params.library_charactrized_neg==false){
 
      process process_openms_to_xcms_conversion_library_neg_centroided {
        label 'xcmsconvert'
-         tag "$name"
+         tag "$mzMLFile"
          publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3496,11 +3504,11 @@ if(params.library_charactrized_neg==false){
          output:
          file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
-         shell:
-         '''
-          /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=negative output=!{mzMLFile.baseName}.rdata sampleClass=library changeNameTO=!{mzMLFile.baseName}.mzML
 
-         '''
+         """
+          /usr/local/bin/featurexmlToCamera.r input=$mzMLFile realFileName=$mzMLFile polarity=negative output=${mzMLFile.baseName}.rdata sampleClass=library changeNameTO=${mzMLFile.baseName}.mzML
+
+         """
      }
    }else{
 
@@ -3513,7 +3521,7 @@ if(params.library_charactrized_neg==false){
 
       process process_ipo_param_library_neg_ipo_centroided{
           label 'ipo'
-          tag "$name"
+          tag "A collection of files"
           publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3525,23 +3533,23 @@ if(params.library_charactrized_neg==false){
 
           script:
             def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-          shell:
+
           """
           touch quant_params_library_neg.json
           touch rt_params_library_neg.json
-            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \
-            methodXset=!{params.ipo_methodXset_library_neg} methodRT=!{params.ipo_methodRT_library_neg} noise_l=!{params.ipo_noise_l_library_neg} \
-             noise_h=!{params.ipo_noise_h_library_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_library_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_library_neg} \
-            prefilter_h_l=!{params.ipo_prefilter_h_l_library_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_library_neg} \
-             snthresh_l=!{params.ipo_snthresh_l_library_neg} snthresh_h=!{params.ipo_snthresh_h_library_neg} mzCenterFun=!{params.ipo_mzCenterFun_library_neg} \
-              integrate=!{params.ipo_integrate_library_neg} fitgauss=!{params.ipo_fitgauss_library_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_neg} \
-               ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_neg} ipo_ppm_l=!{params.ipo_ppm_l_library_neg} \
-             ipo_ppm_h=!{params.ipo_ppm_h_library_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_neg} ipo_charge_camera=!{params.ipo_charge_camera_library_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_neg} \
-             response_l=!{params.ipo_response_l_library_neg} response_h=!{params.ipo_response_h_library_neg} distFunc=!{params.ipo_distFunc_library_neg} factorDiag_l=!{params.ipo_factorDiag_l_library_neg} factorDiag_h=!{params.ipo_factorDiag_h_library_neg} factorGap_l=!{params.ipo_factorGap_l_library_neg} \
-             factorGap_h=!{params.ipo_factorGap_h_library_neg} localAlignment=!{params.ipo_localAlignment_library_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_library_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_library_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_library_neg} \
-             ipo_gapExtend_h=!{params.ipo_gapExtend_h_library_neg} ipo_profStep_l=!{params.ipo_profStep_l_library_neg} ipo_profStep_h=!{params.ipo_profStep_h_library_neg} bw_l=!{params.ipo_bw_l_library_neg} bw_h=!{params.ipo_bw_h_library_neg} minfrac_l=!{params.ipo_minfrac_l_library_neg} \
-              minfrac_h=!{params.ipo_minfrac_h_library_neg} mzwid_l=!{params.ipo_mzwid_l_library_neg} mzwid_h=!{params.ipo_mzwid_h_library_neg} minsamp_l=!{params.ipo_minsamp_l_library_neg} \
-               minsamp_h=!{params.ipo_minsamp_h_library_neg} max_l=!{params.ipo_max_l_library_neg} max_h=!{params.ipo_max_h_library_neg} ncores=!{params.ipo_ncores_library_neg} outputxset=quant_params_library_neg.json outputrt=rt_params_library_neg.json
+            /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \\
+            methodXset=$params.ipo_methodXset_library_neg methodRT=$params.ipo_methodRT_library_neg noise_l=$params.ipo_noise_l_library_neg \\
+             noise_h=$params.ipo_noise_h_library_neg prefilter_l_l=$params.ipo_prefilter_l_l_library_neg prefilter_l_h=$params.ipo_prefilter_l_h_library_neg \\
+            prefilter_h_l=$params.ipo_prefilter_h_l_library_neg prefilter_h_h=$params.ipo_prefilter_h_h_library_neg \\
+             snthresh_l=$params.ipo_snthresh_l_library_neg snthresh_h=$params.ipo_snthresh_h_library_neg mzCenterFun=$params.ipo_mzCenterFun_library_neg \\
+              integrate=$params.ipo_integrate_library_neg fitgauss=$params.ipo_fitgauss_library_neg ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg \\
+               ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg ipo_ppm_l=$params.ipo_ppm_l_library_neg \\
+             ipo_ppm_h=$params.ipo_ppm_h_library_neg ipo_mzdiff_l=$params.ipo_mzdiff_l_library_neg ipo_mzdiff_h=$params.ipo_mzdiff_h_library_neg ipo_charge_camera=$params.ipo_charge_camera_library_neg ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_neg \\
+             response_l=$params.ipo_response_l_library_neg response_h=$params.ipo_response_h_library_neg distFunc=$params.ipo_distFunc_library_neg factorDiag_l=$params.ipo_factorDiag_l_library_neg factorDiag_h=$params.ipo_factorDiag_h_library_neg factorGap_l=$params.ipo_factorGap_l_library_neg \\
+             factorGap_h=$params.ipo_factorGap_h_library_neg localAlignment=$params.ipo_localAlignment_library_neg ipo_gapInit_l=$params.ipo_gapInit_l_library_neg ipo_gapInit_h=$params.ipo_gapInit_h_library_neg ipo_gapExtend_l=$params.ipo_gapExtend_l_library_neg \\
+             ipo_gapExtend_h=$params.ipo_gapExtend_h_library_neg ipo_profStep_l=$params.ipo_profStep_l_library_neg ipo_profStep_h=$params.ipo_profStep_h_library_neg bw_l=$params.ipo_bw_l_library_neg bw_h=$params.ipo_bw_h_library_neg minfrac_l=$params.ipo_minfrac_l_library_neg \\
+              minfrac_h=$params.ipo_minfrac_h_library_neg mzwid_l=$params.ipo_mzwid_l_library_neg mzwid_h=$params.ipo_mzwid_h_library_neg minsamp_l=$params.ipo_minsamp_l_library_neg \\
+               minsamp_h=$params.ipo_minsamp_h_library_neg max_l=$params.ipo_max_l_library_neg max_h=$params.ipo_max_h_library_neg ncores=$params.ipo_ncores_library_neg outputxset=quant_params_library_neg.json outputrt=rt_params_library_neg.json
           """
       }
       }
@@ -3553,7 +3561,7 @@ if(params.library_charactrized_neg==false){
 
      process process_masstrace_detection_library_neg_xcms_centroided{
        label 'xcms'
-       tag "$name"
+       tag "$mzMLFile"
        publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3566,22 +3574,22 @@ if(params.library_charactrized_neg==false){
        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
 
-         shell:
+script:
           def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
          """
-         /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms}   \
-        peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=!{params.sampleclass_quant_library_neg_xcms}   \
-       mzdiff=!{params.mzdiff_quant_library_neg_xcms} snthresh=!{params.snthresh_quant_library_neg_xcms} prefilter_l=!{params.prefilter_quant_library_neg_xcms} prefilter_h=!{params.value_of_prefilter_quant_library_neg_xcms}   \
-      mzCenterFun=!{params.mzCenterFun_quant_library_neg_xcms} integrate=!{params.integrate_quant_library_neg_xcms} fitgauss=!{params.fitgauss_quant_library_neg_xcms} \
-         methodXset=!{params.ipo_methodXset_library_neg} methodRT=!{params.ipo_methodRT_library_neg} noise_l=!{params.ipo_noise_l_library_neg} \
-         noise_h=!{params.ipo_noise_h_library_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_library_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_library_neg} \
-         prefilter_h_l=!{params.ipo_prefilter_h_l_library_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_library_neg} \
-         snthresh_l=!{params.ipo_snthresh_l_library_neg} snthresh_h=!{params.ipo_snthresh_h_library_neg} mzCenterFun=!{params.ipo_mzCenterFun_library_neg} \
-         integrate=!{params.ipo_integrate_library_neg} fitgauss=!{params.ipo_fitgauss_library_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_neg} \
-         ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_neg} ipo_ppm_l=!{params.ipo_ppm_l_library_neg} \
-         ipo_ppm_h=!{params.ipo_ppm_h_library_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_neg} ipo_charge_camera=!{params.ipo_charge_camera_library_neg}   \
-        ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_neg} \
-         ipo_inv=!{ipo_library_neg_localQ}  ${filter_argument}
+         /usr/local/bin/findPeaks.r input=\$PWD/$mzMLFile output=\$PWD/${mzMLFile.baseName}.rdata ppm=$params.masstrace_ppm_library_neg_xcms peakwidthLow=$params.peakwidthlow_quant_library_neg_xcms   \\
+        peakwidthHigh=$params.peakwidthhigh_quant_library_neg_xcms noise=$params.noise_quant_library_neg_xcms polarity=negative realFileName=$mzMLFile sampleClass=$params.sampleclass_quant_library_neg_xcms   \\
+       mzdiff=$params.mzdiff_quant_library_neg_xcms snthresh=$params.snthresh_quant_library_neg_xcms prefilter_l=$params.prefilter_quant_library_neg_xcms prefilter_h=$params.value_of_prefilter_quant_library_neg_xcms   \\
+      mzCenterFun=$params.mzCenterFun_quant_library_neg_xcms integrate=$params.integrate_quant_library_neg_xcms fitgauss=$params.fitgauss_quant_library_neg_xcms \\
+         methodXset=$params.ipo_methodXset_library_neg methodRT=$params.ipo_methodRT_library_neg noise_l=$params.ipo_noise_l_library_neg \\
+         noise_h=$params.ipo_noise_h_library_neg prefilter_l_l=$params.ipo_prefilter_l_l_library_neg prefilter_l_h=$params.ipo_prefilter_l_h_library_neg \\
+         prefilter_h_l=$params.ipo_prefilter_h_l_library_neg prefilter_h_h=$params.ipo_prefilter_h_h_library_neg \\
+         snthresh_l=$params.ipo_snthresh_l_library_neg snthresh_h=$params.ipo_snthresh_h_library_neg mzCenterFun=$params.ipo_mzCenterFun_library_neg \\
+         integrate=$params.ipo_integrate_library_neg fitgauss=$params.ipo_fitgauss_library_neg ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg \\
+         ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg ipo_ppm_l=$params.ipo_ppm_l_library_neg \\
+         ipo_ppm_h=$params.ipo_ppm_h_library_neg ipo_mzdiff_l=$params.ipo_mzdiff_l_library_neg ipo_mzdiff_h=$params.ipo_mzdiff_h_library_neg ipo_charge_camera=$params.ipo_charge_camera_library_neg   \\
+        ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_neg \\
+         ipo_inv=$ipo_library_neg_localQ  ${filter_argument}
          """
      }
    }
@@ -3595,7 +3603,7 @@ if(params.library_charactrized_neg==false){
        */
       process process_masstrace_detection_library_neg_openms_noncentroided {
         label 'openms'
-          tag "$name"
+          tag "$mzMLFile"
           publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3607,10 +3615,10 @@ if(params.library_charactrized_neg==false){
           output:
           file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_library_neg_noncentroided
 
-          shell:
-          '''
-          FeatureFinderMetabo -in !{mzMLFile} -out !{mzMLFile.baseName}.featureXML -ini !{setting_file}
-          '''
+
+          """
+          FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
+          """
       }
 
       /*
@@ -3619,7 +3627,7 @@ if(params.library_charactrized_neg==false){
 
       process process_openms_to_xcms_conversion_library_neg_noncentroided {
         label 'xcmsconvert'
-          tag "$name"
+          tag "$mzMLFile"
           publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3631,11 +3639,11 @@ if(params.library_charactrized_neg==false){
           output:
           file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
-          shell:
-          '''
-           /usr/local/bin/featurexmlToCamera.r input=!{mzMLFile} realFileName=!{mzMLFile} polarity=negative output=!{mzMLFile.baseName}.rdata sampleClass=library changeNameTO=!{mzMLFile.baseName}.mzML
 
-          '''
+          """
+           /usr/local/bin/featurexmlToCamera.r input=$mzMLFile realFileName=$mzMLFile polarity=negative output=${mzMLFile.baseName}.rdata sampleClass=library changeNameTO=${mzMLFile.baseName}.mzML
+
+          """
       }
     }else{
 
@@ -3650,7 +3658,7 @@ if(params.library_charactrized_neg==false){
 
        process process_ipo_param_library_neg_ipo_noncentroided{
            label 'ipo'
-           tag "$name"
+           tag "A collection of files"
            publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3662,23 +3670,23 @@ if(params.library_charactrized_neg==false){
 
            script:
              def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-           shell:
+
            """
            touch quant_params_library_neg.json
            touch rt_params_library_neg.json
-           /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \
-             methodXset=!{params.ipo_methodXset_library_neg} methodRT=!{params.ipo_methodRT_library_neg} noise_l=!{params.ipo_noise_l_library_neg} \
-              noise_h=!{params.ipo_noise_h_library_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_library_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_library_neg} \
-             prefilter_h_l=!{params.ipo_prefilter_h_l_library_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_library_neg} \
-              snthresh_l=!{params.ipo_snthresh_l_library_neg} snthresh_h=!{params.ipo_snthresh_h_library_neg} mzCenterFun=!{params.ipo_mzCenterFun_library_neg} \
-               integrate=!{params.ipo_integrate_library_neg} fitgauss=!{params.ipo_fitgauss_library_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_neg} \
-                ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_neg} ipo_ppm_l=!{params.ipo_ppm_l_library_neg} \
-              ipo_ppm_h=!{params.ipo_ppm_h_library_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_neg} ipo_charge_camera=!{params.ipo_charge_camera_library_neg} ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_neg} \
-              response_l=!{params.ipo_response_l_library_neg} response_h=!{params.ipo_response_h_library_neg} distFunc=!{params.ipo_distFunc_library_neg} factorDiag_l=!{params.ipo_factorDiag_l_library_neg} factorDiag_h=!{params.ipo_factorDiag_h_library_neg} factorGap_l=!{params.ipo_factorGap_l_library_neg} \
-              factorGap_h=!{params.ipo_factorGap_h_library_neg} localAlignment=!{params.ipo_localAlignment_library_neg} ipo_gapInit_l=!{params.ipo_gapInit_l_library_neg} ipo_gapInit_h=!{params.ipo_gapInit_h_library_neg} ipo_gapExtend_l=!{params.ipo_gapExtend_l_library_neg} \
-              ipo_gapExtend_h=!{params.ipo_gapExtend_h_library_neg} ipo_profStep_l=!{params.ipo_profStep_l_library_neg} ipo_profStep_h=!{params.ipo_profStep_h_library_neg} bw_l=!{params.ipo_bw_l_library_neg} bw_h=!{params.ipo_bw_h_library_neg} minfrac_l=!{params.ipo_minfrac_l_library_neg} \
-               minfrac_h=!{params.ipo_minfrac_h_library_neg} mzwid_l=!{params.ipo_mzwid_l_library_neg} mzwid_h=!{params.ipo_mzwid_h_library_neg} minsamp_l=!{params.ipo_minsamp_l_library_neg} \
-                minsamp_h=!{params.ipo_minsamp_h_library_neg} max_l=!{params.ipo_max_l_library_neg} max_h=!{params.ipo_max_h_library_neg} ncores=!{params.ipo_ncores_library_neg} outputxset=quant_params_library_neg.json outputrt=rt_params_library_neg.json
+           /usr/local/bin/ipo.r input=$inputs_aggregated quantOnly=TRUE allSamples=TRUE \\
+             methodXset=$params.ipo_methodXset_library_neg methodRT=$params.ipo_methodRT_library_neg noise_l=$params.ipo_noise_l_library_neg \\
+              noise_h=$params.ipo_noise_h_library_neg prefilter_l_l=$params.ipo_prefilter_l_l_library_neg prefilter_l_h=$params.ipo_prefilter_l_h_library_neg \\
+             prefilter_h_l=$params.ipo_prefilter_h_l_library_neg prefilter_h_h=$params.ipo_prefilter_h_h_library_neg \\
+              snthresh_l=$params.ipo_snthresh_l_library_neg snthresh_h=$params.ipo_snthresh_h_library_neg mzCenterFun=$params.ipo_mzCenterFun_library_neg \\
+               integrate=$params.ipo_integrate_library_neg fitgauss=$params.ipo_fitgauss_library_neg ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg \\
+                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg ipo_ppm_l=$params.ipo_ppm_l_library_neg \\
+              ipo_ppm_h=$params.ipo_ppm_h_library_neg ipo_mzdiff_l=$params.ipo_mzdiff_l_library_neg ipo_mzdiff_h=$params.ipo_mzdiff_h_library_neg ipo_charge_camera=$params.ipo_charge_camera_library_neg ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_neg \\
+              response_l=$params.ipo_response_l_library_neg response_h=$params.ipo_response_h_library_neg distFunc=$params.ipo_distFunc_library_neg factorDiag_l=$params.ipo_factorDiag_l_library_neg factorDiag_h=$params.ipo_factorDiag_h_library_neg factorGap_l=$params.ipo_factorGap_l_library_neg \\
+              factorGap_h=$params.ipo_factorGap_h_library_neg localAlignment=$params.ipo_localAlignment_library_neg ipo_gapInit_l=$params.ipo_gapInit_l_library_neg ipo_gapInit_h=$params.ipo_gapInit_h_library_neg ipo_gapExtend_l=$params.ipo_gapExtend_l_library_neg \\
+              ipo_gapExtend_h=$params.ipo_gapExtend_h_library_neg ipo_profStep_l=$params.ipo_profStep_l_library_neg ipo_profStep_h=$params.ipo_profStep_h_library_neg bw_l=$params.ipo_bw_l_library_neg bw_h=$params.ipo_bw_h_library_neg minfrac_l=$params.ipo_minfrac_l_library_neg \\
+               minfrac_h=$params.ipo_minfrac_h_library_neg mzwid_l=$params.ipo_mzwid_l_library_neg mzwid_h=$params.ipo_mzwid_h_library_neg minsamp_l=$params.ipo_minsamp_l_library_neg \\
+                minsamp_h=$params.ipo_minsamp_h_library_neg max_l=$params.ipo_max_l_library_neg max_h=$params.ipo_max_h_library_neg ncores=$params.ipo_ncores_library_neg outputxset=quant_params_library_neg.json outputrt=rt_params_library_neg.json
            """
        }
        }
@@ -3688,7 +3696,7 @@ if(params.library_charactrized_neg==false){
 
       process process_masstrace_detection_library_neg_xcms_noncentroided{
         label 'xcms'
-        tag "$name"
+        tag "$mzMLFile"
         publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3700,22 +3708,22 @@ if(params.library_charactrized_neg==false){
         output:
         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
-        shell:
+        script:
         def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
         """
-       /usr/local/bin/findPeaks.r input=\$PWD/!{mzMLFile} output=\$PWD/!{mzMLFile.baseName}.rdata ppm=!{params.masstrace_ppm_library_neg_xcms} peakwidthLow=!{params.peakwidthlow_quant_library_neg_xcms}   \
-      peakwidthHigh=!{params.peakwidthhigh_quant_library_neg_xcms} noise=!{params.noise_quant_library_neg_xcms} polarity=negative realFileName=!{mzMLFile} sampleClass=!{params.sampleclass_quant_library_neg_xcms}   \
-      mzdiff=!{params.mzdiff_quant_library_neg_xcms} snthresh=!{params.snthresh_quant_library_neg_xcms} prefilter_l=!{params.prefilter_quant_library_neg_xcms} prefilter_h=!{params.value_of_prefilter_quant_library_neg_xcms}  \
-      mzCenterFun=!{params.mzCenterFun_quant_library_neg_xcms} integrate=!{params.integrate_quant_library_neg_xcms} fitgauss=!{params.fitgauss_quant_library_neg_xcms} \
-       methodXset=!{params.ipo_methodXset_library_neg} methodRT=!{params.ipo_methodRT_library_neg} noise_l=!{params.ipo_noise_l_library_neg} \
-       noise_h=!{params.ipo_noise_h_library_neg} prefilter_l_l=!{params.ipo_prefilter_l_l_library_neg} prefilter_l_h=!{params.ipo_prefilter_l_h_library_neg} \
-       prefilter_h_l=!{params.ipo_prefilter_h_l_library_neg} prefilter_h_h=!{params.ipo_prefilter_h_h_library_neg} \
-       snthresh_l=!{params.ipo_snthresh_l_library_neg} snthresh_h=!{params.ipo_snthresh_h_library_neg} mzCenterFun=!{params.ipo_mzCenterFun_library_neg} \
-       integrate=!{params.ipo_integrate_library_neg} fitgauss=!{params.ipo_fitgauss_library_neg} ipo_min_peakwidth_l=!{params.ipo_min_peakwidth_l_library_neg} \
-       ipo_min_peakwidth_h=!{params.ipo_min_peakwidth_l_library_neg} ipo_max_peakwidth_l=!{params.ipo_max_peakwidth_l_library_neg} ipo_max_peakwidth_h=!{params.ipo_max_peakwidth_h_library_neg} ipo_ppm_l=!{params.ipo_ppm_l_library_neg} \
-       ipo_ppm_h=!{params.ipo_ppm_h_library_neg} ipo_mzdiff_l=!{params.ipo_mzdiff_l_library_neg} ipo_mzdiff_h=!{params.ipo_mzdiff_h_library_neg} ipo_charge_camera=!{params.ipo_charge_camera_library_neg}   \
-      ipo_max_ppm_camera=!{params.ipo_max_ppm_camera_library_neg} \
-       ipo_inv=!{ipo_library_neg_localQ} ${filter_argument}
+       /usr/local/bin/findPeaks.r input=\$PWD/$mzMLFile output=\$PWD/${mzMLFile.baseName}.rdata ppm=$params.masstrace_ppm_library_neg_xcms peakwidthLow=$params.peakwidthlow_quant_library_neg_xcms   \\
+      peakwidthHigh=$params.peakwidthhigh_quant_library_neg_xcms noise=$params.noise_quant_library_neg_xcms polarity=negative realFileName=$mzMLFile sampleClass=$params.sampleclass_quant_library_neg_xcms   \\
+      mzdiff=$params.mzdiff_quant_library_neg_xcms snthresh=$params.snthresh_quant_library_neg_xcms prefilter_l=$params.prefilter_quant_library_neg_xcms prefilter_h=$params.value_of_prefilter_quant_library_neg_xcms  \\
+      mzCenterFun=$params.mzCenterFun_quant_library_neg_xcms integrate=$params.integrate_quant_library_neg_xcms fitgauss=$params.fitgauss_quant_library_neg_xcms \\
+       methodXset=$params.ipo_methodXset_library_neg methodRT=$params.ipo_methodRT_library_neg noise_l=$params.ipo_noise_l_library_neg \\
+       noise_h=$params.ipo_noise_h_library_neg prefilter_l_l=$params.ipo_prefilter_l_l_library_neg prefilter_l_h=$params.ipo_prefilter_l_h_library_neg \\
+       prefilter_h_l=$params.ipo_prefilter_h_l_library_neg prefilter_h_h=$params.ipo_prefilter_h_h_library_neg \\
+       snthresh_l=$params.ipo_snthresh_l_library_neg snthresh_h=$params.ipo_snthresh_h_library_neg mzCenterFun=$params.ipo_mzCenterFun_library_neg \\
+       integrate=$params.ipo_integrate_library_neg fitgauss=$params.ipo_fitgauss_library_neg ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg \\
+       ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg ipo_ppm_l=$params.ipo_ppm_l_library_neg \\
+       ipo_ppm_h=$params.ipo_ppm_h_library_neg ipo_mzdiff_l=$params.ipo_mzdiff_l_library_neg ipo_mzdiff_h=$params.ipo_mzdiff_h_library_neg ipo_charge_camera=$params.ipo_charge_camera_library_neg   \\
+      ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_neg \\
+       ipo_inv=$ipo_library_neg_localQ ${filter_argument}
         """
       }
     }
@@ -3730,7 +3738,7 @@ if(params.library_charactrized_neg==false){
 
   process  process_annotate_peaks_library_neg_camera{
     label 'camera'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_annotate_peaks_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
@@ -3741,10 +3749,10 @@ if(params.library_charactrized_neg==false){
   output:
   file "${rdata_files.baseName}.rdata" into group_rdata_library_neg_camera
 
-    shell:
-      '''
-      /usr/local/bin/xsAnnotate.r  input=!{rdata_files} output=!{rdata_files.baseName}.rdata
-      '''
+
+      """
+      /usr/local/bin/xsAnnotate.r  input=$rdata_files output=${rdata_files.baseName}.rdata
+      """
   }
 
   /*
@@ -3753,7 +3761,7 @@ if(params.library_charactrized_neg==false){
 
   process  process_group_peaks_library_neg_camera{
     label 'camera'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_group_peaks_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
@@ -3764,10 +3772,10 @@ if(params.library_charactrized_neg==false){
   output:
   file "${rdata_files.baseName}.rdata" into findaddcuts_rdata_library_neg_camera
 
-    shell:
-      '''
-      /usr/local/bin/groupFWHM.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata sigma=!{params.sigma_group_library_neg_camera} perfwhm=!{params.perfwhm_group_library_neg_camera} intval=!{params.intval_group_library_neg_camera}
-      '''
+
+      """
+      /usr/local/bin/groupFWHM.r input=$rdata_files output=${rdata_files.baseName}.rdata sigma=$params.sigma_group_library_neg_camera perfwhm=$params.perfwhm_group_library_neg_camera intval=$params.intval_group_library_neg_camera
+      """
   }
 
   /*
@@ -3776,7 +3784,7 @@ if(params.library_charactrized_neg==false){
 
   process  process_find_addcuts_library_neg_camera{
     label 'camera'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_find_addcuts_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
@@ -3787,10 +3795,10 @@ if(params.library_charactrized_neg==false){
   output:
   file "${rdata_files.baseName}.rdata" into findisotopes_rdata_library_neg_camera
 
-    shell:
-      '''
-      /usr/local/bin/findAdducts.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata ppm=!{params.ppm_findaddcuts_library_neg_camera} polarity=!{params.polarity_findaddcuts_library_neg_camera}
-      '''
+
+      """
+      /usr/local/bin/findAdducts.r input=$rdata_files output=${rdata_files.baseName}.rdata ppm=$params.ppm_findaddcuts_library_neg_camera polarity=$params.polarity_findaddcuts_library_neg_camera
+      """
   }
 
   /*
@@ -3799,7 +3807,7 @@ if(params.library_charactrized_neg==false){
 
   process  process_find_isotopes_library_neg_camera{
     label 'camera'
-    tag "$name"
+    tag "$rdata_files"
     publishDir "${params.outdir}/process_find_isotopes_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
     stageInMode 'copy'
 
@@ -3810,10 +3818,10 @@ if(params.library_charactrized_neg==false){
   output:
   file "${rdata_files.baseName}.rdata" into mapmsmstocamera_rdata_library_neg_camera,mapmsmstoparam_rdata_library_neg_camera_tmp, prepareoutput_rdata_library_neg_camera_cfmid
 
-    shell:
-      '''
-      /usr/local/bin/findIsotopes.r input=!{rdata_files} output=!{rdata_files.baseName}.rdata maxcharge=!{params.maxcharge_findisotopes_library_neg_camera}
-      '''
+
+      """
+      /usr/local/bin/findIsotopes.r input=$rdata_files output=${rdata_files.baseName}.rdata maxcharge=$params.maxcharge_findisotopes_library_neg_camera
+      """
   }
 
 
@@ -3824,7 +3832,7 @@ if(params.library_charactrized_neg==false){
 
   process  process_read_MS2_library_neg_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$mzMLFile"
     publishDir "${params.outdir}/process_read_MS2_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3835,10 +3843,10 @@ if(params.library_charactrized_neg==false){
   output:
   file "${mzMLFile.baseName}_ReadMsmsLibrary.rdata" into mapmsmstocamera_rdata_library_neg_msnbase
 
-    shell:
-    '''
-    /usr/local/bin/readMS2MSnBase.r input=!{mzMLFile} output=!{mzMLFile.baseName}_ReadMsmsLibrary.rdata inputname=!{mzMLFile.baseName}
-    '''
+
+    """
+    /usr/local/bin/readMS2MSnBase.r input=$mzMLFile output=${mzMLFile.baseName}_ReadMsmsLibrary.rdata inputname=${mzMLFile.baseName}
+    """
   }
 
 
@@ -3855,7 +3863,7 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
 
   process  process_mapmsms_tocamera_library_neg_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$rdata_files_ms1"
     publishDir "${params.outdir}/process_mapmsms_tocamera_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3870,10 +3878,10 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
 
     //  script:
     //def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
-    shell:
+
     """
-    /usr/local/bin/mapMS2ToCamera.r inputCAMERA=!{rdata_files_ms1} inputMS2=!{rdata_files_ms2} output=!{rdata_files_ms1.baseName}_MapMsms2Camera_library_neg.rdata  \
-    ppm=!{params.ppm_mapmsmstocamera_library_neg_msnbase} rt=!{params.rt_mapmsmstocamera_library_neg_msnbase}
+    /usr/local/bin/mapMS2ToCamera.r inputCAMERA=$rdata_files_ms1 inputMS2=$rdata_files_ms2 output=${rdata_files_ms1.baseName}_MapMsms2Camera_library_neg.rdata  \\
+    ppm=$params.ppm_mapmsmstocamera_library_neg_msnbase rt=$params.rt_mapmsmstocamera_library_neg_msnbase
     """
   }
 
@@ -3889,7 +3897,7 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
 
   process  process_create_library_neg_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "$rdata_camera"
     publishDir "${params.outdir}/process_create_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3901,14 +3909,14 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
   output:
   file "${rdata_camera.baseName}.csv" into collectlibrary_rdata_library_neg_msnbase
 
-    shell:
-      '''
-      mkdir out
-      /usr/local/bin/createLibrary.r inputCAMERA=!{rdata_camera} precursorppm=!{params.ppm_create_library_neg_msnbase} inputMS2=!{ms2_data} output=!{rdata_camera.baseName}.csv  \
-      inputLibrary=!{library_desc}  rawFileName=!{params.raw_file_name_preparelibrary_neg_msnbase}   compundID=!{params.compund_id_preparelibrary_neg_msnbase}    \
-      compoundName=!{params.compound_name_preparelibrary_neg_msnbase}  mzCol=!{params.mz_col_preparelibrary_neg_msnbase} whichmz=!{params.which_mz_preparelibrary_neg_msnbase}
 
-      '''
+      """
+      mkdir out
+      /usr/local/bin/createLibrary.r inputCAMERA=$rdata_camera precursorppm=$params.ppm_create_library_neg_msnbase inputMS2=$ms2_data output=${rdata_camera.baseName}.csv  \\
+      inputLibrary=$library_desc  rawFileName=$params.raw_file_name_preparelibrary_neg_msnbase   compundID=$params.compund_id_preparelibrary_neg_msnbase    \\
+      compoundName=$params.compound_name_preparelibrary_neg_msnbase  mzCol=$params.mz_col_preparelibrary_neg_msnbase whichmz=$params.which_mz_preparelibrary_neg_msnbase
+
+      """
   }
 
   /*
@@ -3918,7 +3926,7 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
 
   process  process_collect_library_neg_msnbase{
     label 'msnbase'
-    tag "$name"
+    tag "A collection of files"
     publishDir "${params.outdir}/process_collect_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3943,7 +3951,7 @@ mapmsmstocamera_rdata_library_neg_camerams2=ch1mapmsmsLibrary_neg.join(ch2mapmsm
 
 process process_remove_adducts_library_neg_msnbase{
   label 'msnbase'
-  tag "$name"
+  tag "A collection of files"
   publishDir "${params.outdir}/process_remove_adducts_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3984,7 +3992,7 @@ zip::zip(zipfile="mappedtometfrag_neg.zip",files=files_to_pass)
 
   process  process_search_engine_library_neg_msnbase_nolibcharac{
     label 'msnbase'
-    tag "$name"
+    tag "$parameters"
     publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -3995,12 +4003,12 @@ zip::zip(zipfile="mappedtometfrag_neg.zip",files=files_to_pass)
   output:
   file "aggregated_identification_library_neg.csv" into library_tsv_neg_passatutto
 
-    shell:
-    '''
-    /usr/local/bin/librarySearchEngine.r -l !{libraryFile} -i !{parameters} -out aggregated_identification_library_neg.csv -th "-1" -im neg -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_neg_msnbase}
-sed -i '/^$/d' aggregated_identification_library_neg.csv
 
-    '''
+    """
+    /usr/local/bin/librarySearchEngine.r -l $libraryFile -i $parameters -out aggregated_identification_library_neg.csv -th "-1" -im neg -ts Scoredotproduct -rs 1000 -ncore $params.ncore_searchengine_library_neg_msnbase
+sed -i '/^\$/d' aggregated_identification_library_neg.csv
+
+    """
   }
 }else{
 
@@ -4010,7 +4018,7 @@ sed -i '/^$/d' aggregated_identification_library_neg.csv
 
   process  process_search_engine_library_neg_msnbase_libcharac{
     label 'msnbase'
-    tag "$name"
+    tag "$parameters"
     publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -4021,13 +4029,13 @@ sed -i '/^$/d' aggregated_identification_library_neg.csv
   output:
   file "aggregated_identification_library_neg.csv" into library_tsv_neg_passatutto
 
-    shell:
-    '''
-    /usr/local/bin/librarySearchEngine.r -l !{libraryFile} -i !{parameters} -out aggregated_identification_library_neg.csv -th "-1" -im neg -ts Scoredotproduct -rs 1000 -ncore !{params.ncore_searchengine_library_neg_msnbase}
 
-    sed -i '/^$/d' aggregated_identification_library_neg.csv
+    """
+    /usr/local/bin/librarySearchEngine.r -l $libraryFile -i $parameters -out aggregated_identification_library_neg.csv -th "-1" -im neg -ts Scoredotproduct -rs 1000 -ncore $params.ncore_searchengine_library_neg_msnbase
 
-    '''
+    sed -i '/^\$/d' aggregated_identification_library_neg.csv
+
+    """
   }
 }
 
@@ -4037,7 +4045,7 @@ sed -i '/^$/d' aggregated_identification_library_neg.csv
 
 process process_pepcalculation_library_neg_passatutto{
   label 'passatutto'
-  tag "$name"
+  tag "$identification_result"
   publishDir "${params.outdir}/process_pepcalculation_library_neg_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
@@ -4047,17 +4055,17 @@ process process_pepcalculation_library_neg_passatutto{
 output:
 file "pep_identification_library_neg.csv" into library_tsv_neg_output
 
-shell:
-  '''
 
-if [ -s !{identification_result} ]
+  """
+
+if [ -s $identification_result ]
 then
-/usr/local/bin/metfragPEP.r input=!{identification_result} score=score output=pep_identification_library_neg.csv readTable=T
+/usr/local/bin/metfragPEP.r input=$identification_result score=score output=pep_identification_library_neg.csv readTable=T
 else
 touch pep_identification_library_neg.csv
 fi
 
-'''
+"""
 }
 
 
@@ -4068,7 +4076,7 @@ fi
 
 process  process_output_quantid_neg_camera_library{
   label 'camera'
-  tag "$name"
+  tag "$camera_input_quant"
   publishDir "${params.outdir}/process_output_quantid_neg_camera_library", mode: params.publish_dir_mode
 
 
@@ -4080,26 +4088,29 @@ process  process_output_quantid_neg_camera_library{
 
 output:
 file "*.txt" into library_neg_finished
-  shell:
-'''
-if [ -s !{library_input_identification} ]
+
+"""
+if [ -s $library_input_identification ]
 then
-    /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputscores=!{library_input_identification} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera}   \
-   rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera}   \
-  rename=!{params.rename_output_neg_camera} renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera}   \
- combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_library.txt   \
-outputVariables=varsNEGout_neg_library.txt outputMetaData=metadataNEGout_neg_library.txt Ifnormalize=!{params.normalize_output_neg_camera}
+    /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputscores=$library_input_identification inputpheno=$phenotype_file ppm=$params.ppm_output_neg_camera   \\
+   rt=$params.rt_output_neg_camera higherTheBetter=true scoreColumn=score impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera selectedType=$params.selected_type_output_neg_camera  \\
+  rename=$params.rename_output_neg_camera renameCol=$params.rename_col_output_neg_camera onlyReportWithID=$params.only_report_with_id_output_neg_camera combineReplicate=$params.combine_replicate_output_neg_camera   \\
+ combineReplicateColumn=$params.combine_replicate_column_output_neg_camera log=$params.log_output_neg_camera sampleCoverage=$params.sample_coverage_output_neg_camera outputPeakTable=peaktableNEGout_neg_library.txt   \\
+outputVariables=varsNEGout_neg_library.txt outputMetaData=metadataNEGout_neg_library.txt Ifnormalize=$params.normalize_output_neg_camera
   else
-  /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true   \
- scoreColumn=score impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera}   \
-renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera}   \
-combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera} outputPeakTable=peaktableNEGout_neg_library.txt   \
-outputVariables=varsNEGout_neg_library.txt outputMetaData=metadataNEGout_neg_library.txt Ifnormalize=!{params.normalize_output_neg_camera}
+  /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file \\
+  ppm=$params.ppm_output_neg_camera rt=$params.rt_output_neg_camera higherTheBetter=true   \\
+ scoreColumn=score impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera \\
+ selectedType=$params.selected_type_output_neg_camera rename=$params.rename_output_neg_camera   \\
+renameCol=$params.rename_col_output_neg_camera onlyReportWithID=$params.only_report_with_id_output_neg_camera \\
+ combineReplicate=$params.combine_replicate_output_neg_camera combineReplicateColumn=$params.combine_replicate_column_output_neg_camera \\
+ log=$params.log_output_neg_camera sampleCoverage=$params.sample_coverage_output_neg_camera outputPeakTable=peaktableNEGout_neg_library.txt   \\
+outputVariables=varsNEGout_neg_library.txt outputMetaData=metadataNEGout_neg_library.txt Ifnormalize=$params.normalize_output_neg_camera
 
   fi
 
 
-  '''
+  """
 }
 }
 }else{
@@ -4109,7 +4120,7 @@ outputVariables=varsNEGout_neg_library.txt outputMetaData=metadataNEGout_neg_lib
    */
   process  process_output_quantid_neg_camera_noid{
     label 'camera'
-    tag "$name"
+    tag "$camera_input_quant"
     publishDir "${params.outdir}/process_output_quantid_neg_camera_noid", mode: params.publish_dir_mode
 
 
@@ -4120,14 +4131,14 @@ outputVariables=varsNEGout_neg_library.txt outputMetaData=metadataNEGout_neg_lib
 
   output:
   file "*.txt" into noid_neg_finished
-    shell:
-    '''
-      /usr/local/bin/prepareOutput.r inputcamera=!{camera_input_quant} inputpheno=!{phenotype_file} ppm=!{params.ppm_output_neg_camera} rt=!{params.rt_output_neg_camera} higherTheBetter=true scoreColumn=score   \
-     impute=!{params.impute_output_neg_camera} typeColumn=!{params.type_column_output_neg_camera} selectedType=!{params.selected_type_output_neg_camera} rename=!{params.rename_output_neg_camera}   \
-    renameCol=!{params.rename_col_output_neg_camera} onlyReportWithID=!{params.only_report_with_id_output_neg_camera} combineReplicate=!{params.combine_replicate_output_neg_camera}   \
-   combineReplicateColumn=!{params.combine_replicate_column_output_neg_camera} log=!{params.log_output_neg_camera} sampleCoverage=!{params.sample_coverage_output_neg_camera}   \
-  outputPeakTable=peaktableNEGout_NEG_noid.txt outputVariables=varsNEGout_neg_noid.txt outputMetaData=metadataNEGout_neg_noid.txt Ifnormalize=!{params.normalize_output_neg_camera}
-      '''
+
+    """
+      /usr/local/bin/prepareOutput.r inputcamera=$camera_input_quant inputpheno=$phenotype_file ppm=$params.ppm_output_neg_camera rt=$params.rt_output_neg_camera higherTheBetter=true scoreColumn=score   \\
+     impute=$params.impute_output_neg_camera typeColumn=$params.type_column_output_neg_camera selectedType=$params.selected_type_output_neg_camera rename=$params.rename_output_neg_camera   \\
+    renameCol=$params.rename_col_output_neg_camera onlyReportWithID=$params.only_report_with_id_output_neg_camera combineReplicate=$params.combine_replicate_output_neg_camera   \\
+   combineReplicateColumn=$params.combine_replicate_column_output_neg_camera log=$params.log_output_neg_camera sampleCoverage=$params.sample_coverage_output_neg_camera   \\
+  outputPeakTable=peaktableNEGout_NEG_noid.txt outputVariables=varsNEGout_neg_noid.txt outputMetaData=metadataNEGout_neg_noid.txt Ifnormalize=$params.normalize_output_neg_camera
+      """
   }
 }
 }

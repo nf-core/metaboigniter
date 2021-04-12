@@ -2576,11 +2576,12 @@
                 },
                 "type_of_ionization": {
                     "type": "string",
-                    "default": "neg",
+                    "default": "pos",
                     "description": "You can either set to 'pos' (only positive), 'neg' (only negative), 'both' (both positive and negative).",
                     "enum": [
                         "pos",
-                        "neg"
+                        "neg",
+                        "both"
                     ]
                 },
                 "need_centroiding": {
