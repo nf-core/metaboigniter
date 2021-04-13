@@ -82,6 +82,6 @@ In addition, references of tools and data used in this pipeline are as follows:
 > 3. Sturm M, Bertsch A, Gröpl C, Hildebrandt A, Hussong R, Lange E, Pfeifer N, Schulz-Trieglaff O, Zerck A, Reinert K, Kohlbacher O. OpenMS – an Open-Source Software Framework for Mass Spectrometry. BMC Bioinformatics. 2008;9:163. doi:10.1186/1471-2105-9-163.
 > 4. Libiseller G, Dvorzak M, Kleb U, Gander E, Eisenberg T, Madeo F, Neumann S, Trausinger G, Sinner F, Pieber T, Magnes C ((2015)). “IPO: a tool for automated optimization of XCMS parameters.” BMC Bioinformatics, 16, 118.
 > 5. Kai Dührkop, Huibin Shen, Marvin Meusel, Juho Rousu, and Sebastian Böcker. Searching molecular structure databases with tandem mass spectra using CSI:FingerID. Proc Natl Acad Sci U S A, 112(41):12580-12585, 2015. (cite this when using CSI:FingerID)
-> 6. Ruttkies C., Schymanski E.L. et al, MetFrag relaunched: incorporating strategies beyond in silico fragmentation. Journal of Cheminformatics, 2016, 8:3. 
+> 6. Ruttkies C., Schymanski E.L. et al, MetFrag relaunched: incorporating strategies beyond in silico fragmentation. Journal of Cheminformatics, 2016, 8:3.
 > 7. Allen F, Greiner R, and Wishart D. Computational prediction of electron ionization mass spectra to assist in GC-MS compound identification. Submitted, 2016.
 > 8. Kerstin Scheubert, Franziska Hufsky, Daniel Petras, Mingxun Wang, Louis-Felix Nothias, Kai Dührkop, Nuno Bandeira, Pieter C Dorrestein, Sebastian Böcker. Significance estimation enabling large scale untargeted metabolomics annotations. Nature Communications, 2017. 8(1494)
