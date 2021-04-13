@@ -1,6 +1,6 @@
 # nf-core/metaboigniter: Changelog
 
-## v1.0.0 - 2021-03-24
+## v1.0.0 - 2021-04-13
 
 Initial release of nf-core/metaboigniter, created with the [nf-core](http://nf-co.re/) template.
 
@@ -16,6 +16,7 @@ metaboIGNITER is used to pre-process untargeted metabolomics data. This version 
 * Metabolite identification using FINGER:ID, MetFrag, CFM-ID, and Internal library
 * Normalization and transformation
 
-In addition, the version of nf-core template has been updated to 1.13.2.
+In addition, the version of nf-core template has been updated to 1.13.3.
+All containers have been merged to one. And some clean up in the main.nf
 
 Thanks to everyone who contributed to the workflow!

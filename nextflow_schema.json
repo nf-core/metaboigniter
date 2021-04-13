@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/metaboigniter/master/nextflow_schema.json",
     "title": "nf-core/metaboigniter pipeline parameters",
-    "description": "Get your metabolomics analysis up and running",
+    "description": "Pre-processing of mass spectrometry-based metabolomics data with quantification and identification based on MS1 and MS2 data",
     "type": "object",
     "definitions": {
         "global_options": {

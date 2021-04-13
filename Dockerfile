@@ -117,6 +117,8 @@ RUN cd /engine/cfm-id-code/cfm/supplementary_material/trained_models/esi_msms_mo
 
 ENV software_version="3.4.4-1trusty0"
 
+RUN apt-get -y update && apt-get -y --no-install-recommends install python python-pip libqtgui4 python-setuptools && pip install -Iv pyopenms==2.1.0
+
 # Add cran R backport
 RUN echo "deb http://cloud.r-project.org/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
@@ -176,25 +178,30 @@ ADD https://raw.githubusercontent.com/MetaboIGNITER/container-xcms/xcms_ipo/scri
 
 
 #
+
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/cameraToFeatureXML.r /usr/local/bin/cameraToFeatureXML.r
+ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/featureXMLToCAMERA.r /usr/local/bin/featureXMLToCAMERA.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/consensusXMLToXcms.r /usr/local/bin/consensusXMLToXcms.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/correctBatchEffect.r /usr/local/bin/correctBatchEffect.r
-ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/featureXMLToCAMERA.r /usr/local/bin/featureXMLToCAMERA.r
+
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/featureXMLToXcms.r /usr/local/bin/featureXMLToXcms.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/findAdducts.r /usr/local/bin/findAdducts.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/findIsotopes.r /usr/local/bin/findIsotopes.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/groupCorr.r /usr/local/bin/groupCorr.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/groupFWHM.r /usr/local/bin/groupFWHM.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/mergeVaribales.r /usr/local/bin/mergeVaribales.r
-ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/xsAnnotate.r /usr/local/bin/xsAnnotate.r
+
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/prepareOutput.r /usr/local/bin/prepareOutput.r
-#
-
-ADD https://raw.githubusercontent.com/MetaboIGNITER/container-csifingerid/sirius-4.5.1/scripts/fingerID.r /usr/local/bin/fingerID.r
-
+ADD https://raw.githubusercontent.com/MetaboIGNITER/container-camera/xcms3.0.2/scripts/xsAnnotate.r /usr/local/bin/xsAnnotate.r
 #
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-msnbase/develop/scripts/MS2ToMetFrag.r /usr/local/bin/MS2ToMetFrag.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-msnbase/develop/scripts/MS2ToMetFragZip.r /usr/local/bin/MS2ToMetFragZip.r
+ADD https://raw.githubusercontent.com/MetaboIGNITER/container-csifingerid/sirius-4.5.1/scripts/fingerID.r /usr/local/bin/fingerID.r
+
+#
+
+
+
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-msnbase/develop/scripts/adductCalculator.r /usr/local/bin/adductCalculator.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-msnbase/develop/scripts/aggregateMetfrag.r /usr/local/bin/aggregateMetfrag.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-msnbase/develop/scripts/collectLibrary.r /usr/local/bin/collectLibrary.r
@@ -207,10 +214,9 @@ ADD https://raw.githubusercontent.com/MetaboIGNITER/container-msnbase/develop/sc
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-msnbase/develop/scripts/readMS2MSnBase.r /usr/local/bin/readMS2MSnBase.r
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-msnbase/develop/scripts/toMetfragCommand.r /usr/local/bin/toMetfragCommand.r
 #
-ADD https://raw.githubusercontent.com/MetaboIGNITER/container-openmstoxcms/master/scripts/featurexmlToCamera.r /usr/local/bin/featurexmlToCamera.r
-ADD https://raw.githubusercontent.com/MetaboIGNITER/container-openmstoxcms/master/scripts/featurexmltotable.py /usr/local/bin/featurexmltotable.py
-#
 ADD https://raw.githubusercontent.com/MetaboIGNITER/container-passatutto/develop/scripts/metfragPEP.r /usr/local/bin/metfragPEP.r
+ADD https://raw.githubusercontent.com/MetaboIGNITER/container-openmstoxcms/master/scripts/featurexmltotable.py /usr/local/bin/featurexmltotable.py
+ADD https://raw.githubusercontent.com/MetaboIGNITER/container-openmstoxcms/master/scripts/featurexmlToCamera.r /usr/local/bin/featurexmlToCamera.r
 #
 ADD https://github.com/MetaboIGNITER/container-metfrag-cli-batch/raw/develop/metfrag /usr/local/share/metfrag-2.4.5-1/metfrag
 
