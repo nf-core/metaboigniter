@@ -1655,10 +1655,10 @@ process  process_ms2_identification_pos_metfrag{
     mkdir inputs
     mkdir outputs
     unzip  -j $parameters -d inputs/
-  touch ${{parameters.baseName}}.csv
+  touch ${parameters.baseName}.csv
   find "\$PWD/inputs" -type f | parallel -j $params.ncore_pos_metfrag /usr/local/bin/run_metfrag.sh   \\
   -p {} -f \$PWD/outputs/{/.}.csv -l "\$PWD/$metfrag_database" -s "OfflineMetFusionScore"
-   zip -j -r ${{parameters.baseName}}_metfrag_pos.zip outputs/*.csv
+   zip -j -r ${parameters.baseName}_metfrag_pos.zip outputs/*.csv
 
     """
 }
@@ -1847,14 +1847,14 @@ process  process_ms2_identification_pos_cfmid{
    mkdir inputs
    mkdir outputs
    unzip  -j $parameters -d inputs/
- touch ${{parameters.baseName}}.csv
+ touch ${parameters.baseName}.csv
  find "\$PWD/inputs" -type f | parallel -j $params.ncore_pos_cfmid /usr/local/bin/cfmid.r input={}   \\
    realName={/} databaseFile=\$PWD/$cfmid_database  output=\$PWD/outputs/{/.}.csv   \\
    candidate_id=$params.candidate_id_identification_pos_cfmid candidate_inchi_smiles=$params.candidate_inchi_smiles_identification_pos_cfmid   \\
    candidate_mass=$params.candidate_mass_identification_pos_cfmid databaseNameColumn=$params.database_name_column_identification_pos_cfmid   \\
    databaseInChIColumn=$params.database_inchI_column_identification_pos_cfmid scoreType=Jaccard
 
-  zip -j -r ${{parameters.baseName}}_cfmid_pos.zip outputs/*.csv
+  zip -j -r ${parameters.baseName}_cfmid_pos.zip outputs/*.csv
 
  """
 }
@@ -2061,7 +2061,7 @@ if(params.library_charactrized_pos==false){
          file "$mzMLFile" into openms_to_xcms_conversion_raw_pos_centroided_library
 
          """
-         FeatureFinderMetabo -in $mzMLFile -out ${{mzMLFile.baseName}}.featureXML -ini $setting_file
+         FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
          """
      }
 
@@ -2091,9 +2091,9 @@ if(params.library_charactrized_pos==false){
 		realFileName=$mzMLFile \\
 		mzMLfiles=\$PWD/$mzMLFile2 \\
 		polarity=positive \\
-		output=${{mzMLFile.baseName}}.rdata \\
+		output=${mzMLFile.baseName}.rdata \\
 		sampleClass=library \\
-		changeNameTO=${{mzMLFile.baseName}}.mzML
+		changeNameTO=${mzMLFile.baseName}.mzML
 
          """
      }
@@ -2207,7 +2207,7 @@ if(params.library_charactrized_pos==false){
          """
 	 /usr/local/bin/findPeaks.r \\
 		input=\$PWD/$mzMLFile \\
-		output=\$PWD/${{mzMLFile.baseName}}.rdata \\
+		output=\$PWD/${mzMLFile.baseName}.rdata \\
 		ppm=$params.masstrace_ppm_library_pos_xcms \\
 		peakwidthLow=$params.peakwidthlow_quant_library_pos_xcms  \\
 	 peakwidthHigh=$params.peakwidthhigh_quant_library_pos_xcms \\
@@ -2275,7 +2275,7 @@ if(params.library_charactrized_pos==false){
 
 
           """
-          FeatureFinderMetabo -in $mzMLFile -out ${{mzMLFile.baseName}}.featureXML -ini $setting_file
+          FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
           """
       }
 
