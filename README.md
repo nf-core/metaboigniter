@@ -18,6 +18,8 @@
 
 The workflow performs MS1 based quantification and MS2 based identification using combination of different modules. The following steps can be performed using the workflow:
 
+![nf-core/metaboigniter-workflow](assets/images/workflow_image.png)
+
 - Centroiding (optional): Also referred to as peak pickering is a step that reduce the distribution of ions derived from a single mass to the peak of the distribution.
 - parameter tuning using IPO: MS1 quantification and library characterization parameters can be tuned using IPO
 - mass trace detection: The ions derived from the same analytes are clustered together forming a mass trace. These are the entities that will be used for quantification.

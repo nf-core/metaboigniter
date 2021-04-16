@@ -114,14 +114,14 @@ Several generic profiles are bundled with the pipeline which instruct the pipeli
 #### Where to start
 
 This depends on what type of data you have available. Here we describe three scenarios where 1) you only have MS1 data, 2) you have MS1 and MS2 data (in-silico identification), and 3) you have MS1, MS2, and an internal library.
-The flow of the pipeline is controlled using several parameters that should be set using **nf-core schemas**
+The flow of the pipeline is controlled using several parameters that should be set using [**nf-core**](https://nf-co.re/metaboigniter/parameters).
 
 #### Convert your data
 
 Before proceeding with the analysis you need to convert your data to open source format (mzML). You can do this using **[msconvert](http://proteowizard.sourceforge.net/tools/msconvert.html)** package in **[ProteoWizard](http://proteowizard.sourceforge.net/index.shtml)**. This must be done for all the raw files you have including MS1, MS2 and library files.
 
 **Senario 1) you only have MS1 data:**
-Please open the parameter file and set the following parameter to "false"
+Please set the following parameter to "false"
 
 ```nextflow
 perform_identification=false
@@ -514,7 +514,7 @@ You need to fix for each of the ionisation mode, a separate library description 
 
 * Name of the mzML file containing the compound
 
-* ID of the compound e.g. HMDB ID
+* ID of the compound e.g. HMDBID
 
 * Name of the compound
 
@@ -522,13 +522,11 @@ You need to fix for each of the ionisation mode, a separate library description 
 
 Here is an example of the expected table format:
 
-```bash
-| raw.File| HMDB.ID      | Name               | m.z           |
+| raw.File| HMDBID     | Name               | m.z           |
 |--|--|--|--|
 | a1.mzML | HMDB0000044  | Ascorbic acid      | 177.032087988 |
 | a1.mzML | HMDB0000001  | 1-Methylhistidine  | 170.085126611 |
 | a2.mzML | HMDB0000002  | 1,3-Diaminopropane | 75.08439833   |
-```
 
 Absolute path to a csv file containing description of the library:
 
@@ -537,7 +535,376 @@ library_description_pos=""
 library_description_neg=""
 ```
 
-The rest of the parameters are described in the nf-core parameter schema.
+The way to set the parameters are to use [nf-core](https://nf-co.re/metaboigniter/parameters) and set the desire parameters in their dedicated group. Here we mention the parameter groups for the positive mode only. The parameters for the negative ionization mode can be set simiarly. One just need to look for "negative" instead of "positive":
+
+**Control parameters**
+General parameters used to control what the workflow does. For example, centroiding, type of identification, search engines etc.
+
+**Quantification input files**
+This group contains the parameter for setting the quantification input files. Exactly as described above
+
+**OpenMS setting files**
+If you choose to do centroiding and/or quantificaiton (using OpenMS) you will need to set the corresponding setting files under this group.
+
+**Quantification parameter (positive mode)**
+Used to set XCMS and IPO paramters for the positive or negative mode.
+
+**Filtering parameters (positive mode)**
+This group includes the parameters used to control the filtering steps. We expand this section a little bit:
+
+The first method is *blank filtering*. This module filters out the signals that have higher abundance in non-biological samples (e.g. blank) compared to biological samples.
+
+If you don't want to perform the blank filtering. Set the following to *false* and go to the next step of the workflow (no need to set the parameters for this step!):
+
+```nextflow
+    blank_filter_pos
+```
+
+Which method to use for summarizing blank and biological sample for comparisons. For example, if Max is selected, a signal will be removed if it maximum abundance in the blank samples is higher than maximum abundance in biological samples (one of max, mean, median):
+
+```nextflow
+    method_blankfilter_pos_xcms="max"
+```
+
+This must indicate the class of blank samples exactly as you refer to them in your phenotype file. IMPORTANT: This class should be identical for all the blank samples:
+
+```nextflow
+    blank_blankfilter_pos_xcms
+```
+
+If true, the (average, median, max) abundance of blank samples will be compared against all other samples. For false see the next parameter:
+
+```nextflow
+    rest_blankfilter_pos_xcms="true"
+```
+
+If the previous parameter is false, a sample class can be specified so that blank abundance will be compared against this sample class:
+
+```nextflow
+    sample_blankfilter_pos_xcms
+```
+
+Dilution filtering:
+
+This module filters out the signals that do not correlate with a specified dilution trend.
+If you don't want to perform the dilution filtering. Set the following to *false* and go to the next step of the workflow (no need to set the parameters for this step!):
+
+```nextflow
+    dilution_filter_pos
+```
+
+This series will used for calculation of correlation. For example if this parameter is set like 1,2,3 and the class of dilution trends is set as D1,D2,D3 the following the pairs will be used for calculating the correlation: (D1,1),(D2,2),(D3,3):
+
+```nextflow
+    corto_dilutionfilter_pos_xcms="0.5,1,2,4"
+```
+
+This must indicate the class of dilution trend samples. IMPORTANT: the samples are correlated to the exact order of the sequence as set here:
+
+```nextflow
+    dilution_dilutionfilter_pos_xcms="D1,D2,D3,D4"
+```
+
+Signals with correlation p-value higher than this will be removed:
+
+```nextflow
+    pvalue_dilutionfilter_pos_xcms="0.05"
+```
+
+Signals with lower correlation than this will be removed:
+
+```nextflow
+    corcut_dilutionfilter_pos_xcms="-1"
+```
+
+Should the algorithm use the correlation as it is (negative and positive) or absolute correlation (either true or false):
+
+```nextflow
+    abs_dilutionfilter_pos_xcms="false"
+```
+
+CV filtering:
+
+This module filters out the signals that do not show the desired coefficient of variation.
+If you don't want to perform the CV filtering. Set the following to *false* and go to the next step of the workflow (no need to set the parameters for this step!):
+
+```nextflow
+cv_filter_pos
+```
+
+This must indicate the class of QC samples:
+
+```nextflow
+    qc_cvfilter_pos_xcms="QC"
+```
+
+Signals with CVs higher than this will be removed:
+
+```nextflow
+    cvcut_cvfilter_pos_xcms=0.3
+```
+
+**Adduct and isotope annotation (positive mode)**
+Used to set CAMERA parameters for finding addcuts and isotopes of the mass traces.
+
+**Global identification parameters (positive mode)**
+These parameters control the overall settings for identification. We also expand this section:
+
+This module is used to map MS/MS spectra to annotated CAMERA features. The mapping is performed based on retention time and m/z values of the annotated features.
+
+The ppm error used for the mapping:
+
+```nextflow
+    ppm_mapmsmstocamera_pos_msnbase="10"
+```
+
+The retention time error (in seconds) used for the mapping:
+
+```nextflow
+    rt_mapmsmstocamera_pos_msnbase="5"
+```
+
+ global parameters (Producing search files)
+
+This module is used to generate search parameters with mapped MS/MS spectra retrieved from the mzML files. These parameters will be sent to all the search engines. You will then have the possibility to set the search engine specific parameters. The only exception is *database_msmstoparam_pos/neg_msnbase* that is only applicable in **MetFrag**.
+
+The ppm error for the precursor mass to search candidates:
+
+```nextflow
+    precursorppm_msmstoparam_pos_msnbase="10"
+```
+
+The ppm error to assign fragments to fragment peaks:
+
+```nextflow
+    fragmentppm_msmstoparam_pos_msnbase="20"
+```
+
+Absolute mass error to assign fragments to fragment peaks:
+
+```nextflow
+    fragmentabs_msmstoparam_pos_msnbase="0.05"
+```
+
+Available databases are KEGG, PubChem, MetChem (a local database that needs to be set up beforehand). In addition, LocalCSV can be used which uses a CSV file for searching. Such a CSV file can be downloaded from [here](https://msbi.ipb-halle.de/~cruttkie/databases/).
+If LocalCSV is selected, a specific file needs to be provided. The format of this file is very strict. See the database parameter.
+
+```nextflow
+    database_msmstoparam_pos_msnbase="LocalCSV"
+```
+
+Adduct ruleset to be used:
+primary - contains most common adduct types ([M-H]-, [M-2H+Na]-, [M-2H+K]-, [M+Cl]-, [M+H]+, [M+Na]+, [M+K]+, [M+NH4]+)
+extended - next to primary also additional adduct types
+
+```nextflow
+    adductRules_msmstoparam_pos_msnbase="primary"
+```
+
+Filter spectra by a minimum number of fragment peaks:
+
+```nextflow
+    minPeaks_msmstoparam_pos_msnbase="2"
+```
+
+**CSI:FINGERID parameters (positive mode)**
+This section control FINGERID parameters:
+
+Please select the database to be used for CSIFingerID. **IMPORTANT: we don't support database file for csi:fingerid. You will need to provide what database to use here, the rest of the parameters will be taken from there parameter file**
+
+Database (this will overwrite the corresponding parameter in the input file). CSI:FingerID does not have LocalCSV. So if you set this in the previous step, change this to your desired database (**one of**: all, chebi, kegg, bio, natural products, pubmed, hmdb, biocyc, hsdb, knapsack, biological, zinc bio, gnps, pubchem, mesh, maconda):
+
+```nextflow
+    database_csifingerid_pos_csifingerid="hmdb"
+```
+
+Number of cores used for CSI:
+
+```nextflow
+    ncore_csifingerid_pos_csifingerid=2
+```
+
+Number of seconds that each csi ion can rum (time limit)
+
+```nextflow
+    timeout_csifingerid_pos_csifingerid=600
+```
+
+**MetFrag parameters (positive mode)**
+Controls Metfrag parameters:
+
+We only need two parameters if the global parameters have been set properly. This is the database file. An example of such a database can be found [here](https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/hmdb_2017-07-23.csv). You can either use the example for HMDB (2017) or generate your own using [MetChem](https://github.com/c-ruttkies/container-metchemdata). Please contact us if you need to generate this file.
+
+Absolute path to the generated database file:
+
+```nextflow
+    database_csv_files_pos_metfrag=""
+```
+
+Number of cores used for Metfrag:
+
+```nextflow
+    ncore_pos_metfrag=2
+```
+
+**CFM-ID parameters (positive mode)**
+Controls CFM-ID:
+You need to specify the database for CFM-ID. The rest of the parameters will be taken from the global parameters. Please see MetFrag parameter on how to construct the database.
+This database must at least contain the following columns: id of the molecules, smile of the molecules, the mass of the molecules, name of the molecules and InChI of the molecules. The best practice would be to use [MetChem](https://github.com/c-ruttkies/container-metchemdata) to construct the database.
+
+Absolute path to a csv file containing your database:
+
+```nextflow
+    database_csv_files_pos_cfmid=""
+```
+
+Name of the column in the database file for id of the molecules:
+
+```nextflow
+    candidate_id_identification_pos_cfmid="Identifier"
+```
+
+Name of the column in the database file for smile of the molecules:
+
+```nextflow
+    candidate_inchi_smiles_identification_pos_cfmid="SMILES"
+```
+
+Name of the column in the database file for mass of the molecules:
+
+```nextflow
+    candidate_mass_identification_pos_cfmid="MonoisotopicMass"
+```
+
+Name of the column in the database file for name of the molecules:
+
+```nextflow
+    database_name_column_identification_pos_cfmid="Name"
+```
+
+Name of the column in the database file for InChI of the molecules:
+
+```nextflow
+    database_inchI_column_identification_pos_cfmid="InChI"
+```
+
+Number of cores for CFM-ID:
+
+```nextflow
+    ncore_pos_cfmid=2
+```
+
+**Output preparation (positive mode)**
+Various parameters for output preparation.
+
+**Library controls and files (positive mode)**
+These parameters are used to provide inputs for library-based identification.
+This had already been expanded. However, if you already have your library characterize e.g the results of *process_collect_library_pos_msnbase* and *process_collect_library_neg_msnbase*. You can set the following parameters to true and also set the absolute paths to the characterization file:
+
+If you have already characterized your library, set this to true and specify the path for library_charactrization_file_pos/neg:
+
+```nextflow
+    library_charactrized_pos=true
+```
+
+Absolute path to the file from characterized library:
+
+```nextflow
+    library_charactrization_file_pos=""
+```
+
+Using this option will prevent the re-characterization of the library.
+**Internal library quantification and identification parameters (positive mode)**
+Used to charactrize the library. Please set the parameters needed for finding the mass traces for the library. These are more or less follow the same design as the quantification of the biological samples. Please see the description of OpenMS and XCMS above. In brief, if you have selected doing centroiding, you need to change OpenMS PeakPickerHiRes parameter file for the library.
+
+Please edit the following files (separate for positive and negative):
+
+```bash
+    assets/openms/openms_peak_picker_lib_ini_pos.ini
+```
+
+you will have to set whether you do the quantification using either OpenMS (set to openms) or XCMS (set to xcms) (**for library**):
+
+```nextflow
+    quantification_openms_xcms_library_pos="xcms"
+```
+
+If OpenMS selected, please edit the following files for doing mass trace detection for the library:
+
+```bash
+    assets/openms/openms_feature_finder_metabo_lib_ini_pos.ini
+```
+
+If you have selected to do quantification using XCMS, you need to tune the following parameters (See the corresponding sections in the quantification above):
+
+ Parameters for XCMS and CAMERA (library)
+
+The same parameters that were set for quantification and adducts identification should be set here for identification. See quantification parameters.
+
+For example, one can run IPO for setting the parameters for use individual parameters.
+
+ Mapping MS2 to features (within the library)
+
+ppm deviation when mapping MS2 parent ion to a mass trace:
+
+```nextflow
+    ppm_mapmsmstocamera_library_pos_msnbase="10"
+```
+
+RT difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace):
+
+```nextflow
+    rt_mapmsmstocamera_library_pos_msnbase="5"
+```
+
+**Internal library parameters (positive mode)**
+This group of parameters are used to do the charactrization.
+
+Please set the following parameters based on your library description files
+
+Column name showing name of the raw file in the library file e.g. "raw.File" in the table above:
+
+```nextflow
+    raw_file_name_preparelibrary_pos_msnbase=""
+```
+
+Column name showing ID of the compound in the library file e.g. "HMDB.ID" in the table above:
+
+```nextflow
+    compund_id_preparelibrary_pos_msnbase=""
+```
+
+Column name showing name of the compound in the library file e.g. "Name" in the table above:
+
+```nextflow
+    compound_name_preparelibrary_pos_msnbase=""
+```
+
+Column name showing m/z of the compound in the library file e.g. "m.z" in the table above:
+
+```nextflow
+    mz_col_preparelibrary_pos_msnbase="mz"
+```
+
+The function can use feature range (f), centroid (c), and parent m/z (Parent) information in order to map a compound to MS1 and MS2 information:
+
+```nextflow
+    which_mz_preparelibrary_pos_msnbase="f"
+```
+
+Set the relative mass deviation (ppm) between the experimental and theoretical masses of metabolites:
+
+```nextflow
+    ppm_create_library_pos_msnbase=10
+```
+
+Number of cores for mapping the features:
+
+```nextflow
+    ncore_searchengine_library_pos_msnbase=1
+```
+
+You can set these parameters using [nf-core](https://nf-co.re/metaboigniter/parameters). For the negative settings just find the negative instead of positive for example Internal library parameters (negative mode).
 
 ## Job resources
 
