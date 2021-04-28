@@ -442,7 +442,7 @@ process get_software_versions  {
     Rscript -e "cat(as.character(packageVersion('MSnbase')),'\\n')" &> v_msnbase.txt
     Rscript -e "cat(as.character(packageVersion('IPO')),'\\n')" &> v_ipo.txt
     OpenMSInfo |  grep -oP -m 1 '([0-9][.][0-9][.][0-9])' &> v_openms.txt
-    sh /usr/local/bin/CSI/bin/sirius.sh --loglevel=OFF --version 2>1 | grep -oP -m 1 '([0-9][.][0-9][.][0-9])' &> v_sirius.txt
+    sh /usr/bin/CSI/bin/sirius.sh --loglevel=OFF --version 2>1 | grep -oP -m 1 '([0-9][.][0-9][.][0-9])' &> v_sirius.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -524,7 +524,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
 
                 """
-                /usr/local/bin/featurexmlToCamera.r \\
+                /usr/bin/featurexmlToCamera.r \\
                     input=$mzMLFile \\
                     realFileName=$mzMLFile \\
                     mzMLfiles=\$PWD/$mzMLFile2 \\
@@ -564,7 +564,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     touch quant_params_pos.json
                     touch rt_params_pos.json
 
-                    /usr/local/bin/ipo.r \\
+                    /usr/bin/ipo.r \\
                         input=$inputs_aggregated \\
                         quantOnly=$ipo_pos_globalAvoidRT \\
                         allSamples=$params.ipo_allSamples_pos \\
@@ -645,7 +645,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 script:
                 def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
                 """
-                /usr/local/bin/findPeaks.r \\
+                /usr/bin/findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
                     output=\$PWD/${mzMLFile.baseName}.rdata \\
                     ppm=$params.masstrace_ppm_pos_xcms \\
@@ -737,7 +737,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
 
                 """
-                /usr/local/bin/featurexmlToCamera.r \\
+                /usr/bin/featurexmlToCamera.r \\
                     input=$mzMLFile \\
                     realFileName=$mzMLFile \\
                     mzMLfiles=\$PWD/$mzMLFile2 \\
@@ -775,7 +775,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     touch quant_params_pos.json
                     touch rt_params_pos.json
 
-                    /usr/local/bin/ipo.r \\
+                    /usr/bin/ipo.r \\
                         input=$inputs_aggregated \\
                         quantOnly=$ipo_pos_globalAvoidRT \\
                         allSamples=$params.ipo_allSamples_pos \\
@@ -856,7 +856,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 script:
                 def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
                 """
-                /usr/local/bin/findPeaks.r \\
+                /usr/bin/findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
                     output=\$PWD/${mzMLFile.baseName}.rdata \\
                     ppm=$params.masstrace_ppm_pos_xcms \\
@@ -923,7 +923,7 @@ if(params.type_of_ionization in (["pos","both"])){
         def inputs_aggregated = rdata_files.collect{ "$it" }.join(",")
         """
         nextFlowDIR=\$PWD
-        /usr/local/bin/xcmsCollect.r input=$inputs_aggregated output=collection_pos.rdata
+        /usr/bin/xcmsCollect.r input=$inputs_aggregated output=collection_pos.rdata
         """
     }
 
@@ -948,7 +948,7 @@ if(params.type_of_ionization in (["pos","both"])){
         def inputs_aggregated = rd.collect{ "$it" }.join(",")
         def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=${paramsRT}" : ''
         """
-        /usr/local/bin/retCor.r \\
+        /usr/bin/retCor.r \\
             input=\$PWD/$rdata_files \\
             output=RTcorrected_pos.rdata \\
             method=obiwarp \\
@@ -1009,7 +1009,7 @@ if(params.type_of_ionization in (["pos","both"])){
         file "groupN1_pos.rdata" into temp_unfiltered_channel_pos_1
 
         """
-        /usr/local/bin/group.r \\
+        /usr/bin/group.r \\
             input=$rdata_files \\
             output=groupN1_pos.rdata \\
             bandwidth=$params.bandwidth_group_N1_pos_xcms \\
@@ -1025,7 +1025,7 @@ if(params.type_of_ionization in (["pos","both"])){
      * STEP 7 - noise filtering by using blank samples, if selected by the users
      */
 
-    if(params.blank_filter_pos){
+    if(params.blank_filter_pos==true){
         blankfilter_rdata_pos_xcms=temp_unfiltered_channel_pos_1
 
         process process_blank_filter_pos_xcms {
@@ -1040,7 +1040,7 @@ if(params.type_of_ionization in (["pos","both"])){
             file "blankFiltered_pos.rdata" into temp_unfiltered_channel_pos_2
 
             """
-            /usr/local/bin/blankfilter.r \\
+            /usr/bin/blankfilter.r \\
                 input=$rdata_files \\
                 output=blankFiltered_pos.rdata \\
                 method=$params.method_blankfilter_pos_xcms \\
@@ -1071,7 +1071,7 @@ if(params.type_of_ionization in (["pos","both"])){
             file "dilutionFiltered_pos.rdata" into temp_unfiltered_channel_pos_3
 
             """
-            /usr/local/bin/dilutionfilter.r \\
+            /usr/bin/dilutionfilter.r \\
                 input=$rdata_files \\
                 output=dilutionFiltered_pos.rdata \\
                 Corto=$params.corto_dilutionfilter_pos_xcms  \\
@@ -1104,7 +1104,7 @@ if(params.type_of_ionization in (["pos","both"])){
             file "cvFiltered_pos.rdata" into temp_unfiltered_channel_pos_4
 
             """
-            /usr/local/bin/cvfilter.r \\
+            /usr/bin/cvfilter.r \\
                 input=$rdata_files \\
                 output=cvFiltered_pos.rdata \\
                 qc=$params.qc_cvfilter_pos_xcms \\
@@ -1132,7 +1132,7 @@ if(params.type_of_ionization in (["pos","both"])){
         file "CameraAnnotatePeaks_pos.rdata" into group_rdata_pos_camera
 
         """
-        /usr/local/bin/xsAnnotate.r  input=$rdata_files output=CameraAnnotatePeaks_pos.rdata
+        /usr/bin/xsAnnotate.r  input=$rdata_files output=CameraAnnotatePeaks_pos.rdata
         """
     }
 
@@ -1152,7 +1152,7 @@ if(params.type_of_ionization in (["pos","both"])){
         file "CameraGroup_pos.rdata" into findaddcuts_rdata_pos_camera
 
         """
-        /usr/local/bin/groupFWHM.r \\
+        /usr/bin/groupFWHM.r \\
             input=$rdata_files \\
             output=CameraGroup_pos.rdata \\
             sigma=$params.sigma_group_pos_camera \\
@@ -1178,7 +1178,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
 
         """
-        /usr/local/bin/findAdducts.r \\
+        /usr/bin/findAdducts.r \\
             input=$rdata_files \\
             output=CameraFindAdducts_pos.rdata \\
             ppm=$params.ppm_findaddcuts_pos_camera \\
@@ -1202,7 +1202,7 @@ if(params.type_of_ionization in (["pos","both"])){
         file "CameraFindIsotopes_pos.rdata" into mapmsmstocamera_rdata_pos_camera,mapmsmstoparam_rdata_pos_camera,prepareoutput_rdata_pos_camera_csifingerid, prepareoutput_rdata_pos_camera_cfmid, prepareoutput_rdata_pos_camera_metfrag, prepareoutput_rdata_pos_camera_library, prepareoutput_rdata_pos_camera_noid
 
         """
-        /usr/local/bin/findIsotopes.r \\
+        /usr/bin/findIsotopes.r \\
             input=$rdata_files \\
             output=CameraFindIsotopes_pos.rdata \\
             maxcharge=$params.maxcharge_findisotopes_pos_camera
@@ -1232,7 +1232,7 @@ if(params.type_of_ionization in (["pos","both"])){
             file "${mzMLFile.baseName}.rdata" into mapmsmstocamera_rdata_pos_msnbase
 
             """
-            /usr/local/bin/readMS2MSnBase.r \\
+            /usr/bin/readMS2MSnBase.r \\
                 input=$mzMLFile \\
                 output=${mzMLFile.baseName}.rdata \\
                 inputname=${mzMLFile.baseName}
@@ -1258,7 +1258,7 @@ if(params.type_of_ionization in (["pos","both"])){
             script:
             def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
             """
-            /usr/local/bin/mapMS2ToCamera.r \\
+            /usr/bin/mapMS2ToCamera.r \\
                 inputCAMERA=$rdata_files_ms1 \\
                 inputMS2=$input_args \\
                 output=MapMsms2Camera_pos.rdata \\
@@ -1287,7 +1287,7 @@ if(params.type_of_ionization in (["pos","both"])){
             """
             mkdir out
 
-            /usr/local/bin/MS2ToMetFrag.r \\
+            /usr/bin/MS2ToMetFrag.r \\
                 inputCAMERA=$rdata_files_ms1 \\
                 inputMS2=$rdata_files_ms2 \\
                 output=out  \\
@@ -1334,7 +1334,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 unzip  -j $parameters -d inputs/
                 touch ${parameters.baseName}_class_Csifingerid_pos.csv
 
-                /usr/local/bin/fingerID.r \\
+                /usr/bin/fingerID.r \\
                     input=\$PWD/inputs \\
                     database=$params.database_csifingerid_pos_csifingerid \\
                     tryOffline=T  \\
@@ -1369,7 +1369,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 for x in *.zip ; do unzip -d all -o -u \$x ; done
                 zip -r Csifingerid_pos.zip all
 
-                /usr/local/bin/aggregateMetfrag.r \\
+                /usr/bin/aggregateMetfrag.r \\
                     inputs=Csifingerid_pos.zip \\
                     realNames=Csifingerid_pos.zip \\
                     output=aggregated_identification_csifingerid_pos.csv \\
@@ -1397,7 +1397,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 """
                 if [ -s $identification_result ]; then
-                    /usr/local/bin/metfragPEP.r \\
+                    /usr/bin/metfragPEP.r \\
                         input=$identification_result \\
                         score=score \\
                         output=pep_identification_csifingerid_pos.csv \\
@@ -1427,7 +1427,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 """
                 if [ -s $csifingerid_input_identification ]; then
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputscores=$csifingerid_input_identification \\
                         inputpheno=$phenotype_file \\
@@ -1452,7 +1452,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 else
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputpheno=$phenotype_file \\
                         ppm=$params.ppm_output_pos_camera \\
@@ -1489,7 +1489,7 @@ if(params.type_of_ionization in (["pos","both"])){
             /*
              * check whether the data base file has been provided
              */
-            if(params.database_msmstoparam_pos_msnbase ==" LocalCSV"){
+            if(params.database_msmstoparam_pos_msnbase =="LocalCSV"){
                 if(params.containsKey('database_csv_files_pos_metfrag') && params.database_csv_files_pos_metfrag instanceof String){
                     Channel.fromPath(params.database_csv_files_pos_metfrag)
                         .ifEmpty { exit 1, "params.database_csv_files_pos_metfrag was empty - no input files supplied" }
@@ -1497,6 +1497,8 @@ if(params.type_of_ionization in (["pos","both"])){
                 } else {
                     exit 1, "params.database_csv_files_pos_metfrag was not found or not defined as string! You need to set database_csv_files_pos_metfrag in conf/parameters.config to the path to a csv file containing your database"
                 }
+            }else{
+                database_csv_files_pos_metfrag=file("nothing")
             }
 
 
@@ -1517,7 +1519,6 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 output:
                 file "${parameters.baseName}_metfrag_pos.zip" into aggregateID_csv_pos_metfrag
-
                 """
                 mkdir inputs
                 mkdir outputs
@@ -1526,7 +1527,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 find "\$PWD/inputs" -type f | \\
                     parallel \\
                         -j $params.ncore_pos_metfrag \\
-                        /usr/local/bin/run_metfrag.sh \\
+                        /usr/bin/run_metfrag.sh \\
                         -p {} \\
                         -f \$PWD/outputs/{/.}.csv \\
                         -l "\$PWD/$metfrag_database" \\
@@ -1556,7 +1557,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 for x in *.zip ; do unzip -d all -o -u \$x ; done
                 zip -r metfrag_pos.zip all
 
-                /usr/local/bin/aggregateMetfrag.r \\
+                /usr/bin/aggregateMetfrag.r \\
                     inputs=metfrag_pos.zip \\
                     realNames=metfrag_pos.zip \\
                     output=aggregated_identification_metfrag_pos.csv \\
@@ -1583,7 +1584,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 """
                 if [ -s $identification_result ];then
-                    /usr/local/bin/metfragPEP.r \\
+                    /usr/bin/metfragPEP.r \\
                         input=$identification_result \\
                         score=FragmenterScore \\
                         output=pep_identification_metfrag_pos.csv \\
@@ -1615,7 +1616,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 """
                 if [ -s $metfrag_input_identification ]; then
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputscores=$metfrag_input_identification \\
                         inputpheno=$phenotype_file \\
@@ -1640,7 +1641,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 else
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputpheno=$phenotype_file \\
                         ppm=$params.ppm_output_pos_camera \\
@@ -1703,7 +1704,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 touch ${parameters.baseName}.csv
                 find "\$PWD/inputs" -type f | \\
                     parallel \\
-                        -j $params.ncore_pos_cfmid /usr/local/bin/cfmid.r \\
+                        -j $params.ncore_pos_cfmid /usr/bin/cfmid.r \\
                         input={} \\
                         realName={/} \\
                         databaseFile=\$PWD/$cfmid_database  \\
@@ -1740,7 +1741,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 for x in *.zip ; do unzip -d all -o -u \$x ; done
                 zip -r cfmid_pos.zip all
 
-                /usr/local/bin/aggregateMetfrag.r \\
+                /usr/bin/aggregateMetfrag.r \\
                     inputs=cfmid_pos.zip \\
                     realNames=cfmid_pos.zip \\
                     output=aggregated_identification_cfmid_pos.csv \\
@@ -1767,7 +1768,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 """
                 if [ -s $identification_result ]; then
-                    /usr/local/bin/metfragPEP.r \\
+                    /usr/bin/metfragPEP.r \\
                         input=$identification_result \\
                         score=Jaccard_Score \\
                         output=pep_identification_cfmid_pos.csv \\
@@ -1799,7 +1800,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 """
                 if [ -s $cfmid_input_identification ]; then
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputscores=$cfmid_input_identification \\
                         inputpheno=$phenotype_file \\
@@ -1824,7 +1825,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 else
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputpheno=$phenotype_file \\
                         ppm=$params.ppm_output_pos_camera \\
@@ -1886,7 +1887,7 @@ if(params.type_of_ionization in (["pos","both"])){
                         """
                     }
 
-                    if(params.quantification_openms_xcms_library_pos ==" openms"){
+                    if(params.quantification_openms_xcms_library_pos == "openms"){
                         /*
                          * STEP 31 - feature detection for the library by openms
                          */
@@ -1926,7 +1927,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
                             """
-                            /usr/local/bin/featurexmlToCamera.r \\
+                            /usr/bin/featurexmlToCamera.r \\
                                 input=$mzMLFile \\
                                 realFileName=$mzMLFile \\
                                 mzMLfiles=\$PWD/$mzMLFile2 \\
@@ -1962,7 +1963,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                 touch quant_params_library_pos.json
                                 touch rt_params_library_pos.json
 
-                                /usr/local/bin/ipo.r \\
+                                /usr/bin/ipo.r \\
                                     input=$inputs_aggregated \\
                                     quantOnly=TRUE \\
                                     allSamples=TRUE  \\
@@ -2036,7 +2037,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             script:
                             def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
                             """
-                            /usr/local/bin/findPeaks.r \\
+                            /usr/bin/findPeaks.r \\
                                 input=\$PWD/$mzMLFile \\
                                 output=\$PWD/${mzMLFile.baseName}.rdata \\
                                 ppm=$params.masstrace_ppm_library_pos_xcms \\
@@ -2083,7 +2084,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     }
                 } else {
 
-                    if(params.quantification_openms_xcms_library_pos=="openms"){
+                    if(params.quantification_openms_xcms_library_pos== "openms"){
                         /*
                          * STEP 31 - feature detection for the library by openms
                          */
@@ -2121,7 +2122,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
                             """
-                            /usr/local/bin/featurexmlToCamera.r \\
+                            /usr/bin/featurexmlToCamera.r \\
                                 input=$mzMLFile \\
                                 realFileName=$mzMLFile \\
                                 mzMLfiles=\$PWD/$mzMLFile2 \\
@@ -2158,7 +2159,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                 touch quant_params_library_pos.json
                                 touch rt_params_library_pos.json
 
-                                /usr/local/bin/ipo.r \\
+                                /usr/bin/ipo.r \\
                                     input=$inputs_aggregated \\
                                     quantOnly=TRUE \\
                                     allSamples=TRUE  \\
@@ -2233,7 +2234,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             script:
                             def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
                             """
-                            /usr/local/bin/findPeaks.r \\
+                            /usr/bin/findPeaks.r \\
                                 input=\$PWD/$mzMLFile \\
                                 output=\$PWD/${mzMLFile.baseName}.rdata \\
                                 ppm=$params.masstrace_ppm_library_pos_xcms \\
@@ -2298,7 +2299,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     file "${rdata_files.baseName}.rdata" into group_rdata_library_pos_camera
 
                     """
-                    /usr/local/bin/xsAnnotate.r input=$rdata_files output=${rdata_files.baseName}.rdata
+                    /usr/bin/xsAnnotate.r input=$rdata_files output=${rdata_files.baseName}.rdata
                     """
                 }
 
@@ -2318,7 +2319,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     file "${rdata_files.baseName}.rdata" into findaddcuts_rdata_library_pos_camera
 
                     """
-                    /usr/local/bin/groupFWHM.r \\
+                    /usr/bin/groupFWHM.r \\
                         input=$rdata_files \\
                         output=${rdata_files.baseName}.rdata \\
                         sigma=$params.sigma_group_library_pos_camera \\
@@ -2344,7 +2345,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     file "${rdata_files.baseName}.rdata" into findisotopes_rdata_library_pos_camera
 
                     """
-                    /usr/local/bin/findAdducts.r \\
+                    /usr/bin/findAdducts.r \\
                         input=$rdata_files \\
                         output=${rdata_files.baseName}.rdata \\
                         ppm=$params.ppm_findaddcuts_library_pos_camera \\
@@ -2369,7 +2370,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     file "${rdata_files.baseName}.rdata" into mapmsmstocamera_rdata_library_pos_camera,mapmsmstoparam_rdata_library_pos_camera_tmp, prepareoutput_rdata_library_pos_camera_cfmid
 
                     """
-                    /usr/local/bin/findIsotopes.r \\
+                    /usr/bin/findIsotopes.r \\
                         input=$rdata_files \\
                         output=${rdata_files.baseName}.rdata \\
                         maxcharge=$params.maxcharge_findisotopes_library_pos_camera
@@ -2394,7 +2395,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     file "${mzMLFile.baseName}_ReadMsmsLibrary.rdata" into mapmsmstocamera_rdata_library_pos_msnbase
 
                     """
-                    /usr/local/bin/readMS2MSnBase.r \\
+                    /usr/bin/readMS2MSnBase.r \\
                         input=$mzMLFile \\
                         output=${mzMLFile.baseName}_ReadMsmsLibrary.rdata \\
                         inputname=${mzMLFile.baseName}
@@ -2423,7 +2424,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                     script:
                     """
-                    /usr/local/bin/mapMS2ToCamera.r \\
+                    /usr/bin/mapMS2ToCamera.r \\
                         inputCAMERA=$rdata_files_ms1 \\
                         inputMS2=$rdata_files_ms2 \\
                         output=${rdata_files_ms1.baseName}_MapMsms2Camera_library_pos.rdata  \\
@@ -2456,7 +2457,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     """
                     mkdir out
 
-                    /usr/local/bin/createLibrary.r \\
+                    /usr/bin/createLibrary.r \\
                         inputCAMERA=$rdata_camera \\
                         precursorppm=$params.ppm_create_library_pos_msnbase \\
                         inputMS2=$ms2_data \\
@@ -2489,7 +2490,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     script:
                     def aggregatecdlibrary = rdata_files.collect{ "$it" }.join(",")
                     """
-                    /usr/local/bin/collectLibrary.r \\
+                    /usr/bin/collectLibrary.r \\
                         inputs=$aggregatecdlibrary \\
                         realNames=$aggregatecdlibrary \\
                         output=library_pos.csv
@@ -2550,7 +2551,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     file "aggregated_identification_library_pos.csv" into library_tsv_pos_passatutto
 
                     """
-                    /usr/local/bin/librarySearchEngine.r \\
+                    /usr/bin/librarySearchEngine.r \\
                         -l $libraryFile \\
                         -i $parameters \\
                         -out aggregated_identification_library_pos.csv \\
@@ -2583,7 +2584,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     file "aggregated_identification_library_pos.csv" into library_tsv_pos_passatutto
 
                     """
-                    /usr/local/bin/librarySearchEngine.r \\
+                    /usr/bin/librarySearchEngine.r \\
                         -l $libraryFile \\
                         -i $parameters \\
                         -out aggregated_identification_library_pos.csv \\
@@ -2615,7 +2616,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 """
                 if [ -s $identification_result ]; then
-                    /usr/local/bin/metfragPEP.r \\
+                    /usr/bin/metfragPEP.r \\
                         input=$identification_result \\
                         score=score \\
                         output=pep_identification_library_pos.csv \\
@@ -2648,7 +2649,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 """
                 if [ -s $library_input_identification ]; then
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputscores=$library_input_identification \\
                         inputpheno=$phenotype_file \\
@@ -2673,7 +2674,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 else
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputpheno=$phenotype_file \\
                         ppm=$params.ppm_output_pos_camera \\
@@ -2717,7 +2718,7 @@ if(params.type_of_ionization in (["pos","both"])){
             file "*.txt" into noid_pos_finished
 
             """
-            /usr/local/bin/prepareOutput.r \\
+            /usr/bin/prepareOutput.r \\
                 inputcamera=$camera_input_quant \\
                 inputpheno=$phenotype_file \\
                 ppm=$params.ppm_output_pos_camera \\
@@ -2778,7 +2779,7 @@ if(params.type_of_ionization in (["neg","both"])){
         /*
         * STEP 2 - feature detection by openms if selected by the user
         */
-        if(params.quantification_openms_xcms_neg ==" openms") {
+        if(params.quantification_openms_xcms_neg == "openms") {
             param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true  ? file("NO_RTFILE") : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_openms_centroided  {
@@ -2816,7 +2817,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
 
                 """
-                /usr/local/bin/featurexmlToCamera.r \\
+                /usr/bin/featurexmlToCamera.r \\
                     input=$mzMLFile \\
                     realFileName=$mzMLFile \\
                     mzMLfiles=\$PWD/$mzMLFile2 \\
@@ -2854,7 +2855,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     touch quant_params_neg.json
                     touch rt_params_neg.json
 
-                    /usr/local/bin/ipo.r \\
+                    /usr/bin/ipo.r \\
                         input=$inputs_aggregated \\
                         quantOnly=$ipo_neg_globalAvoidRT \\
                         allSamples=$params.ipo_allSamples_neg \\
@@ -2935,7 +2936,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 script:
                 def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
                 """
-                /usr/local/bin/findPeaks.r \\
+                /usr/bin/findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
                     output=\$PWD/${mzMLFile.baseName}.rdata \\
                     ppm=$params.masstrace_ppm_neg_xcms \\
@@ -3025,7 +3026,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
 
                 """
-                /usr/local/bin/featurexmlToCamera.r \\
+                /usr/bin/featurexmlToCamera.r \\
                     input=$mzMLFile \\
                     realFileName=$mzMLFile \\
                     mzMLfiles=\$PWD/$mzMLFile2 \\
@@ -3063,7 +3064,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     touch quant_params_neg.json
                     touch rt_params_neg.json
 
-                    /usr/local/bin/ipo.r \\
+                    /usr/bin/ipo.r \\
                         input=$inputs_aggregated \\
                         quantOnly=$ipo_neg_globalAvoidRT \\
                         allSamples=$params.ipo_allSamples_neg \\
@@ -3144,7 +3145,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 script:
                 def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=$paramsQ" : ''
                 """
-                /usr/local/bin/findPeaks.r \\
+                /usr/bin/findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
                     output=\$PWD/${mzMLFile.baseName}.rdata \\
                     ppm=$params.masstrace_ppm_neg_xcms \\
@@ -3211,7 +3212,7 @@ if(params.type_of_ionization in (["neg","both"])){
         def inputs_aggregated = rdata_files.collect{ "$it" }.join(",")
         """
         nextFlowDIR=\$PWD
-        /usr/local/bin/xcmsCollect.r input=$inputs_aggregated output=collection_neg.rdata
+        /usr/bin/xcmsCollect.r input=$inputs_aggregated output=collection_neg.rdata
         """
     }
 
@@ -3236,7 +3237,7 @@ if(params.type_of_ionization in (["neg","both"])){
         def inputs_aggregated = rd.collect{ "$it" }.join(",")
         def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=$paramsRT" : ''
         """
-        /usr/local/bin/retCor.r \\
+        /usr/bin/retCor.r \\
             input=\$PWD/$rdata_files \\
             output=RTcorrected_neg.rdata \\
             method=obiwarp \\
@@ -3295,7 +3296,7 @@ if(params.type_of_ionization in (["neg","both"])){
         file "groupN1_neg.rdata" into temp_unfiltered_channel_neg_1
 
         """
-        /usr/local/bin/group.r \\
+        /usr/bin/group.r \\
             input=$rdata_files \\
             output=groupN1_neg.rdata \\
             bandwidth=$params.bandwidth_group_N1_neg_xcms \\
@@ -3311,7 +3312,7 @@ if(params.type_of_ionization in (["neg","both"])){
      * STEP 7 - noise filtering by using blank samples, if selected by the users
      */
 
-    if(params.blank_filter_neg){
+    if(params.blank_filter_neg==true){
         blankfilter_rdata_neg_xcms = temp_unfiltered_channel_neg_1
 
         process process_blank_filter_neg_xcms {
@@ -3326,7 +3327,7 @@ if(params.type_of_ionization in (["neg","both"])){
             file "blankFiltered_neg.rdata" into temp_unfiltered_channel_neg_2
 
             """
-            /usr/local/bin/blankfilter.r \\
+            /usr/bin/blankfilter.r \\
                 input=$rdata_files \\
                 output=blankFiltered_neg.rdata \\
                 method=$params.method_blankfilter_neg_xcms \\
@@ -3358,7 +3359,7 @@ if(params.type_of_ionization in (["neg","both"])){
             file "dilutionFiltered_neg.rdata" into temp_unfiltered_channel_neg_3
 
             """
-            /usr/local/bin/dilutionfilter.r \\
+            /usr/bin/dilutionfilter.r \\
                 input=$rdata_files \\
                 output=dilutionFiltered_neg.rdata \\
                 Corto=$params.corto_dilutionfilter_neg_xcms  \\
@@ -3390,7 +3391,7 @@ if(params.type_of_ionization in (["neg","both"])){
             file "cvFiltered_neg.rdata" into temp_unfiltered_channel_neg_4
 
             """
-            /usr/local/bin/cvfilter.r \\
+            /usr/bin/cvfilter.r \\
                 input=$rdata_files \\
                 output=cvFiltered_neg.rdata \\
                 qc=$params.qc_cvfilter_neg_xcms \\
@@ -3418,7 +3419,7 @@ if(params.type_of_ionization in (["neg","both"])){
         file "CameraAnnotatePeaks_neg.rdata" into group_rdata_neg_camera
 
         """
-        /usr/local/bin/xsAnnotate.r input=$rdata_files output=CameraAnnotatePeaks_neg.rdata
+        /usr/bin/xsAnnotate.r input=$rdata_files output=CameraAnnotatePeaks_neg.rdata
         """
     }
 
@@ -3438,7 +3439,7 @@ if(params.type_of_ionization in (["neg","both"])){
         file "CameraGroup_neg.rdata" into findaddcuts_rdata_neg_camera
 
         """
-        /usr/local/bin/groupFWHM.r \\
+        /usr/bin/groupFWHM.r \\
             input=$rdata_files \\
             output=CameraGroup_neg.rdata \\
             sigma=$params.sigma_group_neg_camera \\
@@ -3463,7 +3464,7 @@ if(params.type_of_ionization in (["neg","both"])){
         file "CameraFindAdducts_neg.rdata" into findisotopes_rdata_neg_camera
 
         """
-        /usr/local/bin/findAdducts.r \\
+        /usr/bin/findAdducts.r \\
             input=$rdata_files \\
             output=CameraFindAdducts_neg.rdata \\
             ppm=$params.ppm_findaddcuts_neg_camera \\
@@ -3487,7 +3488,7 @@ if(params.type_of_ionization in (["neg","both"])){
         file "CameraFindIsotopes_neg.rdata" into mapmsmstocamera_rdata_neg_camera,mapmsmstoparam_rdata_neg_camera,prepareoutput_rdata_neg_camera_csifingerid, prepareoutput_rdata_neg_camera_cfmid, prepareoutput_rdata_neg_camera_metfrag, prepareoutput_rdata_neg_camera_library, prepareoutput_rdata_neg_camera_noid
 
         """
-        /usr/local/bin/findIsotopes.r \\
+        /usr/bin/findIsotopes.r \\
             input=$rdata_files \\
             output=CameraFindIsotopes_neg.rdata \\
             maxcharge=$params.maxcharge_findisotopes_neg_camera
@@ -3517,7 +3518,7 @@ if(params.type_of_ionization in (["neg","both"])){
             file "${mzMLFile.baseName}.rdata" into mapmsmstocamera_rdata_neg_msnbase
 
             """
-            /usr/local/bin/readMS2MSnBase.r \\
+            /usr/bin/readMS2MSnBase.r \\
                 input=$mzMLFile \\
                 output=${mzMLFile.baseName}.rdata \\
                 inputname=${mzMLFile.baseName}
@@ -3543,7 +3544,7 @@ if(params.type_of_ionization in (["neg","both"])){
             script:
             def input_args = rdata_files_ms2.collect{ "$it" }.join(",")
             """
-            /usr/local/bin/mapMS2ToCamera.r \\
+            /usr/bin/mapMS2ToCamera.r \\
                 inputCAMERA=$rdata_files_ms1 \\
                 inputMS2=$input_args \\
                 output=MapMsms2Camera_neg.rdata  \\
@@ -3571,7 +3572,7 @@ if(params.type_of_ionization in (["neg","both"])){
             """
             mkdir out
 
-            /usr/local/bin/MS2ToMetFrag.r \\
+            /usr/bin/MS2ToMetFrag.r \\
                 inputCAMERA=$rdata_files_ms1 \\
                 inputMS2=$rdata_files_ms2 \\
                 output=out \\
@@ -3617,7 +3618,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 unzip  -j $parameters -d inputs/
                 touch ${parameters.baseName}_class_Csifingerid_neg.csv
 
-                /usr/local/bin/fingerID.r \\
+                /usr/bin/fingerID.r \\
                     input=\$PWD/inputs \\
                     database=$params.database_csifingerid_neg_csifingerid \\
                     tryOffline=T \\
@@ -3651,7 +3652,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 for x in *.zip ; do unzip -d all -o -u \$x ; done
                 zip -r Csifingerid_neg.zip all
 
-                /usr/local/bin/aggregateMetfrag.r \\
+                /usr/bin/aggregateMetfrag.r \\
                     inputs=Csifingerid_neg.zip \\
                     realNames=Csifingerid_neg.zip \\
                     output=aggregated_identification_csifingerid_neg.csv \\
@@ -3680,7 +3681,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 """
                 if [ -s $identification_result ]; then
-                    /usr/local/bin/metfragPEP.r \\
+                    /usr/bin/metfragPEP.r \\
                         input=$identification_result \\
                         score=score \\
                         output=pep_identification_csifingerid_neg.csv \\
@@ -3711,7 +3712,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 """
                 if [ -s $csifingerid_input_identification ]; then
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputscores=$csifingerid_input_identification \\
                         inputpheno=$phenotype_file \\
@@ -3736,7 +3737,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 else
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputpheno=$phenotype_file \\
                         ppm=$params.ppm_output_neg_camera \\
@@ -3781,6 +3782,8 @@ if(params.type_of_ionization in (["neg","both"])){
                 } else {
                     exit 1, "params.database_csv_files_neg_metfrag was not found or not defined as string! You need to set database_csv_files_neg_metfrag in conf/parameters.config to the path to a csv file containing your database"
                 }
+            }else{
+              database_csv_files_neg_metfrag=file("nothing")
             }
 
             metfrag_txt_neg_msnbase_flatten=metfrag_txt_neg_msnbase.flatten()
@@ -3809,7 +3812,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 find "\$PWD/inputs" -type f | \\
                     parallel \\
                         -j $params.ncore_neg_metfrag \\
-                        /usr/local/bin/run_metfrag.sh  \\
+                        /usr/bin/run_metfrag.sh  \\
                         -p {} \\
                         -f \$PWD/outputs/{/.}.csv \\
                         -l "\$PWD/$metfrag_database" \\
@@ -3839,7 +3842,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 for x in *.zip ; do unzip -d all -o -u \$x ; done
                 zip -r metfrag_neg.zip all
 
-                /usr/local/bin/aggregateMetfrag.r \\
+                /usr/bin/aggregateMetfrag.r \\
                     inputs=metfrag_neg.zip \\
                     realNames=metfrag_neg.zip \\
                     output=aggregated_identification_metfrag_neg.csv \\
@@ -3866,7 +3869,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 """
                 if [ -s $identification_result ]; then
-                    /usr/local/bin/metfragPEP.r \\
+                    /usr/bin/metfragPEP.r \\
                         input=$identification_result \\
                         score=FragmenterScore \\
                         output=pep_identification_metfrag_neg.csv \\
@@ -3898,7 +3901,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 """
                 if [ -s $metfrag_input_identification ]; then
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputscores=$metfrag_input_identification \\
                         inputpheno=$phenotype_file \\
@@ -3923,7 +3926,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 else
 
-                    /usr/local/bin/prepareOutput.r \\
+                    /usr/bin/prepareOutput.r \\
                         inputcamera=$camera_input_quant \\
                         inputpheno=$phenotype_file \\
                         ppm=$params.ppm_output_neg_camera \\
@@ -3988,7 +3991,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 find "\$PWD/inputs" -type f | \\
                     parallel \\
                         -j $params.ncore_neg_cfmid \\
-                        /usr/local/bin/cfmid.r \\
+                        /usr/bin/cfmid.r \\
                         input={} \\
                         realName={/} \\
                         databaseFile=\$PWD/$cfmid_database \\
@@ -4025,7 +4028,7 @@ if(params.type_of_ionization in (["neg","both"])){
             for x in *.zip ; do unzip -d all -o -u \$x ; done
             zip -r cfmid_neg.zip all
 
-            /usr/local/bin/aggregateMetfrag.r \\
+            /usr/bin/aggregateMetfrag.r \\
                 inputs=cfmid_neg.zip \\
                 realNames=cfmid_neg.zip \\
                 output=aggregated_identification_cfmid_neg.csv \\
@@ -4053,7 +4056,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             """
             if [ -s $identification_result ]; then
-                /usr/local/bin/metfragPEP.r \\
+                /usr/bin/metfragPEP.r \\
                     input=$identification_result \\
                     score=Jaccard_Score \\
                     output=pep_identification_cfmid_neg.csv \\
@@ -4084,7 +4087,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             """
             if [ -s $cfmid_input_identification ]; then
-                /usr/local/bin/prepareOutput.r \\
+                /usr/bin/prepareOutput.r \\
                     inputcamera=$camera_input_quant \\
                     inputscores=$cfmid_input_identification \\
                     inputpheno=$phenotype_file \\
@@ -4109,7 +4112,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             else
 
-                /usr/local/bin/prepareOutput.r \\
+                /usr/bin/prepareOutput.r \\
                     inputcamera=$camera_input_quant \\
                     inputpheno=$phenotype_file \\
                     ppm=$params.ppm_output_neg_camera \\
@@ -4202,7 +4205,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
                         """
-                        /usr/local/bin/featurexmlToCamera.r \\
+                        /usr/bin/featurexmlToCamera.r \\
                             input=$mzMLFile \\
                             realFileName=$mzMLFile \\
                             mzMLfiles=\$PWD/$mzMLFile2 \\
@@ -4238,7 +4241,7 @@ if(params.type_of_ionization in (["neg","both"])){
                             touch quant_params_library_neg.json
                             touch rt_params_library_neg.json
 
-                            /usr/local/bin/ipo.r \\
+                            /usr/bin/ipo.r \\
                                 input=$inputs_aggregated \\
                                 quantOnly=TRUE \\
                                 allSamples=TRUE  \\
@@ -4313,7 +4316,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         script:
                         def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
                         """
-                        /usr/local/bin/findPeaks.r \\
+                        /usr/bin/findPeaks.r \\
                             input=\$PWD/$mzMLFile \\
                             output=\$PWD/${mzMLFile.baseName}.rdata \\
                             ppm=$params.masstrace_ppm_library_neg_xcms \\
@@ -4360,7 +4363,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 }
             } else {
 
-                if(params.quantification_openms_xcms_library_neg ==" openms"){
+                if(params.quantification_openms_xcms_library_neg =="openms"){
                     /*
                     * STEP 31 - feature detection for the library by openms
                     */
@@ -4398,7 +4401,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
                         """
-                        /usr/local/bin/featurexmlToCamera.r \\
+                        /usr/bin/featurexmlToCamera.r \\
                             input=$mzMLFile \\
                             realFileName=$mzMLFile \\
                             mzMLfiles=\$PWD/$mzMLFile2 \\
@@ -4433,7 +4436,7 @@ if(params.type_of_ionization in (["neg","both"])){
                             touch quant_params_library_neg.json
                             touch rt_params_library_neg.json
 
-                            /usr/local/bin/ipo.r \\
+                            /usr/bin/ipo.r \\
                                 input=$inputs_aggregated \\
                                 quantOnly=TRUE \\
                                 allSamples=TRUE  \\
@@ -4508,7 +4511,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         script:
                         def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
                         """
-                        /usr/local/bin/findPeaks.r \\
+                        /usr/bin/findPeaks.r \\
                             input=\$PWD/$mzMLFile \\
                             output=\$PWD/${mzMLFile.baseName}.rdata \\
                             ppm=$params.masstrace_ppm_library_neg_xcms \\
@@ -4571,7 +4574,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${rdata_files.baseName}.rdata" into group_rdata_library_neg_camera
 
                 """
-                /usr/local/bin/xsAnnotate.r input=$rdata_files output=${rdata_files.baseName}.rdata
+                /usr/bin/xsAnnotate.r input=$rdata_files output=${rdata_files.baseName}.rdata
                 """
             }
 
@@ -4591,7 +4594,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${rdata_files.baseName}.rdata" into findaddcuts_rdata_library_neg_camera
 
                 """
-                /usr/local/bin/groupFWHM.r \\
+                /usr/bin/groupFWHM.r \\
                     input=$rdata_files \\
                     output=${rdata_files.baseName}.rdata \\
                     sigma=$params.sigma_group_library_neg_camera \\
@@ -4616,7 +4619,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${rdata_files.baseName}.rdata" into findisotopes_rdata_library_neg_camera
 
                 """
-                /usr/local/bin/findAdducts.r \\
+                /usr/bin/findAdducts.r \\
                     input=$rdata_files \\
                     output=${rdata_files.baseName}.rdata \\
                     ppm=$params.ppm_findaddcuts_library_neg_camera \\
@@ -4641,7 +4644,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${rdata_files.baseName}.rdata" into mapmsmstocamera_rdata_library_neg_camera,mapmsmstoparam_rdata_library_neg_camera_tmp, prepareoutput_rdata_library_neg_camera_cfmid
 
                 """
-                /usr/local/bin/findIsotopes.r \\
+                /usr/bin/findIsotopes.r \\
                     input=$rdata_files \\
                     output=${rdata_files.baseName}.rdata \\
                     maxcharge=$params.maxcharge_findisotopes_library_neg_camera
@@ -4664,7 +4667,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${mzMLFile.baseName}_ReadMsmsLibrary.rdata" into mapmsmstocamera_rdata_library_neg_msnbase
 
                 """
-                /usr/local/bin/readMS2MSnBase.r \\
+                /usr/bin/readMS2MSnBase.r \\
                     input=$mzMLFile \\
                     output=${mzMLFile.baseName}_ReadMsmsLibrary.rdata \\
                     inputname=${mzMLFile.baseName}
@@ -4692,7 +4695,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 script:
                 """
-                /usr/local/bin/mapMS2ToCamera.r \\
+                /usr/bin/mapMS2ToCamera.r \\
                     inputCAMERA=$rdata_files_ms1 \\
                     inputMS2=$rdata_files_ms2 \\
                     output=${rdata_files_ms1.baseName}_MapMsms2Camera_library_neg.rdata  \\
@@ -4724,7 +4727,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 """
                 mkdir out
-                /usr/local/bin/createLibrary.r \\
+                /usr/bin/createLibrary.r \\
                     inputCAMERA=$rdata_camera \\
                     precursorppm=$params.ppm_create_library_neg_msnbase \\
                     inputMS2=$ms2_data \\
@@ -4755,7 +4758,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 script:
                 def aggregatecdlibrary = rdata_files.collect{ "$it" }.join(",")
                 """
-                /usr/local/bin/collectLibrary.r \\
+                /usr/bin/collectLibrary.r \\
                     inputs=$aggregatecdlibrary \\
                     realNames=$aggregatecdlibrary \\
                     output=library_neg.csv
@@ -4816,7 +4819,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "aggregated_identification_library_neg.csv" into library_tsv_neg_passatutto
 
                 """
-                /usr/local/bin/librarySearchEngine.r \\
+                /usr/bin/librarySearchEngine.r \\
                     -l $libraryFile \\
                     -i $parameters  \\
                     -out aggregated_identification_library_neg.csv \\
@@ -4847,7 +4850,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "aggregated_identification_library_neg.csv" into library_tsv_neg_passatutto
 
                 """
-                /usr/local/bin/librarySearchEngine.r \\
+                /usr/bin/librarySearchEngine.r \\
                     -l $libraryFile \\
                     -i $parameters \\
                     -out aggregated_identification_library_neg.csv \\
@@ -4878,7 +4881,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             """
             if [ -s $identification_result ]; then
-                /usr/local/bin/metfragPEP.r \\
+                /usr/bin/metfragPEP.r \\
                     input=$identification_result \\
                     score=score \\
                     output=pep_identification_library_neg.csv \\
@@ -4911,7 +4914,7 @@ if(params.type_of_ionization in (["neg","both"])){
             """
             if [ -s $library_input_identification ]; then
 
-                /usr/local/bin/prepareOutput.r \\
+                /usr/bin/prepareOutput.r \\
                     inputcamera=$camera_input_quant \\
                     inputscores=$library_input_identification \\
                     inputpheno=$phenotype_file \\
@@ -4936,7 +4939,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             else
 
-                /usr/local/bin/prepareOutput.r \\
+                /usr/bin/prepareOutput.r \\
                     inputcamera=$camera_input_quant \\
                     inputpheno=$phenotype_file  \\
                     ppm=$params.ppm_output_neg_camera \\
@@ -4980,7 +4983,7 @@ if(params.type_of_ionization in (["neg","both"])){
         file "*.txt" into noid_neg_finished
 
         """
-        /usr/local/bin/prepareOutput.r \\
+        /usr/bin/prepareOutput.r \\
             inputcamera=$camera_input_quant \\
             inputpheno=$phenotype_file \\
             ppm=$params.ppm_output_neg_camera \\
