@@ -347,7 +347,7 @@ if (params.type_of_ionization in (['neg', 'both'])) {
 if(params.performIPO_pos in (['global', 'global_quant', 'local', 'local_quant']) && params.quantification_openms_xcms_pos=="openms"){
     exit 1, "We cannot perform IPO for quantification when OpenMS is selected in positive mode!"
 }
-if(params.performIPO_pneg in (['global', 'global_quant', 'local', 'local_quant']) && params.quantification_openms_xcms_neg=="openms"){
+if(params.performIPO_neg in (['global', 'global_quant', 'local', 'local_quant']) && params.quantification_openms_xcms_neg=="openms"){
     exit 1, "We cannot perform IPO for quantification when OpenMS is selected in negative mode"
 }
 
@@ -461,6 +461,7 @@ if(params.type_of_ionization in (["pos","both"])){
     if(params.need_centroiding==true){
         process process_peak_picker_pos_openms  {
             label 'openms'
+            //label 'process_low'
             tag "$mzMLFile"
             publishDir "${params.outdir}/process_peak_picker_pos_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
             stageInMode 'copy'
@@ -489,6 +490,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_masstrace_detection_pos_openms_centroided  {
                 label 'openms'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -510,6 +512,7 @@ if(params.type_of_ionization in (["pos","both"])){
             */
             process process_openms_to_xcms_conversion_pos_centroided  {
                 label 'xcmsconvert'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -546,6 +549,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_ipo_param_pos_ipo_centroided {
                     label 'ipo'
+                    //label 'process_low'
                     tag "A collection of files"
                     publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -630,6 +634,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_masstrace_detection_pos_xcms_centroided {
                 label 'xcms'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -703,6 +708,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_masstrace_detection_pos_openms_noncentroided  {
                 label 'openms'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_pos_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -724,6 +730,7 @@ if(params.type_of_ionization in (["pos","both"])){
              */
             process process_openms_to_xcms_conversion_pos_noncentroided  {
                 label 'xcmsconvert'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -758,6 +765,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_ipo_param_pos_ipo_noncentroided {
                     label 'ipo'
+                    //label 'process_low'
                     tag "A collection of files"
                     publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -841,6 +849,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_masstrace_detection_pos_xcms_noncentroided {
                 label 'xcms'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_pos_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -910,6 +919,7 @@ if(params.type_of_ionization in (["pos","both"])){
      */
     process process_collect_rdata_pos_xcms {
         label 'xcms'
+                //label 'process_low'
         tag "A collection of files"
         publishDir "${params.outdir}/process_collect_rdata_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -933,6 +943,7 @@ if(params.type_of_ionization in (["pos","both"])){
      */
     process process_align_peaks_pos_xcms {
         label 'xcms'
+                //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_align_peaks_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -999,6 +1010,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
     process process_group_peaks_pos_N1_xcms {
         label 'xcms'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_group_peaks_pos_N1_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1030,6 +1042,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
         process process_blank_filter_pos_xcms {
             label 'xcms'
+            //label 'process_low'
             tag "$rdata_files"
             publishDir "${params.outdir}/process_blank_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1061,6 +1074,7 @@ if(params.type_of_ionization in (["pos","both"])){
         dilutionfilter_rdata_pos_xcms=temp_unfiltered_channel_pos_2
         process process_dilution_filter_pos_xcms {
             label 'xcms'
+            //label 'process_low'
             tag "$rdata_files"
             publishDir "${params.outdir}/process_dilution_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1094,6 +1108,7 @@ if(params.type_of_ionization in (["pos","both"])){
         cvfilter_rdata_pos_xcms=temp_unfiltered_channel_pos_3
         process process_cv_filter_pos_xcms {
             label 'xcms'
+            //label 'process_low'
             tag "$rdata_files"
             publishDir "${params.outdir}/process_cv_filter_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1122,6 +1137,7 @@ if(params.type_of_ionization in (["pos","both"])){
      */
     process process_annotate_peaks_pos_camera {
         label 'camera'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_annotate_peaks_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1142,6 +1158,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
     process process_group_peaks_pos_camera {
         label 'camera'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_group_peaks_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1167,6 +1184,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
     process process_find_addcuts_pos_camera {
         label 'camera'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_find_addcuts_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1192,6 +1210,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
     process process_find_isotopes_pos_camera {
         label 'camera'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_find_isotopes_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1222,6 +1241,7 @@ if(params.type_of_ionization in (["pos","both"])){
          */
         process process_read_MS2_pos_msnbase {
             label 'msnbase'
+            //label 'process_low'
             tag "$mzMLFile"
             publishDir "${params.outdir}/process_read_MS2_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1245,6 +1265,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
         process process_mapmsms_tocamera_pos_msnbase {
             label 'msnbase'
+            //label 'process_low'
             tag "A collection of files"
             publishDir "${params.outdir}/process_mapmsms_tocamera_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1274,6 +1295,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
         process process_mapmsms_toparam_pos_msnbase {
             label 'msnbase'
+            //label 'process_medium'
             tag "$rdata_files_ms1"
             publishDir "${params.outdir}/process_mapmsms_toparam_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1318,6 +1340,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_ms2_identification_pos_csifingerid {
                 label 'csifingerid'
+                //label 'process_high'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_pos_csifingerid", mode: params.publish_dir_mode
 
@@ -1354,6 +1377,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_identification_aggregate_pos_csifingerid {
                 label 'msnbase'
+                //label 'process_low'
                 tag "A collection of files"
                 publishDir "${params.outdir}/process_identification_aggregate_pos_csifingerid", mode: params.publish_dir_mode
 
@@ -1386,6 +1410,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_pepcalculation_csifingerid_pos_passatutto {
                 label 'passatutto'
+                //label 'process_low'
                 tag "$identification_result"
                 publishDir "${params.outdir}/process_pepcalculation_csifingerid_pos_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1413,6 +1438,7 @@ if(params.type_of_ionization in (["pos","both"])){
              */
             process process_output_quantid_pos_camera_csifingerid {
                 label 'camera'
+                //label 'process_medium'
                 tag "$camera_input_quant"
                 publishDir "${params.outdir}/process_output_quantid_pos_camera_csifingerid", mode: params.publish_dir_mode
 
@@ -1510,6 +1536,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_ms2_identification_pos_metfrag {
                 label 'metfrag'
+                //label 'process_high'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_pos_metfrag", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1542,6 +1569,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_identification_aggregate_pos_metfrag {
                 label 'msnbase'
+                //label 'process_low'
                 tag "A collection of files"
                 publishDir "${params.outdir}/process_identification_aggregate_pos_metfrag", mode: params.publish_dir_mode
 
@@ -1573,6 +1601,7 @@ if(params.type_of_ionization in (["pos","both"])){
             */
             process process_pepcalculation_metfrag_pos_passatutto {
                 label 'passatutto'
+                //label 'process_low'
                 tag "$identification_result"
                 publishDir "${params.outdir}/process_pepcalculation_metfrag_pos_passatutto", mode: params.publish_dir_mode
 
@@ -1602,6 +1631,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_output_quantid_pos_camera_metfrag {
                 label 'camera'
+                //label 'process_medium'
                 tag "$camera_input_quant"
                 publishDir "${params.outdir}/process_output_quantid_pos_camera_metfrag", mode: params.publish_dir_mode
 
@@ -1687,6 +1717,7 @@ if(params.type_of_ionization in (["pos","both"])){
             */
             process process_ms2_identification_pos_cfmid {
                 label 'cfmid'
+                //label 'process_high'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_pos_cfmid", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1726,6 +1757,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_identification_aggregate_pos_cfmid {
                 label 'msnbase'
+                //label 'process_low'
                 tag "A collection of files"
                 publishDir "${params.outdir}/process_identification_aggregate_pos_cfmid", mode: params.publish_dir_mode
 
@@ -1757,6 +1789,7 @@ if(params.type_of_ionization in (["pos","both"])){
             */
             process process_pepcalculation_cfmid_pos_passatutto {
                 label 'passatutto'
+                //label 'process_low'
                 tag "$identification_result"
                 publishDir "${params.outdir}/process_pepcalculation_cfmid_pos_passatutto", mode: params.publish_dir_mode
 
@@ -1786,6 +1819,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_output_quantid_pos_camera_cfmid {
                 label 'camera'
+                //label 'process_medium'
                 tag "$camera_input_quant"
                 publishDir "${params.outdir}/process_output_quantid_pos_camera_cfmid", mode: params.publish_dir_mode
 
@@ -1871,6 +1905,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                     process process_peak_picker_library_pos_openms_centroided  {
                         label 'openms'
+                        //label 'process_low'
                         tag "$mzMLFile"
                         publishDir "${params.outdir}/process_peak_picker_library_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                         stageInMode 'copy'
@@ -1893,6 +1928,7 @@ if(params.type_of_ionization in (["pos","both"])){
                          */
                         process process_masstrace_detection_library_pos_openms_centroided  {
                             label 'openms'
+                            //label 'process_low'
                             tag "$mzMLFile"
                             publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1915,6 +1951,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                         process process_openms_to_xcms_conversion_library_pos_centroided  {
                             label 'xcmsconvert'
+                            //label 'process_low'
                             tag "$mzMLFile"
                             publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1947,6 +1984,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                             process process_ipo_param_library_pos_ipo_centroided {
                                 label 'ipo'
+                                //label 'process_high'
                                 tag "A collection of files"
                                 publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2024,6 +2062,7 @@ if(params.type_of_ionization in (["pos","both"])){
                         param_target_to_detection_process_library_pos = ipo_library_pos_globalQ ? param_to_detection_process_library_pos : file("NO_QFILE")
                         process process_masstrace_detection_library_pos_xcms_centroided {
                             label 'xcms'
+                            //label 'process_low'
                             tag "$mzMLFile"
                             publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2090,6 +2129,7 @@ if(params.type_of_ionization in (["pos","both"])){
                          */
                         process process_masstrace_detection_library_pos_openms_noncentroided  {
                             label 'openms'
+                            //label 'process_low'
                             tag "$mzMLFile"
                             publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2111,6 +2151,7 @@ if(params.type_of_ionization in (["pos","both"])){
                         */
                         process process_openms_to_xcms_conversion_library_pos_noncentroided  {
                             label 'xcmsconvert'
+                            //label 'process_low'
                             tag "$mzMLFile"
                             publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2143,6 +2184,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                             process process_ipo_param_library_pos_ipo_noncentroided {
                                 label 'ipo'
+                                //label 'process_high'
                                 tag "$mzMLFile"
                                 publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2221,6 +2263,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                         process process_masstrace_detection_library_pos_xcms_noncentroided {
                             label 'xcms'
+                            //label 'process_low'
                             tag "$mzMLFile"
                             publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2288,6 +2331,7 @@ if(params.type_of_ionization in (["pos","both"])){
                  */
                 process process_annotate_peaks_library_pos_camera {
                     label 'camera'
+                    //label 'process_low'
                     tag "$rdata_files"
                     publishDir "${params.outdir}/process_annotate_peaks_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                     stageInMode 'copy'
@@ -2308,6 +2352,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 */
                 process process_group_peaks_library_pos_camera {
                     label 'camera'
+                    //label 'process_low'
                     tag "$rdata_files"
                     publishDir "${params.outdir}/process_group_peaks_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                     stageInMode 'copy'
@@ -2334,6 +2379,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_find_addcuts_library_pos_camera {
                     label 'camera'
+                    //label 'process_low'
                     tag "$rdata_files"
                     publishDir "${params.outdir}/process_find_addcuts_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                     stageInMode 'copy'
@@ -2359,6 +2405,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_find_isotopes_library_pos_camera {
                     label 'camera'
+                    //label 'process_low'
                     tag "$rdata_files"
                     publishDir "${params.outdir}/process_find_isotopes_library_pos_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                     stageInMode 'copy'
@@ -2385,6 +2432,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_read_MS2_library_pos_msnbase {
                     label 'msnbase'
+                    //label 'process_medium'
                     tag "$mzMLFile"
                     publishDir "${params.outdir}/process_read_MS2_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2413,6 +2461,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_mapmsms_tocamera_library_pos_msnbase {
                     label 'msnbase'
+                    //label 'process_medium'
                     tag "$rdata_files_ms1"
                     publishDir "${params.outdir}/process_mapmsms_tocamera_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2444,6 +2493,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_create_library_pos_msnbase {
                     label 'msnbase'
+                    //label 'process_medium'
                     tag "$rdata_camera"
                     publishDir "${params.outdir}/process_create_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2478,6 +2528,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_collect_library_pos_msnbase {
                     label 'msnbase'
+                    //label 'process_low'
                     tag "A collection of files"
                     publishDir "${params.outdir}/process_collect_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2503,6 +2554,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_remove_adducts_library_pos_msnbase {
                     label 'msnbase'
+                    //label 'process_low'
                     tag "A collection of files"
                     publishDir "${params.outdir}/process_remove_adducts_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2540,6 +2592,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_search_engine_library_pos_msnbase_nolibcharac {
                     label 'msnbase'
+                    //label 'process_high'
                     tag "$parameters"
                     publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2573,6 +2626,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 process process_search_engine_library_pos_msnbase_libcharac {
                     label 'msnbase'
+                    //label 'process_high'
                     tag "$parameters"
                     publishDir "${params.outdir}/process_search_engine_library_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2605,6 +2659,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_pepcalculation_library_pos_passatutto {
                 label 'passatutto'
+                //label 'process_low'
                 tag "$identification_result"
                 publishDir "${params.outdir}/process_pepcalculation_library_pos_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2635,6 +2690,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_output_quantid_pos_camera_library {
                 label 'camera'
+                //label 'process_high'
                 tag "$camera_input_quant"
                 publishDir "${params.outdir}/process_output_quantid_pos_camera_library", mode: params.publish_dir_mode
 
@@ -2707,6 +2763,7 @@ if(params.type_of_ionization in (["pos","both"])){
          */
         process process_output_quantid_pos_camera_noid {
             label 'camera'
+            //label 'process_high'
             tag "$camera_input_quant"
             publishDir "${params.outdir}/process_output_quantid_pos_camera_noid", mode: params.publish_dir_mode
 
@@ -2757,6 +2814,7 @@ if(params.type_of_ionization in (["neg","both"])){
     if(params.need_centroiding == true){
         process process_peak_picker_neg_openms {
             label 'openms'
+            //label 'process_low'
             tag "$mzMLFile"
             publishDir "${params.outdir}/process_peak_picker_neg_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
             stageInMode 'copy'
@@ -2784,6 +2842,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_masstrace_detection_neg_openms_centroided  {
                 label 'openms'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2805,6 +2864,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_openms_to_xcms_conversion_neg_centroided  {
                 label 'xcmsconvert'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2838,6 +2898,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 process process_ipo_param_neg_ipo_centroided {
                     label 'ipo'
+                    //label 'process_high'
                     tag "A collection of files"
                     publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2921,6 +2982,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_masstrace_detection_neg_xcms_centroided {
                 label 'xcms'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -2993,6 +3055,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_masstrace_detection_neg_openms_noncentroided  {
                 label 'openms'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_neg_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3014,6 +3077,7 @@ if(params.type_of_ionization in (["neg","both"])){
              */
             process process_openms_to_xcms_conversion_neg_noncentroided  {
                 label 'xcmsconvert'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3048,6 +3112,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 process process_ipo_param_neg_ipo_noncentroided {
                     label 'ipo'
+                    //label 'process_high'
                     publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                     input:
@@ -3130,6 +3195,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_masstrace_detection_neg_xcms_noncentroided {
                 label 'xcms'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3199,6 +3265,7 @@ if(params.type_of_ionization in (["neg","both"])){
      */
     process process_collect_rdata_neg_xcms {
         label 'xcms'
+        //label 'process_low'
         tag "A collection of files"
         publishDir "${params.outdir}/process_collect_rdata_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3222,6 +3289,7 @@ if(params.type_of_ionization in (["neg","both"])){
      */
     process process_align_peaks_neg_xcms {
         label 'xcms'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_align_peaks_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3286,6 +3354,7 @@ if(params.type_of_ionization in (["neg","both"])){
     */
     process process_group_peaks_neg_N1_xcms {
         label 'xcms'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_group_peaks_neg_N1_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3317,6 +3386,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         process process_blank_filter_neg_xcms {
             label 'xcms'
+            //label 'process_low'
             tag "$rdata_files"
             publishDir "${params.outdir}/process_blank_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3349,6 +3419,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         process process_dilution_filter_neg_xcms {
             label 'xcms'
+            //label 'process_low'
             tag "$rdata_files"
             publishDir "${params.outdir}/process_dilution_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3381,6 +3452,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         process process_cv_filter_neg_xcms {
             label 'xcms'
+            //label 'process_low'
             tag "$rdata_files"
             publishDir "${params.outdir}/process_cv_filter_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3409,6 +3481,7 @@ if(params.type_of_ionization in (["neg","both"])){
      */
     process process_annotate_peaks_neg_camera {
         label 'camera'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_annotate_peaks_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3429,6 +3502,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
     process process_group_peaks_neg_camera {
         label 'camera'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_group_peaks_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3454,6 +3528,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
     process process_find_addcuts_neg_camera {
         label 'camera'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_find_addcuts_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3478,6 +3553,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
     process process_find_isotopes_neg_camera {
         label 'camera'
+        //label 'process_low'
         tag "$rdata_files"
         publishDir "${params.outdir}/process_find_isotopes_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3508,6 +3584,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         process process_read_MS2_neg_msnbase {
             label 'msnbase'
+            //label 'process_low'
             tag "$mzMLFile"
             publishDir "${params.outdir}/process_read_MS2_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3531,6 +3608,7 @@ if(params.type_of_ionization in (["neg","both"])){
         */
         process process_mapmsms_tocamera_neg_msnbase {
             label 'msnbase'
+            //label 'process_medium'
             tag "A collection of files"
             publishDir "${params.outdir}/process_mapmsms_tocamera_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3559,6 +3637,7 @@ if(params.type_of_ionization in (["neg","both"])){
          */
         process process_mapmsms_toparam_neg_msnbase {
             label 'msnbase'
+            //label 'process_medium'
             tag "$rdata_files_ms2"
             publishDir "${params.outdir}/process_mapmsms_toparam_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3602,6 +3681,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_ms2_identification_neg_csifingerid {
                 label 'csifingerid'
+                //label 'process_high'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_neg_csifingerid", mode: params.publish_dir_mode
 
@@ -3638,6 +3718,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_identification_aggregate_neg_csifingerid {
                 label 'msnbase'
+                //label 'process_low'
                 publishDir "${params.outdir}/process_identification_aggregate_neg_csifingerid", mode: params.publish_dir_mode
 
                 input:
@@ -3670,6 +3751,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_pepcalculation_csifingerid_neg_passatutto {
                 label 'passatutto'
+                //label 'process_low'
                 tag "$identification_result"
                 publishDir "${params.outdir}/process_pepcalculation_csifingerid_neg_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3698,6 +3780,7 @@ if(params.type_of_ionization in (["neg","both"])){
              */
             process process_output_quantid_neg_camera_csifingerid {
                 label 'camera'
+                //label 'process_high'
                 tag "$camera_input_quant"
                 publishDir "${params.outdir}/process_output_quantid_neg_camera_csifingerid", mode: params.publish_dir_mode
 
@@ -3794,6 +3877,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_ms2_identification_neg_metfrag {
                 label 'metfrag'
+                //label 'process_high'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_neg_metfrag", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3827,6 +3911,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_identification_aggregate_neg_metfrag {
                 label 'msnbase'
+                //label 'process_low'
                 tag "A collection of files"
                 publishDir "${params.outdir}/process_identification_aggregate_neg_metfrag", mode: params.publish_dir_mode
 
@@ -3858,6 +3943,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_pepcalculation_metfrag_neg_passatutto {
                 label 'passatutto'
+                //label 'process_low'
                 tag "$identification_result"
                 publishDir "${params.outdir}/process_pepcalculation_metfrag_neg_passatutto", mode: params.publish_dir_mode
 
@@ -3887,6 +3973,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_output_quantid_neg_camera_metfrag {
                 label 'camera'
+                //label 'process_high'
                 tag "$camera_input_quant"
                 publishDir "${params.outdir}/process_output_quantid_neg_camera_metfrag", mode: params.publish_dir_mode
 
@@ -3972,6 +4059,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_ms2_identification_neg_cfmid {
                 label 'cfmid'
+                //label 'process_high'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_neg_cfmid", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4013,6 +4101,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         process process_identification_aggregate_neg_cfmid {
             label 'msnbase'
+            //label 'process_low'
             tag "A collection of files"
             publishDir "${params.outdir}/process_identification_aggregate_neg_cfmid", mode: params.publish_dir_mode
 
@@ -4044,6 +4133,7 @@ if(params.type_of_ionization in (["neg","both"])){
          */
         process process_pepcalculation_cfmid_neg_passatutto {
             label 'passatutto'
+            //label 'process_low'
             tag "$identification_result"
             publishDir "${params.outdir}/process_pepcalculation_cfmid_neg_passatutto", mode: params.publish_dir_mode
 
@@ -4074,6 +4164,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         process process_output_quantid_neg_camera_cfmid {
             label 'camera'
+            //label 'process_search_engine_library_neg_msnbase_nolibcharac'
             tag "$camera_input_quant"
             publishDir "${params.outdir}/process_output_quantid_neg_camera_cfmid", mode: params.publish_dir_mode
 
@@ -4151,6 +4242,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 */
                 process process_peak_picker_library_neg_openms_centroided  {
                     label 'openms'
+                    //label 'process_low'
                     tag "$mzMLFile"
                     publishDir "${params.outdir}/process_peak_picker_library_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                     stageInMode 'copy'
@@ -4173,6 +4265,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     */
                     process process_masstrace_detection_library_neg_openms_centroided  {
                         label 'openms'
+                        //label 'process_low'
                         tag "$mzMLFile"
                         publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4194,6 +4287,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     */
                     process process_openms_to_xcms_conversion_library_neg_centroided  {
                         label 'xcmsconvert'
+                        //label 'process_low'
                         tag "$mzMLFile"
                         publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4225,6 +4319,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                         process process_ipo_param_library_neg_ipo_centroided {
                             label 'ipo'
+                            //label 'process_high'
                             tag "A collection of files"
                             publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4303,6 +4398,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                     process process_masstrace_detection_library_neg_xcms_centroided {
                         label 'xcms'
+                        //label 'process_low'
                         tag "$mzMLFile"
                         publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4369,6 +4465,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     */
                     process process_masstrace_detection_library_neg_openms_noncentroided  {
                         label 'openms'
+                        //label 'process_low'
                         tag "$mzMLFile"
                         publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4390,6 +4487,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     */
                     process process_openms_to_xcms_conversion_library_neg_noncentroided  {
                         label 'xcmsconvert'
+                        //label 'process_low'
                         tag "$mzMLFile"
                         publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4420,6 +4518,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                         process process_ipo_param_library_neg_ipo_noncentroided {
                             label 'ipo'
+                            //label 'process_high'
                             tag "A collection of files"
                             publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4498,6 +4597,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
                     process process_masstrace_detection_library_neg_xcms_noncentroided {
                         label 'xcms'
+                        //label 'process_low'
                         tag "$mzMLFile"
                         publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4563,6 +4663,7 @@ if(params.type_of_ionization in (["neg","both"])){
              */
             process process_annotate_peaks_library_neg_camera {
                 label 'camera'
+                //label 'process_low'
                 tag "$rdata_files"
                 publishDir "${params.outdir}/process_annotate_peaks_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                 stageInMode 'copy'
@@ -4583,6 +4684,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_group_peaks_library_neg_camera {
                 label 'camera'
+                //label 'process_low'
                 tag "$rdata_files"
                 publishDir "${params.outdir}/process_group_peaks_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                 stageInMode 'copy'
@@ -4608,6 +4710,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_find_addcuts_library_neg_camera {
                 label 'camera'
+                //label 'process_low'
                 tag "$rdata_files"
                 publishDir "${params.outdir}/process_find_addcuts_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                 stageInMode 'copy'
@@ -4633,6 +4736,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_find_isotopes_library_neg_camera {
                 label 'camera'
+                //label 'process_low'
                 tag "$rdata_files"
                 publishDir "${params.outdir}/process_find_isotopes_library_neg_camera", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                 stageInMode 'copy'
@@ -4657,6 +4761,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_read_MS2_library_neg_msnbase {
                 label 'msnbase'
+                //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_read_MS2_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4684,6 +4789,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_mapmsms_tocamera_library_neg_msnbase {
                 label 'msnbase'
+                //label 'process_medium'
                 tag "$rdata_files_ms1"
                 publishDir "${params.outdir}/process_mapmsms_tocamera_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4715,6 +4821,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_create_library_neg_msnbase {
                 label 'msnbase'
+                //label 'process_medium'
                 tag "$rdata_camera"
                 publishDir "${params.outdir}/process_create_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4746,6 +4853,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_collect_library_neg_msnbase {
                 label 'msnbase'
+                //label 'process_low'
                 tag "A collection of files"
                 publishDir "${params.outdir}/process_collect_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4770,6 +4878,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_remove_adducts_library_neg_msnbase {
                 label 'msnbase'
+                //label 'process_low'
                 tag "A collection of files"
                 publishDir "${params.outdir}/process_remove_adducts_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4807,6 +4916,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_search_engine_library_neg_msnbase_nolibcharac {
                 label 'msnbase'
+                //label 'process_high'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4839,6 +4949,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_search_engine_library_neg_msnbase_libcharac {
                 label 'msnbase'
+                //label 'process_high'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_search_engine_library_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4870,6 +4981,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         process process_pepcalculation_library_neg_passatutto {
             label 'passatutto'
+            //label 'process_low'
             tag "$identification_result"
             publishDir "${params.outdir}/process_pepcalculation_library_neg_passatutto", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4900,6 +5012,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         process process_output_quantid_neg_camera_library {
             label 'camera'
+            //label 'process_high'
             tag "$camera_input_quant"
             publishDir "${params.outdir}/process_output_quantid_neg_camera_library", mode: params.publish_dir_mode
 
@@ -4972,6 +5085,7 @@ if(params.type_of_ionization in (["neg","both"])){
     */
     process process_output_quantid_neg_camera_noid {
         label 'camera'
+        //label 'process_high'
         tag "$camera_input_quant"
         publishDir "${params.outdir}/process_output_quantid_neg_camera_noid", mode: params.publish_dir_mode
 
