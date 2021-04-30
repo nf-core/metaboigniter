@@ -16,7 +16,7 @@ autoconf patch libtool make automake wget build-essential cmake python python-pi
 	apt-get install -y ninja-build qt5-default libqt5serialport5-dev qtscript5-dev libqt5svg5-dev zip  && \
 apt-get -y update && apt-get install -y qt59base qt59imageformats qt59quickcontrols qt59quickcontrols2 qt59webengine && \
  apt-get -y update && \
-    apt-get install -y subversion libboost-filesystem-dev software-properties-common && \ 
+    apt-get install -y subversion libboost-filesystem-dev software-properties-common && \
     add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && apt-get -y install wget openjdk-11-jdk parallel && \
 
  R -e 'source("https://bioconductor.org/biocLite.R"); biocLite(c("MSnbase","mzR","MassSpecWavelet","S4Vectors","BiocStyle","faahKO","msdata"))' && \
@@ -121,15 +121,11 @@ ENV software_version="3.4.4-1trusty0"
 
 RUN pip install -Iv pyopenms==2.1.0
 
-# Add cran R backport
-
-
-
 ## Metfrag
-ADD assets/scripts/jni-inchi-0.8.jar /root
+ADD bin/jni-inchi-0.8.jar /root
 RUN mkdir -p /root/.jnati/repo/ && jar xf /root/jni-inchi-0.8.jar && mv META-INF/jniinchi /root/.jnati/repo/
 
-ADD assets/scripts/metfrag.jar /usr/share/metfrag-2.4.5-1/metfrag.jar
+ADD bin/metfrag.jar /usr/share/metfrag-2.4.5-1/metfrag.jar
 
 # Install csi
 
@@ -147,15 +143,15 @@ RUN git clone https://github.com/MetaboIGNITER/container-passatutto.git && cd co
  rm -rf passatutto
 
 #
-ADD assets/scripts/run_metfrag.sh /usr/bin/run_metfrag.sh
+ADD bin/run_metfrag.sh /usr/bin/run_metfrag.sh
 
 
 
 
-ADD assets/scripts/*.r /usr/bin/
+ADD bin/*.r /usr/bin/
 
-ADD assets/scripts/featurexmltotable.py /usr/bin/featurexmltotable.py
-ADD assets/scripts/metfrag /usr/share/metfrag-2.4.5-1/metfrag
+ADD bin/featurexmltotable.py /usr/bin/featurexmltotable.py
+ADD bin/metfrag /usr/share/metfrag-2.4.5-1/metfrag
 
 RUN chmod +x /usr/bin/*.r && chmod +x /usr/bin/CSI/bin/sirius &&\
  chmod +x /usr/bin/featurexmltotable.py  &&\
