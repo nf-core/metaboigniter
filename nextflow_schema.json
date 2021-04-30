@@ -2185,13 +2185,13 @@
                 "method_blankfilter_pos_xcms": {
                     "type": "string",
                     "default": "max",
-                    "description": "method of sumarization of signal in blank samples",
+                    "description": "method of sumarization of signal in blank samples. Must be one of 'max', 'mean' or 'median'. For example, if 'max' is selected, a signal will be removed if it maximum abundance in the blank samples is higher than maximum abundance in biological samples.",
                     "hidden": true
                 },
                 "blank_blankfilter_pos_xcms": {
                     "type": "string",
                     "default": "Blank",
-                    "description": "Name of the class of the blank samples",
+                    "description": "Name of the class of the blank samples. This must show the class of blank samples exactly as you refer to them in your phenotype file",
                     "hidden": true
                 },
                 "sample_blankfilter_pos_xcms": {
@@ -2203,7 +2203,7 @@
                 "rest_blankfilter_pos_xcms": {
                     "type": "string",
                     "default": "T",
-                    "description": "set to T to compare blanks only to rest of the samples",
+                    "description": "set to T to compare the blanks only to rest of the samples. If F, the blank signals will be compared with the samples with class sample_blankfilter_pos_xcms",
                     "hidden": true
                 },
                 "dilution_filter_pos": {
@@ -2221,7 +2221,7 @@
                 "dilution_dilutionfilter_pos_xcms": {
                     "type": "string",
                     "default": "D1,D2,D3,D4",
-                    "description": "The class of the samples represneting dilution. This has to be separated by comma!",
+                    "description": "The class of the samples represneting dilution. This has to be separated by comma! The samples are correlated to the exact order of the sequence provided here",
                     "hidden": true
                 },
                 "pvalue_dilutionfilter_pos_xcms": {
