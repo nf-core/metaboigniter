@@ -5163,7 +5163,7 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: workflow.projectDir ]
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, projectDir: workflow.projectDir ]
     def sf = new File("${workflow.projectDir}/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
