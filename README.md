@@ -10,8 +10,6 @@
 [![Docker](https://img.shields.io/docker/automated/nfcore/metaboigniter.svg)](https://hub.docker.com/r/nfcore/metaboigniter)
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23metaboigniter-4A154B?logo=slack)](https://nfcore.slack.com/channels/metaboigniter)
 
-[![Gitter chat](https://badges.gitter.im/MetaboIGNITER/gitter.png)](https://gitter.im/MetaboIGNITER/community)
-
 ## Introduction
 
 **nf-core/metaboigniter** is bioinformatics pipeline for pre-processing of mass spectrometry-based metabolomics data.
@@ -87,3 +85,15 @@ In addition, references of tools and data used in this pipeline are as follows:
 > 6. Ruttkies C., Schymanski E.L. et al, MetFrag relaunched: incorporating strategies beyond in silico fragmentation. Journal of Cheminformatics, 2016, 8:3.
 > 7. Allen F, Greiner R, and Wishart D. Computational prediction of electron ionization mass spectra to assist in GC-MS compound identification. Submitted, 2016.
 > 8. Kerstin Scheubert, Franziska Hufsky, Daniel Petras, Mingxun Wang, Louis-Felix Nothias, Kai Dührkop, Nuno Bandeira, Pieter C Dorrestein, Sebastian Böcker. Significance estimation enabling large scale untargeted metabolomics annotations. Nature Communications, 2017. 8(1494)
+
+## Third party software copyright
+
+nf-core/metaboigniter contains several scripts for performing various pre-processing steps.
+
+The following software have not been written by us:
+
+MetFrag: This software has been obtained from [here](https://ipb-halle.github.io/MetFrag/) and was originally published under the terms of the GNU Lesser General Public License version 2.1 or later.
+
+jni-inchi has been obtained from [here](http://jniinchi.sourceforge.net/) and was originally published under the terms of the GNU Lesser General Public License v3.
+
+The rest of the scripts has been originally written by Payam Emami as part of [PhenoMeNal (Phenome and Metabolome aNalysis) consortium](https://phenomenal-h2020.eu/home/).
