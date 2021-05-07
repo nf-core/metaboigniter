@@ -92,13 +92,10 @@ nf-core/metaboigniter contains several scripts for performing various pre-proces
 
 The following software have not been written by us:
 
-MetFrag: This software has been obtained from [here](https://ipb-halle.github.io/MetFrag/) and was originally published under the terms of the GNU Lesser General Public License version 2.1 or later. The files include:
-
-- bin/metfrag
-- bin/metfrag.jar
-
-jni-inchi has been obtained from [here](http://jniinchi.sourceforge.net/) and was originally published under the terms of the GNU Lesser General Public License v3. The files include:
-
-- bin/jni-inchi-0.8.jar
+- [MetFrag](https://ipb-halle.github.io/MetFrag/) (GNU LGPL v2.1 or later). Files included:
+    - `bin/metfrag`
+    - `bin/metfrag.jar`
+- [jni-inchi](http://jniinchi.sourceforge.net/) (GNU LGPL v3). Files include:
+    - `bin/jni-inchi-0.8.jar`
 
 The rest of the scripts has been originally written by Payam Emami as part of [PhenoMeNal (Phenome and Metabolome aNalysis) consortium](https://phenomenal-h2020.eu/home/).
