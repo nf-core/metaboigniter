@@ -1,0 +1,3 @@
+files_unchanged:
+  - lib/NfcoreSchema.groovy
+  - assets/sendmail_template.txt   # Removed MultiQC

@@ -1,0 +1,3239 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/metaboigniter/master/nextflow_schema.json",
+    "title": "nf-core/metaboigniter pipeline parameters",
+    "description": "Pre-processing of mass spectrometry-based metabolomics data with quantification and identification based on MS1 and MS2 data",
+    "type": "object",
+    "definitions": {
+        "global_options": {
+            "title": "Global options",
+            "type": "object",
+            "description": "General options that affect the whole pipeline",
+            "default": "",
+            "properties": {
+                "outdir": {
+                    "type": "string",
+                    "description": "Output directory for results",
+                    "default": "./results",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Email address for completion summary",
+                    "fa_icon": "fas fa-envelope",
+                    "help_text": "An email address to send a summary email to when the pipeline is completed.",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                }
+            },
+            "fa_icon": "fas fa-globe"
+        },
+        "internal_library_quantification_and_identification_parameters_negative_mode": {
+            "title": "Internal library quantification and identification parameters (negative mode)",
+            "type": "object",
+            "description": "Parameters used to tune library creation (only set if you want to do library idnetification)",
+            "default": "",
+            "properties": {
+                "quantification_openms_xcms_library_neg": {
+                    "type": "string",
+                    "default": "xcms",
+                    "description": "set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in negative ionization  (for library)",
+                    "enum": [
+                        "xcms",
+                        "openms"
+                    ],
+                    "hidden": true
+                },
+                "performIPO_library_neg": {
+                    "type": "string",
+                    "default": "none",
+                    "description": "Controls how to perform IPO",
+                    "help_text": "Possible values:\n* `none`: don't perform IPO\n* `global`: performs IPO on all or selected number of samples\n* `local`: performs IPO on individual samples one at the time",
+                    "enum": [
+                        "none",
+                        "global",
+                        "local"
+                    ],
+                    "hidden": true
+                },
+                "ipo_methodXset_library_neg": {
+                    "type": "string",
+                    "default": "centWave",
+                    "description": "Quantification methods for IPO",
+                    "help_text": "Only centWave is supported at this stage.",
+                    "hidden": true
+                },
+                "ipo_noise_l_library_neg": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "lowest level of noise",
+                    "hidden": true
+                },
+                "ipo_noise_h_library_neg": {
+                    "type": "number",
+                    "description": "highest level of noise",
+                    "hidden": true
+                },
+                "ipo_snthresh_l_library_neg": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "lowest level of signal to noise threshold",
+                    "hidden": true
+                },
+                "ipo_snthresh_h_library_neg": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "highest level of signal to noise threshold",
+                    "hidden": true
+                },
+                "ipo_mzCenterFun_library_neg": {
+                    "type": "string",
+                    "default": "wMean",
+                    "description": "Function for centering the mz",
+                    "hidden": true
+                },
+                "ipo_integrate_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Integration method",
+                    "help_text": "",
+                    "hidden": true
+                },
+                "ipo_fitgauss_library_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitted",
+                    "hidden": true
+                },
+                "ipo_min_peakwidth_l_library_neg": {
+                    "type": "number",
+                    "default": 12,
+                    "description": "lower minimum width of peaks",
+                    "hidden": true
+                },
+                "ipo_min_peakwidth_h_library_neg": {
+                    "type": "number",
+                    "default": 28,
+                    "description": "higher minimum width of peaks",
+                    "hidden": true
+                },
+                "ipo_max_peakwidth_l_library_neg": {
+                    "type": "number",
+                    "default": 35,
+                    "description": "lower maximum width of peaks",
+                    "hidden": true
+                },
+                "ipo_max_peakwidth_h_library_neg": {
+                    "type": "number",
+                    "default": 65,
+                    "description": "higher maximum width of peaks",
+                    "hidden": true
+                },
+                "ipo_ppm_l_library_neg": {
+                    "type": "number",
+                    "default": 17,
+                    "description": "lower ppm mass deviation",
+                    "hidden": true
+                },
+                "ipo_ppm_h_library_neg": {
+                    "type": "number",
+                    "default": 32,
+                    "description": "higher ppm mass deviation",
+                    "hidden": true
+                },
+                "ipo_mzdiff_l_library_neg": {
+                    "type": "number",
+                    "default": -0.001,
+                    "description": "lower minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "ipo_mzdiff_h_library_neg": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "higher minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "ipo_charge_camera_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "maximum charge of molecules (only used in individual setting)",
+                    "hidden": true
+                },
+                "ipo_max_ppm_camera_library_neg": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm mass deviation for adducts (only used in individual setting)",
+                    "hidden": true
+                },
+                "ipo_prefilter_l_l_library_neg": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "lower value of K in 'prefilter_library_neg=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >_library_neg= 'I'.",
+                    "hidden": true
+                },
+                "ipo_prefilter_l_h_library_neg": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "higher value of K in 'prefilter_library_neg=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >_library_neg= 'I'.",
+                    "hidden": true
+                },
+                "ipo_prefilter_h_l_library_neg": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "lower I in prefilter",
+                    "hidden": true
+                },
+                "ipo_prefilter_h_h_library_neg": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "higher I in prefilter",
+                    "hidden": true
+                },
+                "ipo_ncores_library_neg": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "number of cores used in IPO",
+                    "hidden": true
+                },
+                "ipo_gapInit_l_library_neg": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "lower Penalty for Gap opening",
+                    "hidden": true
+                },
+                "ipo_gapInit_h_library_neg": {
+                    "type": "number",
+                    "default": 0.4,
+                    "description": "higher Penalty for Gap opening",
+                    "hidden": true
+                },
+                "ipo_gapExtend_l_library_neg": {
+                    "type": "number",
+                    "default": 2.1,
+                    "description": "lower Penalty for Gap enlargement",
+                    "hidden": true
+                },
+                "ipo_gapExtend_h_library_neg": {
+                    "type": "number",
+                    "default": 2.7,
+                    "description": "higher Penalty for Gap enlargement",
+                    "hidden": true
+                },
+                "ipo_profStep_l_library_neg": {
+                    "type": "number",
+                    "default": 0.7,
+                    "description": "lower step size (in m/z) to use for profile generation from the raw data files",
+                    "hidden": true
+                },
+                "ipo_profStep_h_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher step size (in m/z) to use for profile generation from the raw data files",
+                    "hidden": true
+                },
+                "ipo_response_l_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors",
+                    "hidden": true
+                },
+                "ipo_response_h_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors",
+                    "hidden": true
+                },
+                "ipo_factorDiag_l_library_neg": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "lower Local weighting applied to diagonal moves in alignment.",
+                    "hidden": true
+                },
+                "ipo_factorDiag_h_library_neg": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "higher Local weighting applied to diagonal moves in alignment.",
+                    "hidden": true
+                },
+                "ipo_factorGap_l_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower Local weighting applied to gap moves in alignment.",
+                    "hidden": true
+                },
+                "ipo_factorGap_h_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher Local weighting applied to gap moves in alignment.",
+                    "hidden": true
+                },
+                "ipo_localAlignment_library_neg": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "Local rather than global alignment",
+                    "hidden": true
+                },
+                "ipo_bw_l_library_neg": {
+                    "type": "number",
+                    "default": 22,
+                    "description": "lower bandwidth (consider something like retention time differences)",
+                    "hidden": true
+                },
+                "ipo_bw_h_library_neg": {
+                    "type": "number",
+                    "default": 38,
+                    "description": "higher bandwidth (consider something like retention time differences)",
+                    "hidden": true
+                },
+                "ipo_minfrac_l_library_neg": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "lower minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_minfrac_h_library_neg": {
+                    "type": "number",
+                    "default": 0.7,
+                    "description": "higher minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_mzwid_l_library_neg": {
+                    "type": "number",
+                    "default": 0.015,
+                    "description": "lower mz width (mz differences)",
+                    "hidden": true
+                },
+                "ipo_mzwid_h_library_neg": {
+                    "type": "number",
+                    "default": 0.035,
+                    "description": "higher mz width (mz differences)",
+                    "hidden": true
+                },
+                "ipo_minsamp_l_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower minimum number of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_minsamp_h_library_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher minimum number of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_max_l_library_neg": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "lower maximum number of groups to identify in a single m/z slice",
+                    "hidden": true
+                },
+                "ipo_max_h_library_neg": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "higher maximum number of groups to identify in a single m/z slice",
+                    "hidden": true
+                },
+                "ipo_distFunc_library_neg": {
+                    "type": "string",
+                    "default": "cor_opt",
+                    "description": "DistFunc function: cor (Pearson's R) or cor_opt (default, calculate only 10% diagonal band of distance matrix, better runtime), cov (covariance), prd (product), euc (Euclidean distance)",
+                    "hidden": true
+                },
+                "ipo_methodRT_library_neg": {
+                    "type": "string",
+                    "default": "obiwarp",
+                    "description": "Only obiwarp is supported",
+                    "hidden": true
+                },
+                "masstrace_ppm_library_neg_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "mass trace deviation in ppm",
+                    "hidden": true
+                },
+                "peakwidthlow_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "lower width of peaks",
+                    "hidden": true
+                },
+                "peakwidthhigh_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "highest width of peaks",
+                    "hidden": true
+                },
+                "noise_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "level of noise",
+                    "hidden": true
+                },
+                "mzdiff_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": -0.001,
+                    "description": "minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "snthresh_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "signal to noise ratio cutoff, definition see below.",
+                    "hidden": true
+                },
+                "prefilter_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "K in 'prefilter=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >= 'I'.",
+                    "hidden": true
+                },
+                "value_of_prefilter_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "I in prefilter",
+                    "hidden": true
+                },
+                "mzCenterFun_quant_library_neg_xcms": {
+                    "type": "string",
+                    "default": "wMean",
+                    "description": "Function to calculate the m/z center of the feature: 'wMean' intensity weighted mean of the feature m/z values, 'mean' mean of the feature m/z values, 'apex' use m/z value at peak apex, 'wMeanApex3' intensity weighted mean of the m/z value at peak apex and the m/z value left and right of it, 'meanApex3' mean of the m/z value at peak apex and the m/z value left and right of it.",
+                    "hidden": true
+                },
+                "integrate_quant_library_neg_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact.",
+                    "hidden": true
+                },
+                "fitgauss_quant_library_neg_xcms": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitted",
+                    "hidden": true
+                },
+                "phenodatacolumn_quant_library_neg": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "name of the column in the phenotype_design_library_neg showing class information of the samples",
+                    "hidden": true
+                },
+                "sampleclass_quant_library_neg_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "A name for the class of sample",
+                    "hidden": true
+                },
+                "sigma_group_library_neg_camera": {
+                    "type": "number",
+                    "default": 8,
+                    "description": "sigma value for grouping the peaks across chromatogram",
+                    "hidden": true
+                },
+                "perfwhm_group_library_neg_camera": {
+                    "type": "number",
+                    "default": 0.6,
+                    "description": "full width at half maximum for finding overlaping peaks",
+                    "hidden": true
+                },
+                "intval_group_library_neg_camera": {
+                    "type": "string",
+                    "default": "maxo",
+                    "description": "which intensity value to use",
+                    "hidden": true
+                },
+                "ppm_findaddcuts_library_neg_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation between theoritical adduct mass and the experimental one",
+                    "hidden": true
+                },
+                "polarity_findaddcuts_library_neg_camera": {
+                    "type": "string",
+                    "default": "negative",
+                    "description": "this has to be negative (for testing only)!",
+                    "hidden": true
+                },
+                "maxcharge_findisotopes_library_neg_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "number of changes to consider (most often 1 is enough)",
+                    "hidden": true
+                },
+                "ppm_mapmsmstocamera_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation when mapping MS2 parent ion to a mass trace",
+                    "hidden": true
+                },
+                "rt_mapmsmstocamera_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace)",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "internal_library_parameters_negative_mode": {
+            "title": "Internal library parameters (negative mode)",
+            "type": "object",
+            "description": "Parameters used to characterize the internal library",
+            "default": "",
+            "properties": {
+                "raw_file_name_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "rawFile",
+                    "description": "name of the column showing which raw files contain which metabolite in the library_description_neg csv file",
+                    "hidden": true
+                },
+                "compund_id_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "HMDB.YMDB.ID",
+                    "description": "name of the column showing id of the metabolites in the library_description_neg csv file",
+                    "hidden": true
+                },
+                "compound_name_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "PRIMARY_NAME",
+                    "description": "name of the compount column in the library_description_neg csv file",
+                    "hidden": true
+                },
+                "mz_col_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "mz",
+                    "description": "name of the mz column in the library_description_neg csv file",
+                    "hidden": true
+                },
+                "which_mz_preparelibrary_neg_msnbase": {
+                    "type": "string",
+                    "default": "f",
+                    "description": "\"f\" or \"c\", showing whether the Feature range or centroid of the feature should be used for mapping",
+                    "enum": [
+                        "f",
+                        "c"
+                    ],
+                    "hidden": true
+                },
+                "ncore_searchengine_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of cores for mapping the features",
+                    "hidden": true
+                },
+                "ppm_create_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm error for mapping the library characterization masses to the experimental one",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "output_preparation_negative_mode": {
+            "title": "Output preparation (negative mode)",
+            "type": "object",
+            "description": "Parameters that control how the results are outputted",
+            "default": "",
+            "properties": {
+                "ppm_output_neg_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "relative difference of mass of the ID hit compare to a mass trace (ppm)"
+                },
+                "rt_output_neg_camera": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "retention time difference of ID to mass trace (second)"
+                },
+                "higher_the_better_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "is higher the score the better (not used for now)",
+                    "hidden": true
+                },
+                "impute_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "should we impute adduct and different chance states with the same ID"
+                },
+                "type_column_output_neg_camera": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "Class of the samples (used for statistics and coverage calculations)"
+                },
+                "selected_type_output_neg_camera": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "what class of samples do you want to keep (anything not matching this in the Class column will be removed)"
+                },
+                "rename_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "you want to rename the files"
+                },
+                "rename_col_output_neg_camera": {
+                    "type": "string",
+                    "default": "rename",
+                    "description": "which column of the phenotype file to use for renaming"
+                },
+                "only_report_with_id_output_neg_camera": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "do only want to see the identified mass traces or everything?"
+                },
+                "combine_replicate_output_neg_camera": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "do you have technical replicates you want to average ?"
+                },
+                "combine_replicate_column_output_neg_camera": {
+                    "type": "string",
+                    "default": "rep",
+                    "description": "which column of the phenotype file show the technical replicates"
+                },
+                "log_output_neg_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "should we log2 the output"
+                },
+                "sample_coverage_output_neg_camera": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "any mass trace having more pecentage of the missing value will be removed"
+                },
+                "sample_coverage_method_output_neg_camera": {
+                    "type": "string",
+                    "default": "global",
+                    "description": "how to calculate missing value percentrage? global across all the samples? or name of the column in the phenotype file showing the grouping"
+                },
+                "ncore_output_neg_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "number of cores used for mapping the features"
+                },
+                "normalize_output_neg_camera": {
+                    "type": "string",
+                    "default": "1",
+                    "description": "do you want to normalize the data set to 'NA' if you don't want normalization"
+                }
+            },
+            "help_text": ""
+        },
+        "cfm_id_parameters_negative_mode": {
+            "title": "CFM-ID parameters (negative mode)",
+            "type": "object",
+            "description": "Parameters specific to CFM-ID",
+            "default": "",
+            "properties": {
+                "database_csv_files_neg_cfmid": {
+                    "type": "string",
+                    "description": "path to a csv file containing your database"
+                },
+                "ncore_neg_cfmid": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "number of cores that cfm can use"
+                },
+                "candidate_id_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "Identifier",
+                    "description": "name of the column in the database for id of the molecules"
+                },
+                "candidate_inchi_smiles_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "SMILES",
+                    "description": "name of the column in the database for smile of the molecules"
+                },
+                "candidate_mass_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "MonoisotopicMass",
+                    "description": "name of the column in the database for mass of the molecules"
+                },
+                "database_name_column_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "Name",
+                    "description": "name of the column in the database for name of the molecules"
+                },
+                "database_inchI_column_identification_neg_cfmid": {
+                    "type": "string",
+                    "default": "InChI",
+                    "description": "name of the column in the database for inchi of the molecules"
+                }
+            },
+            "help_text": ""
+        },
+        "metfrag_parameters_negative_mode": {
+            "title": "MetFrag parameters (negative mode)",
+            "type": "object",
+            "description": "Parameters only for MetFrag",
+            "default": "",
+            "properties": {
+                "database_csv_files_neg_metfrag": {
+                    "type": "string",
+                    "description": "path to a csv file containing your database"
+                },
+                "ncore_neg_metfrag": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "number of cores that metfrag can use"
+                }
+            },
+            "help_text": ""
+        },
+        "csi_fingerid_parameters_negative_mode": {
+            "title": "CSI:FINGERID parameters (negative mode)",
+            "type": "object",
+            "description": "Parameters only for CSI:FINGERID",
+            "default": "",
+            "properties": {
+                "database_csifingerid_neg_csifingerid": {
+                    "type": "string",
+                    "default": "hmdb",
+                    "description": "IMPORTANT: we don't support database file for csi:fingerid. You will need to provide what database to use here, the rest of the parameters will be taken from there parameter file"
+                },
+                "ncore_csifingerid_neg_csifingerid": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "number of cores that csi can use"
+                },
+                "timeout_csifingerid_neg_csifingerid": {
+                    "type": "number",
+                    "default": 600,
+                    "description": "number of seconds that each csi ion can rum (time limit)"
+                }
+            },
+            "help_text": ""
+        },
+        "global_identification_parameters_negative_mode": {
+            "title": "Global identification parameters (negative mode)",
+            "type": "object",
+            "description": "Parameters that will be used in all the search engines",
+            "default": "",
+            "properties": {
+                "ppm_mapmsmstocamera_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation when mapping MS2 parent ion to a mass trace"
+                },
+                "rt_mapmsmstocamera_neg_msnbase": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace)"
+                },
+                "precursorppm_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "relative mass tolerance of the precursor (ppm)"
+                },
+                "fragmentppm_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 20,
+                    "description": "relative mass tolerance of the fragment ions (ppm)"
+                },
+                "fragmentabs_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "absolute mass tolerance of the fragment ions"
+                },
+                "database_msmstoparam_neg_msnbase": {
+                    "type": "string",
+                    "default": "LocalCSV",
+                    "description": "type of database to use (see metaboIGNITER guide)"
+                },
+                "mode_msmstoparam_neg_msnbase": {
+                    "type": "string",
+                    "default": "neg",
+                    "description": "ionization method. This has to be neg (only for testing at this stage)",
+                    "hidden": true
+                },
+                "adductRules_msmstoparam_neg_msnbase": {
+                    "type": "string",
+                    "default": "primary",
+                    "description": "adduct rules (primary or extended)",
+                    "enum": [
+                        "primary",
+                        "extended"
+                    ],
+                    "hidden": true
+                },
+                "minPeaks_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "ions with less that this number will be removed"
+                }
+            },
+            "help_text": ""
+        },
+        "adduct_and_isotope_annotation_negative_mode": {
+            "title": "Adduct and isotope annotation (negative mode)",
+            "type": "object",
+            "description": "Settings for CAMERA to detect adducts and isotopes",
+            "default": "",
+            "properties": {
+                "sigma_group_neg_camera": {
+                    "type": "number",
+                    "default": 8,
+                    "description": "sigma value for grouping the peaks across chromatogram"
+                },
+                "perfwhm_group_neg_camera": {
+                    "type": "number",
+                    "default": 0.6,
+                    "description": "full width at half maximum for finding overlaping peaks"
+                },
+                "intval_group_neg_camera": {
+                    "type": "string",
+                    "default": "maxo",
+                    "description": "which intensity value to use"
+                },
+                "ppm_findaddcuts_neg_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation between theoritical adduct mass and the experimental one"
+                },
+                "polarity_findaddcuts_neg_camera": {
+                    "type": "string",
+                    "default": "negative",
+                    "description": "this has to be negative (for testing only)!",
+                    "hidden": true
+                },
+                "maxcharge_findisotopes_neg_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "number of changes to consider (most often 1 is enough)",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "filtering_parameters_negative_mode": {
+            "title": "Filtering parameters (negative mode)",
+            "type": "object",
+            "description": "Parameters to use for performing QC, blank and dilution filtering",
+            "default": "",
+            "properties": {
+                "blank_filter_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "set to true if you want to remove signal from blank",
+                    "hidden": true
+                },
+                "method_blankfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "max",
+                    "description": "method of sumarization of signal in blank samples",
+                    "hidden": true
+                },
+                "blank_blankfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "Blank",
+                    "description": "Name of the class of the blank samples",
+                    "hidden": true
+                },
+                "sample_blankfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "Name of the class of the biological samples",
+                    "hidden": true
+                },
+                "rest_blankfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "T",
+                    "description": "set to T to compare blanks only to rest of the samples",
+                    "enum": [
+                        "T",
+                        "F"
+                    ],
+                    "hidden": true
+                },
+                "dilution_filter_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether blank filtereing should be done or not?",
+                    "hidden": true
+                },
+                "corto_dilutionfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "0.5,1,2,4",
+                    "description": "This series will used for calculation of correlation. For example if this parameter is set like 1,2,3 and the class of dilution trends is set as D1,D2,D3 the following the pairs will be used for calculating the correlation: (D1,1),(D2,2),(D3,3)",
+                    "hidden": true
+                },
+                "dilution_dilutionfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "D1,D2,D3,D4",
+                    "description": "The class of the samples represneting dilution. This has to be separated by comma!",
+                    "hidden": true
+                },
+                "pvalue_dilutionfilter_neg_xcms": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "p-value of the correlation. Anything higher than this will be removed!",
+                    "hidden": true
+                },
+                "corcut_dilutionfilter_neg_xcms": {
+                    "type": "number",
+                    "default": -1,
+                    "description": "minimum expected correlation. Aniything lower than this will be removed!",
+                    "hidden": true
+                },
+                "abs_dilutionfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "F",
+                    "description": "If the tool should consider absolute correlation rather than the typical one from [-1 to 1] (F or T)",
+                    "enum": [
+                        "T",
+                        "F"
+                    ],
+                    "hidden": true
+                },
+                "cv_filter_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "select to whether perfrom cv filtering or not",
+                    "hidden": true
+                },
+                "qc_cvfilter_neg_xcms": {
+                    "type": "string",
+                    "default": "QC",
+                    "description": "class of your QC samples",
+                    "hidden": true
+                },
+                "cvcut_cvfilter_neg_xcms": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "Maximum coefficient of variation you expect. Anything higher than this will be removed!",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "quantification_parameter_negative_mode": {
+            "title": "Quantification parameter (negative mode)",
+            "type": "object",
+            "description": "Parameters for quantification",
+            "default": "",
+            "properties": {
+                "quantification_openms_xcms_neg": {
+                    "type": "string",
+                    "default": "xcms",
+                    "description": "set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in negative ionization",
+                    "enum": [
+                        "xcms",
+                        "openms"
+                    ],
+                    "hidden": true
+                },
+                "performIPO_neg": {
+                    "type": "string",
+                    "default": "none",
+                    "description": "controls how to perform IPO possible values: \"none\": don't perform IPO, \"global\": performs IPO on all or selected number of samples. \"global_quant\": perform IPO only for quantification (not retention time correction and grouping), \"local\": performs IPO on individual samples one at the time. \"local_quant\": performs IPO on individual samples only for quantification, \"local_RT\": performs IPO on only for retention time correction and grouping.",
+                    "enum": [
+                        "none",
+                        "global",
+                        "global_quant",
+                        "local",
+                        "local_quant",
+                        "local_RT"
+                    ],
+                    "hidden": true
+                },
+                "ipo_allSamples_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Performs IPO on all the samples irrespective of the class they have",
+                    "hidden": true
+                },
+                "ipo_columnToSelect_neg": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "If ipo_allSamples_neg is false, one must pass the phenotype file to select sample. This parameter select the column of the phenotype file.",
+                    "hidden": true
+                },
+                "ipo_valueToSelect_neg": {
+                    "type": "string",
+                    "default": "QC",
+                    "description": "Selects the files only with this value in the columnToSelect column",
+                    "hidden": true
+                },
+                "ipo_methodXset_neg": {
+                    "type": "string",
+                    "default": "centWave",
+                    "description": "Quantification methods for IPO. Only centWave is supported at this stage.",
+                    "hidden": true
+                },
+                "ipo_noise_l_neg": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "lowest level of noise",
+                    "hidden": true
+                },
+                "ipo_noise_h_neg": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "highest level of noise",
+                    "hidden": true
+                },
+                "ipo_snthresh_l_neg": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "lowest level of signal to noise threshold",
+                    "hidden": true
+                },
+                "ipo_snthresh_h_neg": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "highest level of signal to noise threshold",
+                    "hidden": true
+                },
+                "ipo_mzCenterFun_neg": {
+                    "type": "string",
+                    "default": "wMean",
+                    "description": "Function for centering the mz",
+                    "hidden": true
+                },
+                "ipo_integrate_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact.",
+                    "hidden": true
+                },
+                "ipo_fitgauss_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitte",
+                    "hidden": true
+                },
+                "ipo_min_peakwidth_l_neg": {
+                    "type": "number",
+                    "default": 12,
+                    "description": "lower minimum width of peaks",
+                    "hidden": true
+                },
+                "ipo_min_peakwidth_h_neg": {
+                    "type": "number",
+                    "default": 28,
+                    "description": "higher minimum width of peaks",
+                    "hidden": true
+                },
+                "ipo_max_peakwidth_l_neg": {
+                    "type": "number",
+                    "default": 35,
+                    "description": "lower maximum width of peaks",
+                    "hidden": true
+                },
+                "ipo_max_peakwidth_h_neg": {
+                    "type": "number",
+                    "default": 65,
+                    "description": "higher maximum width of peaks",
+                    "hidden": true
+                },
+                "ipo_ppm_l_neg": {
+                    "type": "number",
+                    "default": 17,
+                    "description": "lower ppm mass deviation",
+                    "hidden": true
+                },
+                "ipo_ppm_h_neg": {
+                    "type": "number",
+                    "default": 32,
+                    "description": "higher ppm mass deviation",
+                    "hidden": true
+                },
+                "ipo_mzdiff_l_neg": {
+                    "type": "number",
+                    "default": -0.001,
+                    "description": "lower minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "ipo_mzdiff_h_neg": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "higher minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "ipo_charge_camera_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "maximum charge of molecules (only used in individual setting)",
+                    "hidden": true
+                },
+                "ipo_max_ppm_camera_neg": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm mass deviation for adducts (only used in individual setting)",
+                    "hidden": true
+                },
+                "ipo_prefilter_l_l_neg": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "lower value of K in 'prefilter_neg=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >_neg= 'I'.",
+                    "hidden": true
+                },
+                "ipo_prefilter_l_h_neg": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "higher value of K in 'prefilter_neg=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >_neg= 'I'.",
+                    "hidden": true
+                },
+                "ipo_prefilter_h_l_neg": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "lower I in prefilter",
+                    "hidden": true
+                },
+                "ipo_prefilter_h_h_neg": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "higher I in prefilter",
+                    "hidden": true
+                },
+                "ipo_ncores_neg": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "number of cores used in IPO",
+                    "hidden": true
+                },
+                "ipo_gapInit_l_neg": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "lower Penalty for Gap opening",
+                    "hidden": true
+                },
+                "ipo_gapInit_h_neg": {
+                    "type": "number",
+                    "default": 0.4,
+                    "description": "higher Penalty for Gap opening",
+                    "hidden": true
+                },
+                "ipo_gapExtend_l_neg": {
+                    "type": "number",
+                    "default": 2.1,
+                    "description": "lower Penalty for Gap enlargement",
+                    "hidden": true
+                },
+                "ipo_gapExtend_h_neg": {
+                    "type": "number",
+                    "default": 2.7,
+                    "description": "higher Penalty for Gap enlargement",
+                    "hidden": true
+                },
+                "ipo_profStep_l_neg": {
+                    "type": "number",
+                    "default": 0.7,
+                    "description": "lower step size (in m/z) to use for profile generation from the raw data files",
+                    "hidden": true
+                },
+                "ipo_profStep_h_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher step size (in m/z) to use for profile generation from the raw data files",
+                    "hidden": true
+                },
+                "ipo_response_l_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors",
+                    "hidden": true
+                },
+                "ipo_response_h_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors",
+                    "hidden": true
+                },
+                "ipo_factorDiag_l_neg": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "lower Local weighting applied to diagonal moves in alignment",
+                    "hidden": true
+                },
+                "ipo_factorDiag_h_neg": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "higher Local weighting applied to diagonal moves in alignment",
+                    "hidden": true
+                },
+                "ipo_factorGap_l_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower Local weighting applied to gap moves in alignment",
+                    "hidden": true
+                },
+                "ipo_factorGap_h_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher Local weighting applied to gap moves in alignment",
+                    "hidden": true
+                },
+                "ipo_localAlignment_neg": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "Local rather than global alignment",
+                    "hidden": true
+                },
+                "ipo_bw_l_neg": {
+                    "type": "number",
+                    "default": 22,
+                    "description": "lower bandwidth (consider something like retention time differences)",
+                    "hidden": true
+                },
+                "ipo_bw_h_neg": {
+                    "type": "number",
+                    "default": 38,
+                    "description": "higher bandwidth (consider something like retention time differences)",
+                    "hidden": true
+                },
+                "ipo_minfrac_l_neg": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "lower minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_minfrac_h_neg": {
+                    "type": "number",
+                    "default": 0.7,
+                    "description": "higher minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_mzwid_l_neg": {
+                    "type": "number",
+                    "default": 0.015,
+                    "description": "lower mz width (mz differences)",
+                    "hidden": true
+                },
+                "ipo_mzwid_h_neg": {
+                    "type": "number",
+                    "default": 0.035,
+                    "description": "higher mz width (mz differences)",
+                    "hidden": true
+                },
+                "ipo_minsamp_l_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower minimum number of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_minsamp_h_neg": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher minimum number of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_max_l_neg": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "lower maximum number of groups to identify in a single m/z slice",
+                    "hidden": true
+                },
+                "ipo_max_h_neg": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "higher maximum number of groups to identify in a single m/z slice",
+                    "hidden": true
+                },
+                "ipo_distFunc_neg": {
+                    "type": "string",
+                    "default": "cor_opt",
+                    "description": "DistFunc function: cor (Pearson's R) or cor_opt (default, calculate only 10% diagonal band of distance matrix, better runtime), cov (covariance), prd (product), euc (Euclidean distance)",
+                    "hidden": true
+                },
+                "ipo_methodRT_neg": {
+                    "type": "string",
+                    "default": "obiwarp",
+                    "description": "Only obiwarp is supported",
+                    "hidden": true
+                },
+                "masstrace_ppm_neg_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "masstrance deviation in ppm"
+                },
+                "peakwidthlow_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "lower width of peaks"
+                },
+                "peakwidthhigh_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "highest width of peaks"
+                },
+                "noise_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "level of noise"
+                },
+                "mzdiff_quant_neg_xcms": {
+                    "type": "number",
+                    "default": -0.001,
+                    "description": "minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap"
+                },
+                "snthresh_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "signal to noise ratio cutoff, definition see below."
+                },
+                "prefilter_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "K in 'prefilter=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >= 'I'."
+                },
+                "value_of_prefilter_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "I in prefilter"
+                },
+                "mzCenterFun_quant_neg_xcms": {
+                    "type": "string",
+                    "default": "wMean",
+                    "description": "Function to calculate the m/z center of the feature: 'wMean' intensity weighted mean of the feature m/z values, 'mean' mean of the feature m/z values, 'apex' use m/z value at peak apex, 'wMeanApex3' intensity weighted mean of the m/z value at peak apex and the m/z value left and right of it, 'meanApex3' mean of the m/z value at peak apex and the m/z value left and right of it."
+                },
+                "integrate_quant_neg_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact."
+                },
+                "fitgauss_quant_neg_xcms": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitted"
+                },
+                "phenodatacolumn_quant_neg": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "name of the column in the phenotype_design_neg showing class information of the samples"
+                },
+                "sampleclass_quant_neg_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "A name for the class of sample"
+                },
+                "method_align_N1_neg_xcms": {
+                    "type": "string",
+                    "default": "obiwarp",
+                    "description": "name of the method for correcting the RT shifts."
+                },
+                "profStep_align_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "step size (in m/z) to use for profile generation from the raw data files"
+                },
+                "center_align_N1_neg_xcms": {
+                    "type": "string",
+                    "default": "NULL",
+                    "description": "the index of the sample all others will be aligned to. If center==NULL, the sample with the most peaks is chosen as default."
+                },
+                "response_align_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors"
+                },
+                "distFunc_align_N1_neg_xcms": {
+                    "type": "string",
+                    "default": "cor_opt",
+                    "description": "DistFunc function: cor (Pearson's R) or cor_opt (default, calculate only 10% diagonal band of distance matrix, better runtime), cov (covariance), prd (product), euc (Euclidean distance)",
+                    "enum": [
+                        "cor",
+                        "cor_opt",
+                        "cov",
+                        "prd",
+                        "euc"
+                    ]
+                },
+                "gapInit_align_N1_neg_xcms": {
+                    "type": "string",
+                    "default": "NULL",
+                    "description": "Penalty for Gap opening"
+                },
+                "gapExtend_align_N1_neg_xcms": {
+                    "type": "string",
+                    "default": "NULL",
+                    "description": "Penalty for Gap enlargement"
+                },
+                "factorDiag_align_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "Local weighting applied to diagonal moves in alignment"
+                },
+                "factorGap_align_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Local weighting applied to gap moves in alignment"
+                },
+                "localAlignment_align_N1_neg_xcms": {
+                    "type": "number",
+                    "description": "Local rather than global alignment"
+                },
+                "bandwidth_group_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 15,
+                    "description": "bandwidth (consider something like retention time differences)"
+                },
+                "mzwid_group_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 0.005,
+                    "description": "mz width (mz differences)"
+                },
+                "minfrac_group_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 0.5,
+                    "description": "minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group"
+                },
+                "minsamp_group_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "minimum number of samples necessary in at least one of the sample groups for it to be a valid group"
+                },
+                "max_group_N1_neg_xcms": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "maximum number of groups to identify in a single m/z slice"
+                }
+            },
+            "help_text": ""
+        },
+        "internal_library_quantification_and_identification_parameters_positive_mode": {
+            "title": "Internal library quantification and identification parameters (positive mode)",
+            "type": "object",
+            "description": "Parameters used to tune library creation (only set if you want to do library idnetification)",
+            "default": "",
+            "properties": {
+                "quantification_openms_xcms_library_pos": {
+                    "type": "string",
+                    "default": "xcms",
+                    "description": "set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in positive ionization  (for library)",
+                    "enum": [
+                        "xcms",
+                        "openms"
+                    ],
+                    "hidden": true
+                },
+                "performIPO_library_pos": {
+                    "type": "string",
+                    "default": "none",
+                    "description": "controls how to perform IPO possible values: \"none\": don't perform IPO, \"global\": performs IPO on all or selected number of samples. \"local\": performs IPO on individual samples one at the time.",
+                    "enum": [
+                        "none",
+                        "global",
+                        "local"
+                    ],
+                    "hidden": true
+                },
+                "ipo_methodXset_library_pos": {
+                    "type": "string",
+                    "default": "centWave",
+                    "description": "Quantification methods for IPO. Only centWave is supported at this stage.",
+                    "hidden": true
+                },
+                "ipo_noise_l_library_pos": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "lowest level of noise",
+                    "hidden": true
+                },
+                "ipo_noise_h_library_pos": {
+                    "type": "number",
+                    "description": "highest level of noise",
+                    "hidden": true
+                },
+                "ipo_snthresh_l_library_pos": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "lowest level of signal to noise threshold",
+                    "hidden": true
+                },
+                "ipo_snthresh_h_library_pos": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "highest level of signal to noise threshold",
+                    "hidden": true
+                },
+                "ipo_mzCenterFun_library_pos": {
+                    "type": "string",
+                    "default": "wMean",
+                    "description": "Function for centering the mz",
+                    "hidden": true
+                },
+                "ipo_integrate_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact.",
+                    "hidden": true
+                },
+                "ipo_fitgauss_library_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitte",
+                    "hidden": true
+                },
+                "ipo_min_peakwidth_l_library_pos": {
+                    "type": "number",
+                    "default": 12,
+                    "description": "lower minimum width of peaks",
+                    "hidden": true
+                },
+                "ipo_min_peakwidth_h_library_pos": {
+                    "type": "number",
+                    "default": 28,
+                    "description": "higher minimum width of peaks",
+                    "hidden": true
+                },
+                "ipo_max_peakwidth_l_library_pos": {
+                    "type": "number",
+                    "default": 35,
+                    "description": "lower maximum width of peaks",
+                    "hidden": true
+                },
+                "ipo_max_peakwidth_h_library_pos": {
+                    "type": "number",
+                    "default": 65,
+                    "description": "higher maximum width of peaks",
+                    "hidden": true
+                },
+                "ipo_ppm_l_library_pos": {
+                    "type": "number",
+                    "default": 17,
+                    "description": "lower ppm mass deviation",
+                    "hidden": true
+                },
+                "ipo_ppm_h_library_pos": {
+                    "type": "number",
+                    "default": 32,
+                    "description": "higher ppm mass deviation",
+                    "hidden": true
+                },
+                "ipo_mzdiff_l_library_pos": {
+                    "type": "number",
+                    "default": -0.001,
+                    "description": "lower minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "ipo_mzdiff_h_library_pos": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "higher minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "ipo_charge_camera_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "maximum charge of molecules (only used in individual setting)",
+                    "hidden": true
+                },
+                "ipo_max_ppm_camera_library_pos": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm mass deviation for adducts (only used in individual setting)",
+                    "hidden": true
+                },
+                "ipo_prefilter_l_l_library_pos": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "lower value of K in 'prefilter_library_pos=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >_library_pos= 'I'.",
+                    "hidden": true
+                },
+                "ipo_prefilter_l_h_library_pos": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "higher value of K in 'prefilter_library_pos=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >_library_pos= 'I'.",
+                    "hidden": true
+                },
+                "ipo_prefilter_h_l_library_pos": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "lower I in prefilter",
+                    "hidden": true
+                },
+                "ipo_prefilter_h_h_library_pos": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "higher I in prefilter",
+                    "hidden": true
+                },
+                "ipo_ncores_library_pos": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "number of cores used in IPO",
+                    "hidden": true
+                },
+                "ipo_gapInit_l_library_pos": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "lower Penalty for Gap opening",
+                    "hidden": true
+                },
+                "ipo_gapInit_h_library_pos": {
+                    "type": "number",
+                    "default": 0.4,
+                    "description": "higher Penalty for Gap opening",
+                    "hidden": true
+                },
+                "ipo_gapExtend_l_library_pos": {
+                    "type": "number",
+                    "default": 2.1,
+                    "description": "lower Penalty for Gap enlargement",
+                    "hidden": true
+                },
+                "ipo_gapExtend_h_library_pos": {
+                    "type": "number",
+                    "default": 2.7,
+                    "description": "higher Penalty for Gap enlargement",
+                    "hidden": true
+                },
+                "ipo_profStep_l_library_pos": {
+                    "type": "number",
+                    "default": 0.7,
+                    "description": "lower step size (in m/z) to use for profile generation from the raw data files",
+                    "hidden": true
+                },
+                "ipo_profStep_h_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher step size (in m/z) to use for profile generation from the raw data files",
+                    "hidden": true
+                },
+                "ipo_response_l_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors",
+                    "hidden": true
+                },
+                "ipo_response_h_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors",
+                    "hidden": true
+                },
+                "ipo_factorDiag_l_library_pos": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "lower Local weighting applied to diagonal moves in alignment.",
+                    "hidden": true
+                },
+                "ipo_factorDiag_h_library_pos": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "higher Local weighting applied to diagonal moves in alignment.",
+                    "hidden": true
+                },
+                "ipo_factorGap_l_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower Local weighting applied to gap moves in alignment.",
+                    "hidden": true
+                },
+                "ipo_factorGap_h_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher Local weighting applied to gap moves in alignment.",
+                    "hidden": true
+                },
+                "ipo_localAlignment_library_pos": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "Local rather than global alignment",
+                    "hidden": true
+                },
+                "ipo_bw_l_library_pos": {
+                    "type": "number",
+                    "default": 22,
+                    "description": "lower bandwidth (consider something like retention time differences)",
+                    "hidden": true
+                },
+                "ipo_bw_h_library_pos": {
+                    "type": "number",
+                    "default": 38,
+                    "description": "higher bandwidth (consider something like retention time differences)",
+                    "hidden": true
+                },
+                "ipo_minfrac_l_library_pos": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "lower minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_minfrac_h_library_pos": {
+                    "type": "number",
+                    "default": 0.7,
+                    "description": "higher minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_mzwid_l_library_pos": {
+                    "type": "number",
+                    "default": 0.015,
+                    "description": "lower mz width (mz differences)",
+                    "hidden": true
+                },
+                "ipo_mzwid_h_library_pos": {
+                    "type": "number",
+                    "default": 0.035,
+                    "description": "higher mz width (mz differences)",
+                    "hidden": true
+                },
+                "ipo_minsamp_l_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower minimum number of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_minsamp_h_library_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher minimum number of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_max_l_library_pos": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "lower maximum number of groups to identify in a single m/z slice",
+                    "hidden": true
+                },
+                "ipo_max_h_library_pos": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "higher maximum number of groups to identify in a single m/z slice",
+                    "hidden": true
+                },
+                "ipo_distFunc_library_pos": {
+                    "type": "string",
+                    "default": "cor_opt",
+                    "description": "DistFunc function: cor (Pearson's R) or cor_opt (default, calculate only 10% diagonal band of distance matrix, better runtime), cov (covariance), prd (product), euc (Euclidean distance)",
+                    "enum": [
+                        "cor",
+                        "cor_opt",
+                        "cov",
+                        "prd",
+                        "euc"
+                    ],
+                    "hidden": true
+                },
+                "ipo_methodRT_library_pos": {
+                    "type": "string",
+                    "default": "obiwarp",
+                    "description": "Only obiwarp is supported",
+                    "hidden": true
+                },
+                "masstrace_ppm_library_pos_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "mass trace deviation in ppm",
+                    "hidden": true
+                },
+                "peakwidthlow_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "lower width of peaks",
+                    "hidden": true
+                },
+                "peakwidthhigh_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "highest width of peaks",
+                    "hidden": true
+                },
+                "noise_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "level of noise",
+                    "hidden": true
+                },
+                "mzdiff_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": -0.001,
+                    "description": "minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "snthresh_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "signal to noise ratio cutoff, definition see below.",
+                    "hidden": true
+                },
+                "prefilter_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "K in 'prefilter=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >= 'I'.",
+                    "hidden": true
+                },
+                "value_of_prefilter_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "I in prefilter",
+                    "hidden": true
+                },
+                "mzCenterFun_quant_library_pos_xcms": {
+                    "type": "string",
+                    "default": "wMean",
+                    "description": "Function to calculate the m/z center of the feature: 'wMean' intensity weighted mean of the feature m/z values, 'mean' mean of the feature m/z values, 'apex' use m/z value at peak apex, 'wMeanApex3' intensity weighted mean of the m/z value at peak apex and the m/z value left and right of it, 'meanApex3' mean of the m/z value at peak apex and the m/z value left and right of it.",
+                    "hidden": true
+                },
+                "integrate_quant_library_pos_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact.",
+                    "hidden": true
+                },
+                "fitgauss_quant_library_pos_xcms": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitted",
+                    "hidden": true
+                },
+                "phenodatacolumn_quant_library_pos": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "name of the column in the phenotype_design_library_pos showing class information of the samples",
+                    "hidden": true
+                },
+                "sampleclass_quant_library_pos_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "A name for the class of sample",
+                    "hidden": true
+                },
+                "sigma_group_library_pos_camera": {
+                    "type": "number",
+                    "default": 8,
+                    "description": "sigma value for grouping the peaks across chromatogram",
+                    "hidden": true
+                },
+                "perfwhm_group_library_pos_camera": {
+                    "type": "number",
+                    "default": 0.6,
+                    "description": "full width at half maximum for finding overlaping peaks",
+                    "hidden": true
+                },
+                "intval_group_library_pos_camera": {
+                    "type": "string",
+                    "default": "maxo",
+                    "description": "which intensity value to use",
+                    "hidden": true
+                },
+                "ppm_findaddcuts_library_pos_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation between theoritical adduct mass and the experimental one",
+                    "hidden": true
+                },
+                "polarity_findaddcuts_library_pos_camera": {
+                    "type": "string",
+                    "default": "positive",
+                    "description": "this has to be positive (for testing only)!",
+                    "hidden": true
+                },
+                "maxcharge_findisotopes_library_pos_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "number of changes to consider (most often 1 is enough)",
+                    "hidden": true
+                },
+                "ppm_mapmsmstocamera_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation when mapping MS2 parent ion to a mass trace",
+                    "hidden": true
+                },
+                "rt_mapmsmstocamera_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace)",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "internal_library_parameters_positive_mode": {
+            "title": "Internal library parameters (positive mode)",
+            "type": "object",
+            "description": "Parameters used to characterize the internal library",
+            "default": "",
+            "properties": {
+                "raw_file_name_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "rawFile",
+                    "description": "name of the column showing which raw files contain which metabolite in the library_description_pos csv file",
+                    "hidden": true
+                },
+                "compund_id_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "HMDB.YMDB.ID",
+                    "description": "name of the column showing id of the metabolites in the library_description_pos csv file",
+                    "hidden": true
+                },
+                "compound_name_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "PRIMARY_NAME",
+                    "description": "name of the compount column in the library_description_pos csv file",
+                    "hidden": true
+                },
+                "mz_col_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "mz",
+                    "description": "name of the mz column in the library_description_pos csv file",
+                    "hidden": true
+                },
+                "which_mz_preparelibrary_pos_msnbase": {
+                    "type": "string",
+                    "default": "f",
+                    "description": "\"f\" or \"c\", showing whether the Feature range or centroid of the feature should be used for mapping",
+                    "enum": [
+                        "f",
+                        "c"
+                    ],
+                    "hidden": true
+                },
+                "ncore_searchengine_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of cores for mapping the features",
+                    "hidden": true
+                },
+                "ppm_create_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm error for mapping the library characterization masses to the experimental one",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "output_preparation_positive_mode": {
+            "title": "Output preparation (positive mode)",
+            "type": "object",
+            "description": "Parameters that control how the results are outputted",
+            "default": "",
+            "properties": {
+                "ppm_output_pos_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "relative difference of mass of the ID hit compare to a mass trace (ppm)"
+                },
+                "rt_output_pos_camera": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "retention time difference of ID to mass trace (second)"
+                },
+                "higher_the_better_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "is higher the score the better (not used for now)",
+                    "hidden": true
+                },
+                "impute_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "should we impute adduct and different chance states with the same ID"
+                },
+                "type_column_output_pos_camera": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "Class of the samples (used for statistics and coverage calculations)"
+                },
+                "selected_type_output_pos_camera": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "what class of samples do you want to keep (anything not matching this in the Class column will be removed)"
+                },
+                "rename_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "you want to rename the files"
+                },
+                "rename_col_output_pos_camera": {
+                    "type": "string",
+                    "default": "rename",
+                    "description": "which column of the phenotype file to use for renaming"
+                },
+                "only_report_with_id_output_pos_camera": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "do only want to see the identified mass traces or everything?"
+                },
+                "combine_replicate_output_pos_camera": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "do you have technical replicates you want to average ?"
+                },
+                "combine_replicate_column_output_pos_camera": {
+                    "type": "string",
+                    "default": "rep",
+                    "description": "which column of the phenotype file show the technical replicates"
+                },
+                "log_output_pos_camera": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "should we log2 the output"
+                },
+                "sample_coverage_output_pos_camera": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "any mass trace having more pecentage of the missing value will be removed"
+                },
+                "sample_coverage_method_output_pos_camera": {
+                    "type": "string",
+                    "default": "global",
+                    "description": "how to calculate missing value percentrage? global across all the samples? or name of the column in the phenotype file showing the grouping"
+                },
+                "ncore_output_pos_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "number of cores used for mapping the features"
+                },
+                "normalize_output_pos_camera": {
+                    "type": "string",
+                    "default": "1",
+                    "description": "do you want to normalize the data set to 'NA' if you don't want normalization"
+                }
+            },
+            "help_text": ""
+        },
+        "cfm_id_parameters_positive_mode": {
+            "title": "CFM-ID parameters (positive mode)",
+            "type": "object",
+            "description": "Parameters specific to CFM-ID",
+            "default": "",
+            "properties": {
+                "database_csv_files_pos_cfmid": {
+                    "type": "string",
+                    "description": "path to a csv file containing your database"
+                },
+                "ncore_pos_cfmid": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "number of cores that cfm can use"
+                },
+                "candidate_id_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "Identifier",
+                    "description": "name of the column in the database for id of the molecules"
+                },
+                "candidate_inchi_smiles_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "SMILES",
+                    "description": "name of the column in the database for smile of the molecules"
+                },
+                "candidate_mass_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "MonoisotopicMass",
+                    "description": "name of the column in the database for mass of the molecules"
+                },
+                "database_name_column_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "Name",
+                    "description": "name of the column in the database for name of the molecules"
+                },
+                "database_inchI_column_identification_pos_cfmid": {
+                    "type": "string",
+                    "default": "InChI",
+                    "description": "name of the column in the database for inchi of the molecules"
+                }
+            },
+            "help_text": ""
+        },
+        "metfrag_parameters_positive_mode": {
+            "title": "MetFrag parameters (positive mode)",
+            "type": "object",
+            "description": "Parameters only for MetFrag",
+            "default": "",
+            "properties": {
+                "database_csv_files_pos_metfrag": {
+                    "type": "string",
+                    "description": "path to a csv file containing your database"
+                },
+                "ncore_pos_metfrag": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "number of cores that metfrag can use"
+                }
+            },
+            "help_text": ""
+        },
+        "csi_fingerid_parameters_positive_mode": {
+            "title": "CSI:FINGERID parameters (positive mode)",
+            "type": "object",
+            "description": "Parameters only for CSI:FINGERID",
+            "default": "",
+            "properties": {
+                "database_csifingerid_pos_csifingerid": {
+                    "type": "string",
+                    "default": "hmdb",
+                    "description": "IMPORTANT: we don't support database file for csi:fingerid. You will need to provide what database to use here, the rest of the parameters will be taken from there parameter file"
+                },
+                "ncore_csifingerid_pos_csifingerid": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "number of cores that csi can use"
+                },
+                "timeout_csifingerid_pos_csifingerid": {
+                    "type": "number",
+                    "default": 600,
+                    "description": "number of seconds that each csi ion can rum (time limit)"
+                }
+            },
+            "help_text": ""
+        },
+        "global_identification_parameters_positive_mode": {
+            "title": "Global identification parameters (positive mode)",
+            "type": "object",
+            "description": "Parameters that will be used in all the search engines",
+            "default": "",
+            "properties": {
+                "ppm_mapmsmstocamera_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation when mapping MS2 parent ion to a mass trace"
+                },
+                "rt_mapmsmstocamera_pos_msnbase": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace)"
+                },
+                "precursorppm_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "relative mass tolerance of the precursor (ppm)"
+                },
+                "fragmentppm_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 20,
+                    "description": "relative mass tolerance of the fragment ions (ppm)"
+                },
+                "fragmentabs_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "absolute mass tolerance of the fragment ions"
+                },
+                "database_msmstoparam_pos_msnbase": {
+                    "type": "string",
+                    "default": "LocalCSV",
+                    "description": "type of database to use (see metaboIGNITER guide)"
+                },
+                "mode_msmstoparam_pos_msnbase": {
+                    "type": "string",
+                    "default": "pos",
+                    "description": "ionization method. This has to be pos (only for testing at this stage)",
+                    "hidden": true
+                },
+                "adductRules_msmstoparam_pos_msnbase": {
+                    "type": "string",
+                    "default": "primary",
+                    "description": "adduct rules (primary or extended)",
+                    "enum": [
+                        "primary",
+                        "extended"
+                    ]
+                },
+                "minPeaks_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "ions with less that this number will be removed"
+                }
+            },
+            "help_text": ""
+        },
+        "adduct_and_isotope_annotation_positive_mode": {
+            "title": "Adduct and isotope annotation (positive mode)",
+            "type": "object",
+            "description": "Settings for CAMERA to detect adducts and isotopes",
+            "default": "",
+            "properties": {
+                "sigma_group_pos_camera": {
+                    "type": "number",
+                    "default": 8,
+                    "description": "sigma value for grouping the peaks across chromatogram"
+                },
+                "perfwhm_group_pos_camera": {
+                    "type": "number",
+                    "default": 0.6,
+                    "description": "full width at half maximum for finding overlaping peaks"
+                },
+                "intval_group_pos_camera": {
+                    "type": "string",
+                    "default": "maxo",
+                    "description": "which intensity value to use"
+                },
+                "ppm_findaddcuts_pos_camera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm deviation between theoritical adduct mass and the experimental one"
+                },
+                "polarity_findaddcuts_pos_camera": {
+                    "type": "string",
+                    "default": "positive",
+                    "description": "this has to be positive (for testing only)!",
+                    "hidden": true
+                },
+                "maxcharge_findisotopes_pos_camera": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "number of changes to consider (most often 1 is enough)",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "filtering_parameters_positive_mode": {
+            "title": "Filtering parameters (positive mode)",
+            "type": "object",
+            "description": "Parameters to use for performing QC, blank and dilution filtering",
+            "default": "",
+            "properties": {
+                "blank_filter_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "set to true if you want to remove signal from blank",
+                    "hidden": true
+                },
+                "method_blankfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "max",
+                    "description": "method of sumarization of signal in blank samples. Must be one of 'max', 'mean' or 'median'. For example, if 'max' is selected, a signal will be removed if it maximum abundance in the blank samples is higher than maximum abundance in biological samples.",
+                    "hidden": true
+                },
+                "blank_blankfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "Blank",
+                    "description": "Name of the class of the blank samples. This must show the class of blank samples exactly as you refer to them in your phenotype file",
+                    "hidden": true
+                },
+                "sample_blankfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "Name of the class of the biological samples",
+                    "hidden": true
+                },
+                "rest_blankfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "T",
+                    "description": "set to T to compare the blanks only to rest of the samples. If F, the blank signals will be compared with the samples with class sample_blankfilter_pos_xcms",
+                    "hidden": true
+                },
+                "dilution_filter_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Select whether you want to do dilution filtering",
+                    "hidden": true
+                },
+                "corto_dilutionfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "0.5,1,2,4",
+                    "description": "This series will used for calculation of correlation. For example if this parameter is set like 1,2,3 and the class of dilution trends is set as D1,D2,D3 the following the pairs will be used for calculating the correlation: (D1,1),(D2,2),(D3,3)",
+                    "hidden": true
+                },
+                "dilution_dilutionfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "D1,D2,D3,D4",
+                    "description": "The class of the samples represneting dilution. This has to be separated by comma! The samples are correlated to the exact order of the sequence provided here",
+                    "hidden": true
+                },
+                "pvalue_dilutionfilter_pos_xcms": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "p-value of the correlation. Anything higher than this will be removed!",
+                    "hidden": true
+                },
+                "corcut_dilutionfilter_pos_xcms": {
+                    "type": "number",
+                    "default": -1,
+                    "description": "minimum expected correlation. Aniything lower than this will be removed!",
+                    "hidden": true
+                },
+                "abs_dilutionfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "F",
+                    "description": "If the tool should consider absolute correlation rather than the typical one from [-1 to 1] (F or T)",
+                    "enum": [
+                        "F",
+                        "T"
+                    ],
+                    "hidden": true
+                },
+                "cv_filter_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "select to whether perfrom cv filtering or not",
+                    "hidden": true
+                },
+                "qc_cvfilter_pos_xcms": {
+                    "type": "string",
+                    "default": "QC",
+                    "description": "class of your QC samples",
+                    "hidden": true
+                },
+                "cvcut_cvfilter_pos_xcms": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "Maximum coefficient of variation you expect. Anything higher than this will be removed!",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "quantification_parameter_positive_mode": {
+            "title": "Quantification parameter (positive mode)",
+            "type": "object",
+            "description": "Parameters for quantification",
+            "default": "",
+            "properties": {
+                "quantification_openms_xcms_pos": {
+                    "type": "string",
+                    "default": "xcms",
+                    "description": "set whether you want to do quantification with OpenMS (openms) or XCMS (xcms) in positive ionization",
+                    "enum": [
+                        "xcms",
+                        "openms"
+                    ],
+                    "hidden": true
+                },
+                "performIPO_pos": {
+                    "type": "string",
+                    "default": "none",
+                    "description": "controls how to perform IPO possible values: \"none\": don't perform IPO, \"global\": performs IPO on all or selected number of samples. \"global_quant\": perform IPO only for quantification (not retention time correction and grouping), \"local\": performs IPO on individual samples one at the time. \"local_quant\": performs IPO on individual samples only for quantification, \"local_RT\": performs IPO on only for retention time correction and grouping.",
+                    "enum": [
+                        "none",
+                        "global",
+                        "global_quant",
+                        "local",
+                        "local_quant",
+                        "local_RT"
+                    ],
+                    "hidden": true
+                },
+                "ipo_allSamples_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Performs IPO on all the samples irrespective of the class they have",
+                    "hidden": true
+                },
+                "ipo_columnToSelect_pos": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "If ipo_allSamples_pos is false, one must pass the phenotype file to select sample. This parameter select the column of the phenotype file.",
+                    "hidden": true
+                },
+                "ipo_valueToSelect_pos": {
+                    "type": "string",
+                    "default": "QC",
+                    "description": "Selects the files only with this value in the columnToSelect column",
+                    "hidden": true
+                },
+                "ipo_methodXset_pos": {
+                    "type": "string",
+                    "default": "centWave",
+                    "description": "Quantification methods for IPO. Only centWave is supported at this stage.",
+                    "hidden": true
+                },
+                "ipo_noise_l_pos": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "lowest level of noise",
+                    "hidden": true
+                },
+                "ipo_noise_h_pos": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "highest level of noise",
+                    "hidden": true
+                },
+                "ipo_snthresh_l_pos": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "lowest level of signal to noise threshold",
+                    "hidden": true
+                },
+                "ipo_snthresh_h_pos": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "highest level of signal to noise threshold",
+                    "hidden": true
+                },
+                "ipo_mzCenterFun_pos": {
+                    "type": "string",
+                    "default": "wMean",
+                    "description": "Function for centering the mz",
+                    "hidden": true
+                },
+                "ipo_integrate_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact.",
+                    "hidden": true
+                },
+                "ipo_fitgauss_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitte",
+                    "hidden": true
+                },
+                "ipo_min_peakwidth_l_pos": {
+                    "type": "number",
+                    "default": 12,
+                    "description": "lower minimum width of peaks",
+                    "hidden": true
+                },
+                "ipo_min_peakwidth_h_pos": {
+                    "type": "number",
+                    "default": 28,
+                    "description": "higher minimum width of peaks",
+                    "hidden": true
+                },
+                "ipo_max_peakwidth_l_pos": {
+                    "type": "number",
+                    "default": 35,
+                    "description": "lower maximum width of peaks",
+                    "hidden": true
+                },
+                "ipo_max_peakwidth_h_pos": {
+                    "type": "number",
+                    "default": 65,
+                    "description": "higher maximum width of peaks",
+                    "hidden": true
+                },
+                "ipo_ppm_l_pos": {
+                    "type": "number",
+                    "default": 17,
+                    "description": "lower ppm mass deviation",
+                    "hidden": true
+                },
+                "ipo_ppm_h_pos": {
+                    "type": "number",
+                    "default": 32,
+                    "description": "higher ppm mass deviation",
+                    "hidden": true
+                },
+                "ipo_mzdiff_l_pos": {
+                    "type": "number",
+                    "default": -0.001,
+                    "description": "lower minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "ipo_mzdiff_h_pos": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "higher minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap",
+                    "hidden": true
+                },
+                "ipo_charge_camera_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "maximum charge of molecules (only used in individual setting)",
+                    "hidden": true
+                },
+                "ipo_max_ppm_camera_pos": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm mass deviation for adducts (only used in individual setting)",
+                    "hidden": true
+                },
+                "ipo_prefilter_l_l_pos": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "lower value of K in 'prefilter_pos=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >_pos= 'I'.",
+                    "hidden": true
+                },
+                "ipo_prefilter_l_h_pos": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "higher value of K in 'prefilter_pos=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >_pos= 'I'.",
+                    "hidden": true
+                },
+                "ipo_prefilter_h_l_pos": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "lower I in prefilter",
+                    "hidden": true
+                },
+                "ipo_prefilter_h_h_pos": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "higher I in prefilter",
+                    "hidden": true
+                },
+                "ipo_ncores_pos": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "number of cores used in IPO",
+                    "hidden": true
+                },
+                "ipo_gapInit_l_pos": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "lower Penalty for Gap opening",
+                    "hidden": true
+                },
+                "ipo_gapInit_h_pos": {
+                    "type": "number",
+                    "default": 0.4,
+                    "description": "higher Penalty for Gap opening",
+                    "hidden": true
+                },
+                "ipo_gapExtend_l_pos": {
+                    "type": "number",
+                    "default": 2.1,
+                    "description": "lower Penalty for Gap enlargement",
+                    "hidden": true
+                },
+                "ipo_gapExtend_h_pos": {
+                    "type": "number",
+                    "default": 2.7,
+                    "description": "higher Penalty for Gap enlargement",
+                    "hidden": true
+                },
+                "ipo_profStep_l_pos": {
+                    "type": "number",
+                    "default": 0.7,
+                    "description": "lower step size (in m/z) to use for profile generation from the raw data files",
+                    "hidden": true
+                },
+                "ipo_profStep_h_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher step size (in m/z) to use for profile generation from the raw data files",
+                    "hidden": true
+                },
+                "ipo_response_l_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors",
+                    "hidden": true
+                },
+                "ipo_response_h_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors",
+                    "hidden": true
+                },
+                "ipo_factorDiag_l_pos": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "lower Local weighting applied to diagonal moves in alignment",
+                    "hidden": true
+                },
+                "ipo_factorDiag_h_pos": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "higher Local weighting applied to diagonal moves in alignment",
+                    "hidden": true
+                },
+                "ipo_factorGap_l_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower Local weighting applied to gap moves in alignment",
+                    "hidden": true
+                },
+                "ipo_factorGap_h_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher Local weighting applied to gap moves in alignment",
+                    "hidden": true
+                },
+                "ipo_localAlignment_pos": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "Local rather than global alignment",
+                    "hidden": true
+                },
+                "ipo_bw_l_pos": {
+                    "type": "number",
+                    "default": 22,
+                    "description": "lower bandwidth (consider something like retention time differences)",
+                    "hidden": true
+                },
+                "ipo_bw_h_pos": {
+                    "type": "number",
+                    "default": 38,
+                    "description": "higher bandwidth (consider something like retention time differences)",
+                    "hidden": true
+                },
+                "ipo_minfrac_l_pos": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "lower minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_minfrac_h_pos": {
+                    "type": "number",
+                    "default": 0.7,
+                    "description": "higher minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_mzwid_l_pos": {
+                    "type": "number",
+                    "default": 0.015,
+                    "description": "lower mz width (mz differences)",
+                    "hidden": true
+                },
+                "ipo_mzwid_h_pos": {
+                    "type": "number",
+                    "default": 0.035,
+                    "description": "higher mz width (mz differences)",
+                    "hidden": true
+                },
+                "ipo_minsamp_l_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "lower minimum number of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_minsamp_h_pos": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "higher minimum number of samples necessary in at least one of the sample groups for it to be a valid group",
+                    "hidden": true
+                },
+                "ipo_max_l_pos": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "lower maximum number of groups to identify in a single m/z slice",
+                    "hidden": true
+                },
+                "ipo_max_h_pos": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "higher maximum number of groups to identify in a single m/z slice",
+                    "hidden": true
+                },
+                "ipo_distFunc_pos": {
+                    "type": "string",
+                    "default": "cor_opt",
+                    "description": "DistFunc function: cor (Pearson's R) or cor_opt (default, calculate only 10% diagonal band of distance matrix, better runtime), cov (covariance), prd (product), euc (Euclidean distance)",
+                    "hidden": true
+                },
+                "ipo_methodRT_pos": {
+                    "type": "string",
+                    "default": "obiwarp",
+                    "description": "Only obiwarp is supported",
+                    "hidden": true
+                },
+                "masstrace_ppm_pos_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "masstrance deviation in ppm"
+                },
+                "peakwidthlow_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "lower width of peaks"
+                },
+                "peakwidthhigh_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "highest width of peaks"
+                },
+                "noise_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "level of noise"
+                },
+                "mzdiff_quant_pos_xcms": {
+                    "type": "number",
+                    "default": -0.001,
+                    "description": "minimum difference in m/z for peaks with overlapping retention times, can be negative to allow overlap"
+                },
+                "snthresh_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "signal to noise ratio cutoff, definition see below."
+                },
+                "prefilter_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "K in 'prefilter=c(k,I)'. Prefilter step for the first phase. Mass traces are only retained if they contain at least 'k' peaks with intensity >= 'I'."
+                },
+                "value_of_prefilter_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "I in prefilter"
+                },
+                "mzCenterFun_quant_pos_xcms": {
+                    "type": "string",
+                    "default": "wMean",
+                    "description": "Function to calculate the m/z center of the feature: 'wMean' intensity weighted mean of the feature m/z values, 'mean' mean of the feature m/z values, 'apex' use m/z value at peak apex, 'wMeanApex3' intensity weighted mean of the m/z value at peak apex and the m/z value left and right of it, 'meanApex3' mean of the m/z value at peak apex and the m/z value left and right of it."
+                },
+                "integrate_quant_pos_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Integration method. If '=1' peak limits are found through descent on the mexican hat filtered data, if '=2' the descent is done on the real data. Method 2 is very accurate but prone to noise, while method 1 is more robust to noise but less exact."
+                },
+                "fitgauss_quant_pos_xcms": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "logical, if TRUE a Gaussian is fitted"
+                },
+                "phenodatacolumn_quant_pos": {
+                    "type": "string",
+                    "default": "Class",
+                    "description": "name of the column in the phenotype_design_pos showing class information of the samples"
+                },
+                "sampleclass_quant_pos_xcms": {
+                    "type": "string",
+                    "default": "Sample",
+                    "description": "A name for the class of sample"
+                },
+                "method_align_N1_pos_xcms": {
+                    "type": "string",
+                    "default": "obiwarp",
+                    "description": "name of the method for correcting the RT shifts."
+                },
+                "profStep_align_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "step size (in m/z) to use for profile generation from the raw data files"
+                },
+                "center_align_N1_pos_xcms": {
+                    "type": "string",
+                    "default": "NULL",
+                    "description": "the index of the sample all others will be aligned to. If center==NULL, the sample with the most peaks is chosen as default."
+                },
+                "response_align_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Responsiveness of warping.  0 will give a linear warp based on start and end points.  100 will use all bijective anchors"
+                },
+                "distFunc_align_N1_pos_xcms": {
+                    "type": "string",
+                    "default": "cor_opt",
+                    "description": "DistFunc function: cor (Pearson's R) or cor_opt (default, calculate only 10% diagonal band of distance matrix, better runtime), cov (covariance), prd (product), euc (Euclidean distance)",
+                    "enum": [
+                        "cor",
+                        "cor_opt",
+                        "cov",
+                        "prd",
+                        "euc"
+                    ]
+                },
+                "gapInit_align_N1_pos_xcms": {
+                    "type": "string",
+                    "default": "NULL",
+                    "description": "Penalty for Gap opening"
+                },
+                "gapExtend_align_N1_pos_xcms": {
+                    "type": "string",
+                    "default": "NULL",
+                    "description": "Penalty for Gap enlargement"
+                },
+                "factorDiag_align_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "Local weighting applied to diagonal moves in alignment"
+                },
+                "factorGap_align_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Local weighting applied to gap moves in alignment"
+                },
+                "localAlignment_align_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "Local rather than global alignment"
+                },
+                "bandwidth_group_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 15,
+                    "description": "bandwidth (consider something like retention time differences)"
+                },
+                "mzwid_group_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 0.005,
+                    "description": "mz width (mz differences)"
+                },
+                "minfrac_group_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 0.5,
+                    "description": "minimum fraction of samples necessary in at least one of the sample groups for it to be a valid group"
+                },
+                "minsamp_group_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "minimum number of samples necessary in at least one of the sample groups for it to be a valid group"
+                },
+                "max_group_N1_pos_xcms": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "maximum number of groups to identify in a single m/z slice"
+                }
+            },
+            "help_text": ""
+        },
+        "library_controls_and_files_negative_mode": {
+            "title": "Library controls and files (negative mode)",
+            "type": "object",
+            "description": "Input files includes mzML files and settings for performing identification using internal library",
+            "default": "",
+            "properties": {
+                "library_charactrized_neg": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "if you have already charaztrized your negative library set this to true and specify the path for library_charactrization_file_neg",
+                    "hidden": true
+                },
+                "library_charactrization_file_neg": {
+                    "type": "string",
+                    "description": "path to the file from charaztrized library (negative)",
+                    "hidden": true
+                },
+                "quant_library_mzml_files_neg": {
+                    "type": "string",
+                    "description": "Path to a folder containing library mzML files used for doing adduct calcculation (MS1 data in megative ionization method)",
+                    "hidden": true
+                },
+                "id_library_mzml_files_neg": {
+                    "type": "string",
+                    "description": "Path to a folder containing mzML files used for doing identification (MS2 data in negative ionization method)",
+                    "hidden": true
+                },
+                "library_description_neg": {
+                    "type": "string",
+                    "description": "Path to a csv file containing description of the library for negative (see the help)",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "library_controls_and_files_positive_mode": {
+            "title": "Library controls and files (positive mode)",
+            "type": "object",
+            "description": "Input files includes mzML files and settings for performing identification using internal library",
+            "default": "",
+            "properties": {
+                "library_charactrized_pos": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "if you have already charaztrized your positive library set this to true and specify the path for library_charactrization_file_pos",
+                    "hidden": true
+                },
+                "library_charactrization_file_pos": {
+                    "type": "string",
+                    "description": "path to the file from charaztrized library (positive)",
+                    "hidden": true
+                },
+                "quant_library_mzml_files_pos": {
+                    "type": "string",
+                    "description": "Path to a folder containing library mzML files used for doing adduct calcculation (MS1 data in positive ionization method)",
+                    "hidden": true
+                },
+                "id_library_mzml_files_pos": {
+                    "type": "string",
+                    "description": "Path to a folder containing mzML files used for doing identification (MS2 data in positive ionization method)",
+                    "hidden": true
+                },
+                "library_description_pos": {
+                    "type": "string",
+                    "description": "Path to a csv file containing description of the library for positive (see the help)",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "identification_input_files": {
+            "title": "Identification input files",
+            "type": "object",
+            "description": "Input files includes mzML files for performing identification",
+            "default": "",
+            "properties": {
+                "id_mzml_files_pos": {
+                    "type": "string",
+                    "description": "ath to a folder containing mzML files used for doing identification (MS2 data in positive ionization method)"
+                },
+                "id_mzml_files_neg": {
+                    "type": "string",
+                    "description": "Path to a folder containing mzML files used for doing identification (MS2 data in negative ionization method)"
+                }
+            },
+            "help_text": ""
+        },
+        "control_parameters": {
+            "title": "Control parameters",
+            "type": "object",
+            "description": "Used to control functionality of the workflow e.g identification, quantification etc",
+            "default": "",
+            "properties": {
+                "publishDir_intermediate": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "set to true to publish all the middle stages"
+                },
+                "perform_identification": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to false if you don't want to do identification. You will not require to set MS2 related parameters if you set this to false"
+                },
+                "perform_identification_metfrag": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should Metfrag be used for doing identification?"
+                },
+                "perform_identification_csifingerid": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should CSI:FingerID be used for doing identification?"
+                },
+                "perform_identification_cfmid": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should CFM-ID be used for doing identification?"
+                },
+                "perform_identification_internal_library": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should an internal library be used for doing identification?",
+                    "hidden": true
+                },
+                "type_of_ionization": {
+                    "type": "string",
+                    "default": "pos",
+                    "description": "You can either set to 'pos' (only positive), 'neg' (only negative), 'both' (both positive and negative).",
+                    "enum": [
+                        "pos",
+                        "neg",
+                        "both"
+                    ]
+                },
+                "need_centroiding": {
+                    "type": "boolean",
+                    "description": "Set to true if your data is in profile mode (only for quantification!)"
+                }
+            },
+            "help_text": ""
+        },
+        "openms_setting_files": {
+            "title": "OpenMS setting files",
+            "type": "object",
+            "description": "Used for peak picking and feature detection",
+            "default": "",
+            "properties": {
+                "peakpicker_ini_file_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_ini_pos.ini",
+                    "description": "Path to the ini file for PeakPickerHiRes",
+                    "hidden": true
+                },
+                "peakpicker_ini_file_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_ini_neg.ini",
+                    "description": "Path to the ini file for PeakPickerHiRes",
+                    "hidden": true
+                },
+                "featurefinder_ini_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_feature_finder_metabo_ini_pos.ini",
+                    "description": "Path to the ini file for OpenMS FeatureFinderMetabo in positive mode",
+                    "hidden": true
+                },
+                "featurefinder_ini_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_feature_finder_metabo_ini_neg.ini",
+                    "description": "Path to the ini file for OpenMS FeatureFinderMetabo in negative mode",
+                    "hidden": true
+                },
+                "peakpicker_ini_file_library_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_lib_ini_pos.ini",
+                    "description": "Path to the ini file for PeakPickerHiRes (for library)",
+                    "hidden": true
+                },
+                "peakpicker_ini_file_library_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_lib_ini_neg.ini",
+                    "description": "Path to the ini file for PeakPickerHiRes  (for library)",
+                    "hidden": true
+                },
+                "featurefinder_ini_library_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_feature_finder_metabo_lib_ini_pos.ini",
+                    "description": "Path to the ini file for OpenMS FeatureFinderMetabo in positive mode  (for library)",
+                    "hidden": true
+                },
+                "featurefinder_ini_library_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_feature_finder_metabo_lib_ini_neg.ini",
+                    "description": "Path to the ini file for OpenMS FeatureFinderMetabo in negative mode  (for library)",
+                    "hidden": true
+                }
+            },
+            "help_text": ""
+        },
+        "quantification_input_files": {
+            "title": "Quantification input files",
+            "type": "object",
+            "description": "Input files includes mzML files for performing quantification",
+            "default": "",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "description": "Path to a folder containing mzML files used for doing quantification (MS1 data in positive ionization method)"
+                },
+                "quant_mzml_files_neg": {
+                    "type": "string",
+                    "description": "Path to a folder containing mzML files used for doing quantification (MS1 data in negative ionization method)"
+                },
+                "phenotype_design_pos": {
+                    "type": "string",
+                    "description": "Path to a csv file containing the experimental design (MS1 data in positive ionization method)"
+                },
+                "phenotype_design_neg": {
+                    "type": "string",
+                    "description": "Path to a csv file containing the experimental design (MS1 data in negative ionization method)"
+                }
+            },
+            "required": [
+                "input"
+            ],
+            "help_text": ""
+        },
+        "generic_options": {
+            "title": "Generic options",
+            "type": "object",
+            "fa_icon": "fas fa-file-import",
+            "description": "Less common options for the pipeline, typically set in a config file.",
+            "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
+            "properties": {
+                "help": {
+                    "type": "boolean",
+                    "description": "Display help text.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-question-circle"
+                },
+                "publish_dir_mode": {
+                    "type": "string",
+                    "default": "copy",
+                    "hidden": true,
+                    "description": "Method used to save pipeline results to output directory.",
+                    "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
+                    "fa_icon": "fas fa-copy",
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ]
+                },
+                "validate_params": {
+                    "type": "boolean",
+                    "description": "Boolean whether to validate parameters against the schema at runtime",
+                    "default": true,
+                    "fa_icon": "fas fa-check-square",
+                    "hidden": true
+                },
+                "email_on_fail": {
+                    "type": "string",
+                    "description": "Email address for completion summary, only when pipeline fails.",
+                    "fa_icon": "fas fa-exclamation-triangle",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+                    "hidden": true,
+                    "help_text": "This works exactly as with `--email`, except emails are only sent if the workflow is not successful."
+                },
+                "plaintext_email": {
+                    "type": "boolean",
+                    "description": "Send plain-text email instead of HTML.",
+                    "fa_icon": "fas fa-remove-format",
+                    "hidden": true,
+                    "help_text": "Set to receive plain-text e-mails instead of HTML formatted."
+                },
+                "monochrome_logs": {
+                    "type": "boolean",
+                    "description": "Do not use coloured log outputs.",
+                    "fa_icon": "fas fa-palette",
+                    "hidden": true,
+                    "help_text": "Set to disable colourful command line output and live life in monochrome."
+                },
+                "tracedir": {
+                    "type": "string",
+                    "description": "Directory to keep pipeline Nextflow logs and reports.",
+                    "default": "${params.outdir}/pipeline_info",
+                    "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                },
+                "show_hidden_params": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-eye-slash",
+                    "description": "Show all params when using `--help`",
+                    "hidden": true,
+                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+                }
+            }
+        },
+        "max_job_request_options": {
+            "title": "Max job request options",
+            "type": "object",
+            "fa_icon": "fab fa-acquisitions-incorporated",
+            "description": "Set the top limit for requested resources for any single job.",
+            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
+            "properties": {
+                "max_cpus": {
+                    "type": "number",
+                    "description": "Maximum number of CPUs that can be requested    for any single job.",
+                    "default": 16,
+                    "fa_icon": "fas fa-microchip",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
+                },
+                "max_memory": {
+                    "type": "string",
+                    "description": "Maximum amount of memory that can be requested for any single job.",
+                    "default": "128.GB",
+                    "fa_icon": "fas fa-memory",
+                    "pattern": "^[\\d\\.]+\\s*.(K|M|G|T)?B$",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
+                },
+                "max_time": {
+                    "type": "string",
+                    "description": "Maximum amount of time that can be requested for any single job.",
+                    "default": "240.h",
+                    "fa_icon": "far fa-clock",
+                    "pattern": "^[\\d\\.]+\\.*(s|m|h|d)$",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
+                }
+            }
+        },
+        "institutional_config_options": {
+            "title": "Institutional config options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to describe centralised config profiles. These should not be edited.",
+            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline.",
+            "properties": {
+                "custom_config_version": {
+                    "type": "string",
+                    "description": "Git commit id for Institutional configs.",
+                    "default": "master",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": "Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default: `master`.\n\n```bash\n Download and use config file with following git commit id\n--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96\n```"
+                },
+                "custom_config_base": {
+                    "type": "string",
+                    "description": "Base directory for Institutional configs.",
+                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
+                    "hidden": true,
+                    "help_text": "If you're running offline, nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell nextflow where to find them with the `custom_config_base` option. For example:\n\n```bash\n Download and unzip the config files\ncd /path/to/my/configs\nwget https://github.com/nf-core/configs/archive/master.zip\nunzip master.zip\n\n Run the pipeline\ncd /path/to/my/data\nnextflow run /path/to/pipeline/ --custom_config_base /path/to/my/configs/configs-master/\n```\n\n> Note that the nf-core/tools helper package has a `download` command to download all required pipeline files + singularity containers + institutional configs in one go for you, to make this process easier.",
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "hostnames": {
+                    "type": "string",
+                    "description": "Institutional configs hostname.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_name": {
+                    "type": "string",
+                    "description": "Institutional config name.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_description": {
+                    "type": "string",
+                    "description": "Institutional config description.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_contact": {
+                    "type": "string",
+                    "description": "Institutional config contact information.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_url": {
+                    "type": "string",
+                    "description": "Institutional config URL link.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/global_options"
+        },
+        {
+            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/internal_library_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/output_preparation_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/cfm_id_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/metfrag_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/csi_fingerid_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/global_identification_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/adduct_and_isotope_annotation_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/filtering_parameters_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/quantification_parameter_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/internal_library_quantification_and_identification_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/internal_library_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/output_preparation_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/cfm_id_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/metfrag_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/csi_fingerid_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/global_identification_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/adduct_and_isotope_annotation_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/filtering_parameters_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/quantification_parameter_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/library_controls_and_files_negative_mode"
+        },
+        {
+            "$ref": "#/definitions/library_controls_and_files_positive_mode"
+        },
+        {
+            "$ref": "#/definitions/identification_input_files"
+        },
+        {
+            "$ref": "#/definitions/control_parameters"
+        },
+        {
+            "$ref": "#/definitions/openms_setting_files"
+        },
+        {
+            "$ref": "#/definitions/quantification_input_files"
+        },
+        {
+            "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/max_job_request_options"
+        },
+        {
+            "$ref": "#/definitions/institutional_config_options"
+        }
+    ]
+}
