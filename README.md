@@ -1,68 +1,60 @@
 # ![nf-core/metaboigniter](docs/images/nf-core-metaboigniter_logo.png)
 
-**Get your metabolomics analysis up and running**.
+**Pre-processing of mass spectrometry-based metabolomics data with quantification and identification based on MS1 and MS2 data**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/metaboigniter/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/metaboigniter/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
 
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/metaboigniter.svg)](https://hub.docker.com/r/nfcore/metaboigniter)
-
-
-[![Gitter chat](https://badges.gitter.im/MetaboIGNITER/gitter.png)](https://gitter.im/MetaboIGNITER/community)
+[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23metaboigniter-4A154B?logo=slack)](https://nfcore.slack.com/channels/metaboigniter)
 
 ## Introduction
 
-**metaboigniter** is bioinformatics pipeline for pre-processing of mass spectrometry-based metabolomics data.
-It can be used to perform quantification and identification based on MS1 and MS2 data.
-The backbone of pipeline is based on XCMS, OpenMS, CAMERA, MSnbase, MetFrag, CSIFingerID, CFM-ID, and several other customized tools to noise filtering, quantification and identification both for library and in-silico identification. **Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
+**nf-core/metaboigniter** is bioinformatics pipeline for pre-processing of mass spectrometry-based metabolomics data.
+
+The workflow performs MS1 based quantification and MS2 based identification using combination of different modules. The following steps can be performed using the workflow:
+
+![nf-core/metaboigniter-workflow](assets/images/workflow_image.png)
+
+- Centroiding (optional): Also referred to as peak pickering is a step that reduce the distribution of ions derived from a single mass to the peak of the distribution.
+- parameter tuning using IPO: MS1 quantification and library characterization parameters can be tuned using IPO
+- mass trace detection: The ions derived from the same analytes are clustered together forming a mass trace. These are the entities that will be used for quantification.
+- mass trace matching and retention time (RT) correction: The mass traces across different samples will be match against each other and  RT shift between the samples will be adjusted.
+- filtering (optional): The mass traces will be filtered out based on the QC samples.
+- Annotation: The isotopes and adducts will be annotated in this step.
+- MS2 (identification): At the moment we support two types of identification: in-silico and identificaiton based on internal library. This will be expanded in the corresponding section. At the moment we do not support MS1-based identification.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
 ## Quick Start
 
-i. Install [`nextflow`](https://nf-co.re/usage/installation)
+1. Install [`nextflow`](https://nf-co.re/usage/installation)
 
-ii. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility (please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))
+2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
 
-iii. Download the pipeline and test it on a minimal dataset with a single command
+3. Download the pipeline and test it on a minimal dataset with a single command
 
-```bash
-nextflow run nf-core/metaboigniter -profile test,<docker/singularity/conda/institute>
-```
+    ```bash
+    nextflow run nf-core/metaboigniter -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
+    ```
 
-> Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
+    > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
-iv. Start running your own analysis!
-We highly recommend that you use the parameter file located in conf/parameters.config. Since the number of parameters is large, it's going to be a fairly complex bash command to run the workflow. Nevertheless, the parameters can always be passed to the workflow as argument using two dashes "--".
+4. Start running your own analysis!
 
-**Please go on to [this page](docs/metaboigniter_guide.md) to learn how to use the workflow**
+    We highly recommend that you follow our usage [documentation](https://nf-co.re/metaboigniter/usage). Since the number of parameters is large, it's going to be a fairly complex bash command to run the workflow. Nevertheless, the parameters can always be passed to the workflow as argument using two dashes "--".
 
-```bash
-nextflow run nf-core/metaboigniter -profile analysis,<docker/singularity/conda/institute>
-```
-
-See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
+    See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 
 ## Documentation
 
-The nf-core/metaboigniter pipeline comes with documentation about the pipeline, found in the `docs/` directory:
-
-1. [Installation](https://nf-co.re/usage/installation)
-2. Pipeline configuration
-    * [Local installation](https://nf-co.re/usage/local_installation)
-    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
-3. [Running the pipeline](docs/usage.md)
-4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-
-MetaboIGNITER is a comprehensive pipeline of several independent tools used to pre-process liquid chromatography-mass spectrometry (LCMS) data.  We use Nextflow and nf-core to build and run the workflow but parts of this pipeline have also been implemented using Galaxy as part of [PhenoMeNal](https://github.com/phnmnl/) and [Pachyderm](https://github.com/pharmbio/LC-MS-Pachyderm).
+The nf-core/metaboigniter pipeline comes with documentation about the pipeline: [usage](https://nf-co.re/metaboigniter/usage) and [output](https://nf-co.re/metaboigniter/output).
 
 ## Credits
 
-MetaboIGNITER was originally written by Payam Emami.
+nf-core/metaboigniter was originally written by Payam Emami.
 
 ## Contributions and Support
 
@@ -81,5 +73,29 @@ You can cite the `nf-core` publication as follows:
 >
 > Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
 >
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).  
-> ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+
+In addition, references of tools and data used in this pipeline are as follows:
+
+> 1. Kuhl C, Tautenhahn R, Boettcher C, Larson TR and Neumann S: CAMERA: an integrated strategy for compound spectra extraction and annotation of liquid chromatography/mass spectrometry data sets. Anal Chem 84:283-289.
+> 2. Benton HP, Wong DM, Trauger SA, Siuzdak G: XCMS2: Processing Tandem Mass Spectrometry Data for Metabolite Identification and Structural Characterization. Anal Chem 80(16):6382-6389. doi:10.1021/ac800795f.
+> 3. Sturm M, Bertsch A, Gröpl C, Hildebrandt A, Hussong R, Lange E, Pfeifer N, Schulz-Trieglaff O, Zerck A, Reinert K, Kohlbacher O. OpenMS – an Open-Source Software Framework for Mass Spectrometry. BMC Bioinformatics. 2008;9:163. doi:10.1186/1471-2105-9-163.
+> 4. Libiseller G, Dvorzak M, Kleb U, Gander E, Eisenberg T, Madeo F, Neumann S, Trausinger G, Sinner F, Pieber T, Magnes C ((2015)). “IPO: a tool for automated optimization of XCMS parameters.” BMC Bioinformatics, 16, 118.
+> 5. Kai Dührkop, Huibin Shen, Marvin Meusel, Juho Rousu, and Sebastian Böcker. Searching molecular structure databases with tandem mass spectra using CSI:FingerID. Proc Natl Acad Sci U S A, 112(41):12580-12585, 2015. (cite this when using CSI:FingerID)
+> 6. Ruttkies C., Schymanski E.L. et al, MetFrag relaunched: incorporating strategies beyond in silico fragmentation. Journal of Cheminformatics, 2016, 8:3.
+> 7. Allen F, Greiner R, and Wishart D. Computational prediction of electron ionization mass spectra to assist in GC-MS compound identification. Submitted, 2016.
+> 8. Kerstin Scheubert, Franziska Hufsky, Daniel Petras, Mingxun Wang, Louis-Felix Nothias, Kai Dührkop, Nuno Bandeira, Pieter C Dorrestein, Sebastian Böcker. Significance estimation enabling large scale untargeted metabolomics annotations. Nature Communications, 2017. 8(1494)
+
+## Third party software copyright
+
+nf-core/metaboigniter contains several scripts for performing various pre-processing steps.
+
+The following software have not been written by us:
+
+- [MetFrag](https://ipb-halle.github.io/MetFrag/) (GNU LGPL v2.1 or later). Files included:
+  - `bin/metfrag`
+  - `bin/metfrag.jar`
+- [jni-inchi](http://jni-inchi.sourceforge.net/) (GNU LGPL v3). Files include:
+  - `bin/jni-inchi-0.8.jar`
+
+The rest of the scripts has been originally written by Payam Emami as part of [PhenoMeNal (Phenome and Metabolome aNalysis) consortium](https://phenomenal-h2020.eu/home/).
