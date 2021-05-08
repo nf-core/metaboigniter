@@ -1,6 +1,6 @@
 # nf-core/metaboigniter: Changelog
 
-## v1.0.0 - [2021-05-08]
+## [v1.0.0](https://github.com/nf-core/metaboigniter/releases/tag/1.0.0) - 2021-05-08
 
 Initial release of nf-core/metaboigniter, created with the [nf-core](http://nf-co.re/) template.
 
