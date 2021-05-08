@@ -62,7 +62,7 @@ In this case, the "varNameForNextStep" will refer to a CAMERA object rather than
 ```r
 library(CAMERA)
 load("path to rdata")
-xcms_object <- get(varNameForNextStep)
+camera_object <- get(varNameForNextStep)
 ```
 
 ## Identification
