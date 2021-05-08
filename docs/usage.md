@@ -140,9 +140,9 @@ This will prevent the workflow to perform the identification. So you will not ne
 
 ### Organize your mzML files
 
-If you only have MS1 data and you wish to perform quantification, you should first organize your mzML files into a folder structure.
+If you only have MS1 data and you wish to perform quantification, you should first organize your `mzML` files into a folder structure.
 An example of such structure can be seen [here](https://github.com/nf-core/test-datasets/tree/metaboigniter).
-You don't have to follow the folder tree in the example, you just have to make sure that mzML files from different ionization are placed in different folders.
+You don't have to follow the folder tree in the example, you just have to make sure that `mzML` files from different ionization are placed in different folders.
 
 If you only have one ionization mode (positive or negative), just put all the files in a single folder.
 If you have both, then create two folders, one for each of the ionization modes.
@@ -260,8 +260,8 @@ type_of_ionization: "both"
 
 Set the absolute path to your ionization phenotype files:
 
-* `phenotype_design_pos` - Path to a csv file containing the experimental design (MS1 data in positive ionization method).
-* `phenotype_design_neg` - Path to a csv file containing the experimental design (MS1 data in negative ionization method)
+* `phenotype_design_pos` - Path to a `csv` file containing the experimental design (MS1 data in positive ionization method).
+* `phenotype_design_neg` - Path to a `csv` file containing the experimental design (MS1 data in negative ionization method)
 
 For example, say you have only positive data.
 Create you phenotype file and set `phenotype_design_pos` to the absolute path of your file line _(this is just an example!)_:
@@ -346,11 +346,11 @@ This includes the parameters for xcms mass trace detection, grouping and retenti
 
 As described above, currently we support three time of signal filtering. You can turn them on and off depending on availability the data, experimental design or if you wish to do the manually later.
 
-The first method is *blank filtering*. This module filters out the signals that have higher abundance in non-biological samples (e.g. blank) compared to biological samples.
+The first method is `blank filtering`. This module filters out the signals that have higher abundance in non-biological samples (e.g. blank) compared to biological samples.
 
-The *dilution filtering* module filters out the signals that do not correlate with a specified dilution trend.
+The `dilution filtering` module filters out the signals that do not correlate with a specified dilution trend.
 
-The *CV filtering* module filters out the signals that do not show desired coefficient of variation.
+The `CV filtering` module filters out the signals that do not show desired coefficient of variation.
 If you don't want to perform the CV filtering. Set the following to `false` and go to the next step of the workflow (no need to set the parameters for this step!):
 
 #### Annotation (CAMERA)
@@ -382,9 +382,9 @@ The resulting scores from metabolite spectrum matches will be transformed into p
 
 ### Organize you mzML files (identification)
 
-Before proceeding with setting the parameters for identification you need to complete the mzMl folder structure.
+Before proceeding with setting the parameters for identification you need to complete the `mzMl` folder structure.
 This basically follows the same design as the MS1 data preparation.
-You need to create separate directories for mzML files that contain MS2 information.
+You need to create separate directories for `mzML` files that contain MS2 information.
 So if you have MS2 files both positive and negative mode, you need to create two more folders.
 For example, `mzML_NEG_ID` and `mzML_POS_ID` containing, negative and positive MS2 data respectively.
 
@@ -439,8 +439,8 @@ The following file tree shows an example of such structure. In this example, we 
 
 When you are ready with the folder structure you will need to set the parameters needed:
 
-* `id_mzml_files_pos`: A glob path to a folder containing mzML files used for doing identification (MS2 data in positive ionization method)
-* `id_mzml_files_neg`: A glob path to a folder containing mzML files used for doing identification (MS2 data in negative ionization method)
+* `id_mzml_files_pos`: A glob path to a folder containing `mzML` files used for doing identification (MS2 data in positive ionization method)
+* `id_mzml_files_neg`: A glob path to a folder containing `mzML` files used for doing identification (MS2 data in negative ionization method)
 
 For example:
 
@@ -463,14 +463,14 @@ In the case of multiple search engines, the workflow will have multiple final ou
 
 This part of the workflow is used to create and characterize in-house library.
 
-This is how it works: we assume that the library consists of one or more mzML files, each containing a number of compounds.
+This is how it works: we assume that the library consists of one or more `mzML` files, each containing a number of compounds.
 A possible scenario is when the users have several standard metabolites that can have overlapping masses with unknown retention times.
 The standards with overlapping masses can be run separately using MS, resulting in different runs.
 
 MetaboIGNITER will help you to characterize this type of internal libraries.
-You will need to construct the Characterization file (see below) that shows which standards are present in which mzML file.
+You will need to construct the Characterization file (see below) that shows which standards are present in which `mzML` file.
 The workflow will then do mass trace detection, MS2 extraction and mapping of parent ions to mass traces.
-Doing so will result in finding the retention time and empirical m/z of each standard.
+Doing so will result in finding the retention time and empirical `m/z` of each standard.
 This will then be used to create identification parameters and search the biological MS2 files.
 
 Set the library parameter to true if you would like to perform library search:
@@ -585,10 +585,12 @@ library_description_pos: "path/to/table.csv"
 library_description_neg: "path/to/table.csv"
 ```
 
-The way to set the parameters are to use [nf-core](https://nf-co.re/metaboigniter/parameters) and set the desire parameters in their dedicated group.
+## Parameter groups
+
+The way to set the parameters is to use [nf-core](https://nf-co.re/metaboigniter/parameters) and set the desire parameters in their dedicated group.
 
 Here we mention the parameter groups for the positive mode only.
-The parameters for the negative ionization mode can be set simiarly.
+The parameters for the negative ionization mode can be set similarly.
 One just need to look for `negative` instead of `positive`:
 
 * _Control parameters_
@@ -600,11 +602,17 @@ One just need to look for `negative` instead of `positive`:
 * _Quantification parameter (positive mode)_
   * Used to set XCMS and IPO paramters for the positive or negative mode.
 * _Filtering parameters (positive mode)_
-  * This group includes the parameters used to control the filtering steps. We expand this section a little bit:
+  * This group includes the parameters used to control the filtering steps.
+* Global identification parameters (positive mode)_
+  * This group includes the parameters used to control the identification steps.
+
+We expand the parameters for the filtering and the identification steps:
+
+### Filtering parameters
 
 #### Blank filtering
 
-The first method is *blank filtering*. This module filters out the signals that have higher abundance in non-biological samples (e.g. blank) compared to biological samples.
+The first method is `blank filtering`. This module filters out the signals that have higher abundance in non-biological samples (e.g. blank) compared to biological samples.
 
 If you don't want to perform the blank filtering. Set `blank_filter_pos` to `false` and go to the next step of the workflow _(no need to set the parameters for this step!)_:
 
@@ -632,23 +640,10 @@ If you don't want to perform the CV filtering. Set `cv_filter_pos` to `false` an
 cv_filter_pos: false
 ```
 
-#### Adduct and isotope annotation (positive mode)
+### Identification parameters (positive mode)
 
-Used to set CAMERA parameters for finding adducts and isotopes of the mass traces.
-
-#### Global identification parameters (positive mode)
-
-These parameters control the overall settings for identification. We also expand this section:
-
-This module is used to map MS/MS spectra to annotated CAMERA features.
-
-The mapping is performed based on retention time and m/z values of the annotated features.
-
-#### Global parameters (Producing search files)
-
-This module is used to generate search parameters with mapped MS/MS spectra retrieved from the mzML files.
-These parameters will be sent to all the search engines.
-You will then have the possibility to set the search engine specific parameters.
+This module is used to generate search parameters with mapped MS/MS spectra retrieved from the `mzML` files.
+These parameters will be sent to all the search engines. You will then have the possibility to set the search engine specific parameters.
 
 > The only exception is `database_msmstoparam_pos/neg_msnbase` that is only applicable in **MetFrag**.
 
@@ -663,8 +658,10 @@ database_msmstoparam_pos_msnbase: "LocalCSV"
 ```
 
 Adduct ruleset to be used:
-primary - contains most common adduct types ([M-H]-, [M-2H+Na]-, [M-2H+K]-, [M+Cl]-, [M+H]+, [M+Na]+, [M+K]+, [M+NH4]+)
-extended - next to primary also additional adduct types
+
+* `primary`: contains most common adduct types:
+`([M-H]-, [M-2H+Na]-, [M-2H+K]-, [M+Cl]-, [M+H]+, [M+Na]+, [M+K]+, [M+NH4]+)`
+* `extended`: next to primary also additional adduct types
 
 ```yaml
 adductRules_msmstoparam_pos_msnbase: "primary"
@@ -676,8 +673,8 @@ This section control FINGERID parameters.
 
 > IMPORTANT: we don't support database file for csi:fingerid. You will need to provide what database to use here, the rest of the parameters will be taken from there parameter file.
 
-Database (this will overwrite the corresponding parameter in the input file). CSI:FingerID does not have LocalCSV.
-So if you set this in the previous step, change this to your desired database (**one of**: all, chebi, kegg, bio, natural products, pubmed, hmdb, biocyc, hsdb, knapsack, biological, zinc bio, gnps, pubchem, mesh, maconda):
+Database (this will overwrite the corresponding parameter in the input file). CSI:FingerID does not have `LocalCSV`.
+So if you set this in the previous step, change this to your desired database (**one of**: `all`, `chebi`, `kegg`, `bio`, `natural products`, `pubmed`, `hmdb`, `biocyc`, `hsdb`, `knapsack`, `biological`, `zinc bio`, `gnps`, `pubchem`, `mesh`, `maconda`):
 
 #### MetFrag parameters (positive mode)
 
@@ -691,19 +688,15 @@ You need to specify the database for CFM-ID. The rest of the parameters will be 
 This database must at least contain the following columns: id of the molecules, smile of the molecules, the mass of the molecules, name of the molecules and InChI of the molecules.
 The best practice would be to use [MetChem](https://github.com/c-ruttkies/container-metchemdata) to construct the database. After constructing the database, you can then go ahead and set the required parameters.
 
-#### Output preparation (positive mode)
-
-These are several parameters for outputting the results of the pipeline including imputation, normalization, and log transformation.
-
 #### Library controls and files (positive mode)
 
 These parameters are used to provide inputs for library-based identification.
-This had already been expanded. However, if you already have your library characterized e.g the results of *process_collect_library_pos_msnbase* and *process_collect_library_neg_msnbase*. You can set the corresponding parameters to prevent the re-characterization of the library.
-The most important parameter in this section is *library_charactrization_file_pos* which has to be sent to the results of process_collect_library_pos_msnbase.
+This had already been expanded. However, if you already have your library characterized e.g the results of `process_collect_library_pos_msnbase` and `process_collect_library_neg_msnbase`. You can set the corresponding parameters to prevent the re-characterization of the library.
+The most important parameter in this section is `library_charactrization_file_pos` which has to be sent to the results of process_collect_library_pos_msnbase.
 
 #### Internal library quantification and identification parameters (positive mode)
 
-This is Used to charactrize the library. Please set the parameters needed for finding the mass traces for the library. These are more or less follow the same design as the quantification of the biological samples.
+This is used to charactrize the library. Please set the parameters needed for finding the mass traces for the library. These are more or less follow the same design as the quantification of the biological samples.
 Please see the description of OpenMS and XCMS above. In brief, if you have selected doing centroiding, you need to change OpenMS PeakPickerHiRes parameter file for the library.
 
 Please edit the following files (separate for positive and negative):
@@ -712,7 +705,7 @@ Please edit the following files (separate for positive and negative):
 assets/openms/openms_peak_picker_lib_ini_pos.ini
 ```
 
-You will have to set whether you do the quantification using either OpenMS (set to openms) or XCMS (set to xcms) (**for library**):
+You will have to set whether you do the quantification using either OpenMS (set to OpenMS) or XCMS (set to xcms) (**for library**):
 
 ```yaml
 quantification_openms_xcms_library_pos: "xcms"
@@ -730,11 +723,11 @@ If you have selected to do quantification using XCMS, you need to tune the follo
 
 The same parameters that were set for quantification and adducts identification should be set here for identification. See quantification parameters.
 
-For example, one can run IPO for setting the parameters for use individual parameters. In addtion you should set the parameters related to mapping of the MS2 ions to mass traces.
+For example, one can run IPO for setting the parameters for use individual parameters. In addition you should set the parameters related to mapping of the MS2 ions to mass traces.
 
 #### Internal library parameters (positive mode)
 
-This group of parameters are used to do the charactrization. You need a library description files containing columns: name of the raw files, ID of the compounds, name of the compounds, and m/z of the compounds.
+This group of parameters are used to do the charactrization. You need a library description files containing columns: name of the raw files, ID of the compounds, name of the compounds, and `m/z` of the compounds.
 
 > We recommend using a YAML file and supplying to the pipeline with the Nextflow option `-params-file`.
 > Alternatively, you can create a Nextflow config file and supply this with `-c`.
