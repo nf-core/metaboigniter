@@ -1,6 +1,8 @@
 # nf-core/metaboigniter: Changelog
 
-## v1.0.0dev - 2021-05-08
+## v1.1.0 dev
+
+_..nothing yet.._
 
 ## [v1.0.0](https://github.com/nf-core/metaboigniter/releases/tag/1.0.0) - 2021-05-08
 
