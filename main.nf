@@ -473,7 +473,7 @@ if(params.type_of_ionization in (["pos","both"])){
          */
         if(params.quantification_openms_xcms_pos == "openms"){
 
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_pos
+            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
             process process_masstrace_detection_pos_openms_centroided  {
                 label 'openms'
@@ -616,8 +616,8 @@ if(params.type_of_ionization in (["pos","both"])){
                 }
             }
 
-            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : file("NO_QFILE")
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_pos
+            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : Channel.from(false)
+            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
             process process_masstrace_detection_pos_xcms_centroided {
                 label 'xcms'
@@ -635,7 +635,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
 
                 script:
-                def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                def filter_argument = paramsQ.name == 'quant_params_pos.json' ? "ipo_in=${paramsQ}" : ''
                 """
                 findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
@@ -691,7 +691,7 @@ if(params.type_of_ionization in (["pos","both"])){
         */
         if(params.quantification_openms_xcms_pos == "openms"){
 
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_pos
+            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
             process process_masstrace_detection_pos_openms_noncentroided  {
                 label 'openms'
@@ -831,8 +831,8 @@ if(params.type_of_ionization in (["pos","both"])){
                 }
             }
 
-            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : file("NO_QFILE")
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_pos
+            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : Channel.from(false)
+            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
             process process_masstrace_detection_pos_xcms_noncentroided {
                 label 'xcms'
@@ -850,7 +850,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
 
                 script:
-                def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                def filter_argument = paramsQ.name == 'quant_params_pos.json' ? "ipo_in=${paramsQ}" : ''
                 """
                 findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
@@ -944,7 +944,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
         script:
         def inputs_aggregated = rd.collect{ "$it" }.join(",")
-        def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=${paramsRT}" : ''
+        def filter_argument = paramsRT.name == 'rt_params_pos.json' ? "ipo_in=${paramsRT}" : ''
         """
         retCor.r \\
             input=\$PWD/$rdata_files \\
@@ -1511,7 +1511,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     exit 1, "params.database_csv_files_pos_metfrag was not found or not defined as string! You need to set database_csv_files_pos_metfrag in conf/parameters.config to the path to a csv file containing your database"
                 }
             }else{
-                database_csv_files_pos_metfrag=file("nothing")
+                database_csv_files_pos_metfrag=Channel.from(false)
             }
 
 
@@ -2046,7 +2046,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             }
                         }
 
-                        param_target_to_detection_process_library_pos = ipo_library_pos_globalQ ? param_to_detection_process_library_pos : file("NO_QFILE")
+                        param_target_to_detection_process_library_pos = ipo_library_pos_globalQ ? param_to_detection_process_library_pos : Channel.from(false)
                         process process_masstrace_detection_library_pos_xcms_centroided {
                             label 'xcms'
                             //label 'process_low'
@@ -2061,7 +2061,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
                             script:
-                            def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
+                            def filter_argument = paramsQ.name == 'quant_params_library_pos.json' ? "ipo_in ${paramsQ}" : ''
                             """
                             findPeaks.r \\
                                 input=\$PWD/$mzMLFile \\
@@ -2246,7 +2246,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             }
                         }
 
-                        param_target_to_detection_process_library_pos =ipo_library_pos_globalQ ? param_to_detection_process_library_pos : file("NO_QFILE")
+                        param_target_to_detection_process_library_pos =ipo_library_pos_globalQ ? param_to_detection_process_library_pos : Channel.from(false)
 
                         process process_masstrace_detection_library_pos_xcms_noncentroided {
                             label 'xcms'
@@ -2262,7 +2262,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
                             script:
-                            def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                            def filter_argument = paramsQ.name == 'quant_params_library_pos.json' ? "ipo_in=${paramsQ}" : ''
                             """
                             findPeaks.r \\
                                 input=\$PWD/$mzMLFile \\
@@ -2825,7 +2825,7 @@ if(params.type_of_ionization in (["neg","both"])){
         * STEP 2 - feature detection by openms if selected by the user
         */
         if(params.quantification_openms_xcms_neg == "openms") {
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true  ? file("NO_RTFILE") : param_to_rt_process_neg
+            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true  ? Channel.from(false) : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_openms_centroided  {
                 label 'openms'
@@ -2964,8 +2964,8 @@ if(params.type_of_ionization in (["neg","both"])){
                 }
             }
 
-            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : file("NO_QFILE")
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_neg
+            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : Channel.from(false)
+            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_xcms_centroided {
                 label 'xcms'
@@ -2983,7 +2983,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
 
                 script:
-                def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                def filter_argument = paramsQ.name == 'quant_params_neg.json' ? "ipo_in=${paramsQ}" : ''
                 """
                 findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
@@ -3038,7 +3038,7 @@ if(params.type_of_ionization in (["neg","both"])){
          * STEP 2 - feature detection by openms if selected by the user
          */
         if(params.quantification_openms_xcms_neg == "openms"){
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_neg
+            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_openms_noncentroided  {
                 label 'openms'
@@ -3177,8 +3177,8 @@ if(params.type_of_ionization in (["neg","both"])){
                 }
             }
 
-            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : file("NO_QFILE")
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_neg
+            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : Channel.from(false)
+            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_xcms_noncentroided {
                 label 'xcms'
@@ -3196,7 +3196,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
 
                 script:
-                def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=$paramsQ" : ''
+                def filter_argument = paramsQ.name == 'quant_params_neg.json' ? "ipo_in=$paramsQ" : ''
                 """
                 findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
@@ -3290,7 +3290,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         script:
         def inputs_aggregated = rd.collect{ "$it" }.join(",")
-        def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=$paramsRT" : ''
+        def filter_argument = paramsRT.name == 'rt_params_neg.json' ? "ipo_in=$paramsRT" : ''
         """
         retCor.r \\
             input=\$PWD/$rdata_files \\
@@ -3853,7 +3853,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     exit 1, "params.database_csv_files_neg_metfrag was not found or not defined as string! You need to set database_csv_files_neg_metfrag in conf/parameters.config to the path to a csv file containing your database"
                 }
             }else{
-              database_csv_files_neg_metfrag=file("nothing")
+              database_csv_files_neg_metfrag=Channel.from(false)
             }
 
             metfrag_txt_neg_msnbase_flatten=metfrag_txt_neg_msnbase.flatten()
@@ -4381,7 +4381,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         }
                     }
 
-                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : file("NO_QFILE")
+                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : Channel.from(false)
 
                     process process_masstrace_detection_library_neg_xcms_centroided {
                         label 'xcms'
@@ -4397,7 +4397,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
                         script:
-                        def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
+                        def filter_argument = paramsQ.name == 'quant_params_library_neg.json' ? "ipo_in ${paramsQ}" : ''
                         """
                         findPeaks.r \\
                             input=\$PWD/$mzMLFile \\
@@ -4580,7 +4580,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         }
                     }
 
-                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : file("NO_QFILE")
+                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : Channel.from(false)
 
                     process process_masstrace_detection_library_neg_xcms_noncentroided {
                         label 'xcms'
@@ -4596,7 +4596,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
                         script:
-                        def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                        def filter_argument = paramsQ.name == 'quant_params_library_neg.json' ? "ipo_in=${paramsQ}" : ''
                         """
                         findPeaks.r \\
                             input=\$PWD/$mzMLFile \\
