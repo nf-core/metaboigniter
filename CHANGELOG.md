@@ -2,7 +2,7 @@
 
 ## [v1.0.1](https://github.com/nf-core/metaboigniter/releases/tag/1.0.1) - 2021-05-11
 
-A bug in running using AWS has been fixed. 
+A bug in running using AWS has been fixed.
 
 ## [v1.0.0](https://github.com/nf-core/metaboigniter/releases/tag/1.0.0) - 2021-05-08
 
