@@ -588,11 +588,6 @@
                     "default": 50,
                     "description": "any mass trace having more pecentage of the missing value will be removed"
                 },
-                "sample_coverage_method_output_neg_camera": {
-                    "type": "string",
-                    "default": "global",
-                    "description": "how to calculate missing value percentrage? global across all the samples? or name of the column in the phenotype file showing the grouping"
-                },
                 "normalize_output_neg_camera": {
                     "type": "string",
                     "default": "1",
