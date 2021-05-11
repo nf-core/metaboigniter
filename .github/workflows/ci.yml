@@ -33,13 +33,13 @@ jobs:
 
       - name: Build new docker image
         if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/metaboigniter:dev
+        run: docker build --no-cache . -t nfcore/metaboigniter:1.0.1
 
       - name: Pull docker image
         if: ${{ !env.MATCHED_FILES }}
         run: |
           docker pull nfcore/metaboigniter:dev
-          docker tag nfcore/metaboigniter:dev nfcore/metaboigniter:dev 
+          docker tag nfcore/metaboigniter:dev nfcore/metaboigniter:1.0.1 
 
       - name: Install Nextflow
         env:
