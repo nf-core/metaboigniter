@@ -576,7 +576,7 @@ if(params.type_of_ionization in (["pos","both"])){
                         integrate=$params.ipo_integrate_pos \\
                         fitgauss=$params.ipo_fitgauss_pos \\
                         ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \\
+                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
                         ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
                         ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
                         ipo_ppm_l=$params.ipo_ppm_l_pos  \\
@@ -670,7 +670,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     integrate=$params.ipo_integrate_pos \\
                     fitgauss=$params.ipo_fitgauss_pos \\
                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \\
+                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
                     ipo_ppm_l=$params.ipo_ppm_l_pos  \\
@@ -791,7 +791,7 @@ if(params.type_of_ionization in (["pos","both"])){
                         integrate=$params.ipo_integrate_pos \\
                         fitgauss=$params.ipo_fitgauss_pos \\
                         ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \\
+                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
                         ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
                         ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
                         ipo_ppm_l=$params.ipo_ppm_l_pos  \\
@@ -885,7 +885,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     integrate=$params.ipo_integrate_pos \\
                     fitgauss=$params.ipo_fitgauss_pos \\
                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \\
+                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
                     ipo_ppm_l=$params.ipo_ppm_l_pos  \\
@@ -983,7 +983,7 @@ if(params.type_of_ionization in (["pos","both"])){
             gapInit=$params.gapInit_align_N1_pos_xcms \\
             gapExtend=$params.gapExtend_align_N1_pos_xcms  \\
             factorDiag=$params.factorDiag_align_N1_pos_xcms \\
-            factorGap=$params.factorDiag_align_N1_pos_xcms \\
+            factorGap=$params.factorGap_align_N1_pos_xcms \\
             localAlignment=$params.localAlignment_align_N1_pos_xcms \\
             $filter_argument \\
             inputraw=$inputs_aggregated
@@ -2006,7 +2006,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                     integrate=$params.ipo_integrate_library_pos \\
                                     fitgauss=$params.ipo_fitgauss_library_pos \\
                                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos \\
+                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
                                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
                                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
                                     ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
@@ -2094,7 +2094,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                 integrate=$params.ipo_integrate_library_pos \\
                                 fitgauss=$params.ipo_fitgauss_library_pos \\
                                 ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos \\
+                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
                                 ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
                                 ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
                                 ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
@@ -2206,7 +2206,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                     integrate=$params.ipo_integrate_library_pos \\
                                     fitgauss=$params.ipo_fitgauss_library_pos \\
                                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos \\
+                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
                                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
                                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
                                     ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
@@ -2295,7 +2295,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                 integrate=$params.ipo_integrate_library_pos \\
                                 fitgauss=$params.ipo_fitgauss_library_pos \\
                                 ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos \\
+                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
                                 ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
                                 ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
                                 ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
@@ -2924,7 +2924,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         integrate=$params.ipo_integrate_neg \\
                         fitgauss=$params.ipo_fitgauss_neg \\
                         ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg \\
+                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
                         ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
                         ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
                         ipo_ppm_l=$params.ipo_ppm_l_neg  \\
@@ -3018,7 +3018,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     integrate=$params.ipo_integrate_neg \\
                     fitgauss=$params.ipo_fitgauss_neg \\
                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg \\
+                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
                     ipo_ppm_l=$params.ipo_ppm_l_neg  \\
@@ -3137,7 +3137,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         integrate=$params.ipo_integrate_neg \\
                         fitgauss=$params.ipo_fitgauss_neg \\
                         ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg \\
+                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
                         ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
                         ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
                         ipo_ppm_l=$params.ipo_ppm_l_neg  \\
@@ -3231,7 +3231,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     integrate=$params.ipo_integrate_neg \\
                     fitgauss=$params.ipo_fitgauss_neg \\
                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg \\
+                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
                     ipo_ppm_l=$params.ipo_ppm_l_neg  \\
@@ -3329,7 +3329,7 @@ if(params.type_of_ionization in (["neg","both"])){
             gapInit=$params.gapInit_align_N1_neg_xcms \\
             gapExtend=$params.gapExtend_align_N1_neg_xcms  \\
             factorDiag=$params.factorDiag_align_N1_neg_xcms \\
-            factorGap=$params.factorDiag_align_N1_neg_xcms \\
+            factorGap=$params.factorGap_align_N1_neg_xcms \\
             localAlignment=$params.localAlignment_align_N1_neg_xcms \\
             $filter_argument \\
             inputraw=$inputs_aggregated
@@ -4341,7 +4341,7 @@ if(params.type_of_ionization in (["neg","both"])){
                                 integrate=$params.ipo_integrate_library_neg \\
                                 fitgauss=$params.ipo_fitgauss_library_neg \\
                                 ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg \\
+                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
                                 ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
                                 ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
                                 ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
@@ -4430,7 +4430,7 @@ if(params.type_of_ionization in (["neg","both"])){
                             integrate=$params.ipo_integrate_library_neg \\
                             fitgauss=$params.ipo_fitgauss_library_neg \\
                             ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg \\
+                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
                             ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
                             ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
                             ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
@@ -4540,7 +4540,7 @@ if(params.type_of_ionization in (["neg","both"])){
                                 integrate=$params.ipo_integrate_library_neg \\
                                 fitgauss=$params.ipo_fitgauss_library_neg \\
                                 ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg \\
+                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
                                 ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
                                 ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
                                 ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
@@ -4629,7 +4629,7 @@ if(params.type_of_ionization in (["neg","both"])){
                             integrate=$params.ipo_integrate_library_neg \\
                             fitgauss=$params.ipo_fitgauss_library_neg \\
                             ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg \\
+                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
                             ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
                             ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
                             ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
@@ -5227,11 +5227,11 @@ def checkHostname() {
         params.hostnames.each { prof, hnames ->
             hnames.each { hname ->
                 if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
-                    log.error '====================================================\n' +
+                    log.error "${c_red}====================================================${c_reset}\n" +
                             "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
                             "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
                             "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
-                            '============================================================'
+                            "${c_red}====================================================${c_reset}\n"
                 }
             }
         }

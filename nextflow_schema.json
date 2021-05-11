@@ -410,12 +410,6 @@
                     "description": "logical, if TRUE a Gaussian is fitted",
                     "hidden": true
                 },
-                "phenodatacolumn_quant_library_neg": {
-                    "type": "string",
-                    "default": "Class",
-                    "description": "name of the column in the phenotype_design_library_neg showing class information of the samples",
-                    "hidden": true
-                },
                 "sampleclass_quant_library_neg_xcms": {
                     "type": "string",
                     "default": "Sample",
@@ -544,12 +538,6 @@
                     "default": 5,
                     "description": "retention time difference of ID to mass trace (second)"
                 },
-                "higher_the_better_output_neg_camera": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "is higher the score the better (not used for now)",
-                    "hidden": true
-                },
                 "impute_output_neg_camera": {
                     "type": "boolean",
                     "default": true,
@@ -599,16 +587,6 @@
                     "type": "number",
                     "default": 50,
                     "description": "any mass trace having more pecentage of the missing value will be removed"
-                },
-                "sample_coverage_method_output_neg_camera": {
-                    "type": "string",
-                    "default": "global",
-                    "description": "how to calculate missing value percentrage? global across all the samples? or name of the column in the phenotype file showing the grouping"
-                },
-                "ncore_output_neg_camera": {
-                    "type": "number",
-                    "default": 1,
-                    "description": "number of cores used for mapping the features"
                 },
                 "normalize_output_neg_camera": {
                     "type": "string",
@@ -1306,11 +1284,6 @@
                     "default": "Sample",
                     "description": "A name for the class of sample"
                 },
-                "method_align_N1_neg_xcms": {
-                    "type": "string",
-                    "default": "obiwarp",
-                    "description": "name of the method for correcting the RT shifts."
-                },
                 "profStep_align_N1_neg_xcms": {
                     "type": "number",
                     "default": 1,
@@ -1777,12 +1750,6 @@
                     "description": "logical, if TRUE a Gaussian is fitted",
                     "hidden": true
                 },
-                "phenodatacolumn_quant_library_pos": {
-                    "type": "string",
-                    "default": "Class",
-                    "description": "name of the column in the phenotype_design_library_pos showing class information of the samples",
-                    "hidden": true
-                },
                 "sampleclass_quant_library_pos_xcms": {
                     "type": "string",
                     "default": "Sample",
@@ -1911,12 +1878,6 @@
                     "default": 5,
                     "description": "retention time difference of ID to mass trace (second)"
                 },
-                "higher_the_better_output_pos_camera": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "is higher the score the better (not used for now)",
-                    "hidden": true
-                },
                 "impute_output_pos_camera": {
                     "type": "boolean",
                     "default": true,
@@ -1966,16 +1927,6 @@
                     "type": "number",
                     "default": 50,
                     "description": "any mass trace having more pecentage of the missing value will be removed"
-                },
-                "sample_coverage_method_output_pos_camera": {
-                    "type": "string",
-                    "default": "global",
-                    "description": "how to calculate missing value percentrage? global across all the samples? or name of the column in the phenotype file showing the grouping"
-                },
-                "ncore_output_pos_camera": {
-                    "type": "number",
-                    "default": 1,
-                    "description": "number of cores used for mapping the features"
                 },
                 "normalize_output_pos_camera": {
                     "type": "string",
@@ -2668,11 +2619,6 @@
                     "default": "Sample",
                     "description": "A name for the class of sample"
                 },
-                "method_align_N1_pos_xcms": {
-                    "type": "string",
-                    "default": "obiwarp",
-                    "description": "name of the method for correcting the RT shifts."
-                },
                 "profStep_align_N1_pos_xcms": {
                     "type": "number",
                     "default": 1,
@@ -3073,7 +3019,7 @@
                     "description": "Maximum amount of memory that can be requested for any single job.",
                     "default": "128.GB",
                     "fa_icon": "fas fa-memory",
-                    "pattern": "^[\\d\\.]+\\s*.(K|M|G|T)?B$",
+                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
                 },
@@ -3082,7 +3028,7 @@
                     "description": "Maximum amount of time that can be requested for any single job.",
                     "default": "240.h",
                     "fa_icon": "far fa-clock",
-                    "pattern": "^[\\d\\.]+\\.*(s|m|h|d)$",
+                    "pattern": "^(\\d+\\.?\\s*(s|m|h|day)\\s*)+$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }
