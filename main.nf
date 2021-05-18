@@ -473,7 +473,7 @@ if(params.type_of_ionization in (["pos","both"])){
          */
         if(params.quantification_openms_xcms_pos == "openms"){
 
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_pos
+            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
             process process_masstrace_detection_pos_openms_centroided  {
                 label 'openms'
@@ -576,7 +576,7 @@ if(params.type_of_ionization in (["pos","both"])){
                         integrate=$params.ipo_integrate_pos \\
                         fitgauss=$params.ipo_fitgauss_pos \\
                         ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \\
+                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
                         ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
                         ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
                         ipo_ppm_l=$params.ipo_ppm_l_pos  \\
@@ -616,8 +616,8 @@ if(params.type_of_ionization in (["pos","both"])){
                 }
             }
 
-            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : file("NO_QFILE")
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_pos
+            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : Channel.from(false)
+            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
             process process_masstrace_detection_pos_xcms_centroided {
                 label 'xcms'
@@ -635,7 +635,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
 
                 script:
-                def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                def filter_argument = paramsQ.name == 'quant_params_pos.json' ? "ipo_in=${paramsQ}" : ''
                 """
                 findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
@@ -670,7 +670,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     integrate=$params.ipo_integrate_pos \\
                     fitgauss=$params.ipo_fitgauss_pos \\
                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \\
+                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
                     ipo_ppm_l=$params.ipo_ppm_l_pos  \\
@@ -691,7 +691,7 @@ if(params.type_of_ionization in (["pos","both"])){
         */
         if(params.quantification_openms_xcms_pos == "openms"){
 
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_pos
+            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
             process process_masstrace_detection_pos_openms_noncentroided  {
                 label 'openms'
@@ -791,7 +791,7 @@ if(params.type_of_ionization in (["pos","both"])){
                         integrate=$params.ipo_integrate_pos \\
                         fitgauss=$params.ipo_fitgauss_pos \\
                         ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \\
+                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
                         ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
                         ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
                         ipo_ppm_l=$params.ipo_ppm_l_pos  \\
@@ -831,8 +831,8 @@ if(params.type_of_ionization in (["pos","both"])){
                 }
             }
 
-            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : file("NO_QFILE")
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_pos
+            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : Channel.from(false)
+            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
             process process_masstrace_detection_pos_xcms_noncentroided {
                 label 'xcms'
@@ -850,7 +850,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
 
                 script:
-                def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                def filter_argument = paramsQ.name == 'quant_params_pos.json' ? "ipo_in=${paramsQ}" : ''
                 """
                 findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
@@ -885,7 +885,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     integrate=$params.ipo_integrate_pos \\
                     fitgauss=$params.ipo_fitgauss_pos \\
                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_pos \\
+                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
                     ipo_ppm_l=$params.ipo_ppm_l_pos  \\
@@ -944,7 +944,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
         script:
         def inputs_aggregated = rd.collect{ "$it" }.join(",")
-        def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=${paramsRT}" : ''
+        def filter_argument = paramsRT.name == 'rt_params_pos.json' ? "ipo_in=${paramsRT}" : ''
         """
         retCor.r \\
             input=\$PWD/$rdata_files \\
@@ -983,7 +983,7 @@ if(params.type_of_ionization in (["pos","both"])){
             gapInit=$params.gapInit_align_N1_pos_xcms \\
             gapExtend=$params.gapExtend_align_N1_pos_xcms  \\
             factorDiag=$params.factorDiag_align_N1_pos_xcms \\
-            factorGap=$params.factorDiag_align_N1_pos_xcms \\
+            factorGap=$params.factorGap_align_N1_pos_xcms \\
             localAlignment=$params.localAlignment_align_N1_pos_xcms \\
             $filter_argument \\
             inputraw=$inputs_aggregated
@@ -1511,7 +1511,7 @@ if(params.type_of_ionization in (["pos","both"])){
                     exit 1, "params.database_csv_files_pos_metfrag was not found or not defined as string! You need to set database_csv_files_pos_metfrag in conf/parameters.config to the path to a csv file containing your database"
                 }
             }else{
-                database_csv_files_pos_metfrag=file("nothing")
+                database_csv_files_pos_metfrag=Channel.from(false)
             }
 
 
@@ -2006,7 +2006,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                     integrate=$params.ipo_integrate_library_pos \\
                                     fitgauss=$params.ipo_fitgauss_library_pos \\
                                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos \\
+                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
                                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
                                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
                                     ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
@@ -2046,7 +2046,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             }
                         }
 
-                        param_target_to_detection_process_library_pos = ipo_library_pos_globalQ ? param_to_detection_process_library_pos : file("NO_QFILE")
+                        param_target_to_detection_process_library_pos = ipo_library_pos_globalQ ? param_to_detection_process_library_pos : Channel.from(false)
                         process process_masstrace_detection_library_pos_xcms_centroided {
                             label 'xcms'
                             //label 'process_low'
@@ -2061,7 +2061,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
                             script:
-                            def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
+                            def filter_argument = paramsQ.name == 'quant_params_library_pos.json' ? "ipo_in ${paramsQ}" : ''
                             """
                             findPeaks.r \\
                                 input=\$PWD/$mzMLFile \\
@@ -2094,7 +2094,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                 integrate=$params.ipo_integrate_library_pos \\
                                 fitgauss=$params.ipo_fitgauss_library_pos \\
                                 ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos \\
+                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
                                 ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
                                 ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
                                 ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
@@ -2206,7 +2206,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                     integrate=$params.ipo_integrate_library_pos \\
                                     fitgauss=$params.ipo_fitgauss_library_pos \\
                                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos \\
+                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
                                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
                                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
                                     ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
@@ -2246,7 +2246,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             }
                         }
 
-                        param_target_to_detection_process_library_pos =ipo_library_pos_globalQ ? param_to_detection_process_library_pos : file("NO_QFILE")
+                        param_target_to_detection_process_library_pos =ipo_library_pos_globalQ ? param_to_detection_process_library_pos : Channel.from(false)
 
                         process process_masstrace_detection_library_pos_xcms_noncentroided {
                             label 'xcms'
@@ -2262,7 +2262,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
 
                             script:
-                            def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                            def filter_argument = paramsQ.name == 'quant_params_library_pos.json' ? "ipo_in=${paramsQ}" : ''
                             """
                             findPeaks.r \\
                                 input=\$PWD/$mzMLFile \\
@@ -2295,7 +2295,7 @@ if(params.type_of_ionization in (["pos","both"])){
                                 integrate=$params.ipo_integrate_library_pos \\
                                 fitgauss=$params.ipo_fitgauss_library_pos \\
                                 ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_pos \\
+                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
                                 ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
                                 ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
                                 ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
@@ -2825,7 +2825,7 @@ if(params.type_of_ionization in (["neg","both"])){
         * STEP 2 - feature detection by openms if selected by the user
         */
         if(params.quantification_openms_xcms_neg == "openms") {
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true  ? file("NO_RTFILE") : param_to_rt_process_neg
+            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true  ? Channel.from(false) : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_openms_centroided  {
                 label 'openms'
@@ -2924,7 +2924,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         integrate=$params.ipo_integrate_neg \\
                         fitgauss=$params.ipo_fitgauss_neg \\
                         ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg \\
+                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
                         ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
                         ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
                         ipo_ppm_l=$params.ipo_ppm_l_neg  \\
@@ -2964,8 +2964,8 @@ if(params.type_of_ionization in (["neg","both"])){
                 }
             }
 
-            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : file("NO_QFILE")
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_neg
+            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : Channel.from(false)
+            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_xcms_centroided {
                 label 'xcms'
@@ -2983,7 +2983,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
 
                 script:
-                def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                def filter_argument = paramsQ.name == 'quant_params_neg.json' ? "ipo_in=${paramsQ}" : ''
                 """
                 findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
@@ -3018,7 +3018,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     integrate=$params.ipo_integrate_neg \\
                     fitgauss=$params.ipo_fitgauss_neg \\
                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg \\
+                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
                     ipo_ppm_l=$params.ipo_ppm_l_neg  \\
@@ -3038,7 +3038,7 @@ if(params.type_of_ionization in (["neg","both"])){
          * STEP 2 - feature detection by openms if selected by the user
          */
         if(params.quantification_openms_xcms_neg == "openms"){
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_neg
+            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_openms_noncentroided  {
                 label 'openms'
@@ -3137,7 +3137,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         integrate=$params.ipo_integrate_neg \\
                         fitgauss=$params.ipo_fitgauss_neg \\
                         ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg \\
+                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
                         ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
                         ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
                         ipo_ppm_l=$params.ipo_ppm_l_neg  \\
@@ -3177,8 +3177,8 @@ if(params.type_of_ionization in (["neg","both"])){
                 }
             }
 
-            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : file("NO_QFILE")
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? file("NO_RTFILE") : param_to_rt_process_neg
+            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : Channel.from(false)
+            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
 
             process process_masstrace_detection_neg_xcms_noncentroided {
                 label 'xcms'
@@ -3196,7 +3196,7 @@ if(params.type_of_ionization in (["neg","both"])){
                 file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
 
                 script:
-                def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=$paramsQ" : ''
+                def filter_argument = paramsQ.name == 'quant_params_neg.json' ? "ipo_in=$paramsQ" : ''
                 """
                 findPeaks.r \\
                     input=\$PWD/$mzMLFile \\
@@ -3231,7 +3231,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     integrate=$params.ipo_integrate_neg \\
                     fitgauss=$params.ipo_fitgauss_neg \\
                     ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_neg \\
+                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
                     ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
                     ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
                     ipo_ppm_l=$params.ipo_ppm_l_neg  \\
@@ -3290,7 +3290,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
         script:
         def inputs_aggregated = rd.collect{ "$it" }.join(",")
-        def filter_argument = paramsRT.name != 'NO_RTFILE' ? "ipo_in=$paramsRT" : ''
+        def filter_argument = paramsRT.name == 'rt_params_neg.json' ? "ipo_in=$paramsRT" : ''
         """
         retCor.r \\
             input=\$PWD/$rdata_files \\
@@ -3329,7 +3329,7 @@ if(params.type_of_ionization in (["neg","both"])){
             gapInit=$params.gapInit_align_N1_neg_xcms \\
             gapExtend=$params.gapExtend_align_N1_neg_xcms  \\
             factorDiag=$params.factorDiag_align_N1_neg_xcms \\
-            factorGap=$params.factorDiag_align_N1_neg_xcms \\
+            factorGap=$params.factorGap_align_N1_neg_xcms \\
             localAlignment=$params.localAlignment_align_N1_neg_xcms \\
             $filter_argument \\
             inputraw=$inputs_aggregated
@@ -3853,7 +3853,7 @@ if(params.type_of_ionization in (["neg","both"])){
                     exit 1, "params.database_csv_files_neg_metfrag was not found or not defined as string! You need to set database_csv_files_neg_metfrag in conf/parameters.config to the path to a csv file containing your database"
                 }
             }else{
-              database_csv_files_neg_metfrag=file("nothing")
+              database_csv_files_neg_metfrag=Channel.from(false)
             }
 
             metfrag_txt_neg_msnbase_flatten=metfrag_txt_neg_msnbase.flatten()
@@ -4341,7 +4341,7 @@ if(params.type_of_ionization in (["neg","both"])){
                                 integrate=$params.ipo_integrate_library_neg \\
                                 fitgauss=$params.ipo_fitgauss_library_neg \\
                                 ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg \\
+                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
                                 ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
                                 ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
                                 ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
@@ -4381,7 +4381,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         }
                     }
 
-                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : file("NO_QFILE")
+                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : Channel.from(false)
 
                     process process_masstrace_detection_library_neg_xcms_centroided {
                         label 'xcms'
@@ -4397,7 +4397,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
                         script:
-                        def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in ${paramsQ}" : ''
+                        def filter_argument = paramsQ.name == 'quant_params_library_neg.json' ? "ipo_in ${paramsQ}" : ''
                         """
                         findPeaks.r \\
                             input=\$PWD/$mzMLFile \\
@@ -4430,7 +4430,7 @@ if(params.type_of_ionization in (["neg","both"])){
                             integrate=$params.ipo_integrate_library_neg \\
                             fitgauss=$params.ipo_fitgauss_library_neg \\
                             ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg \\
+                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
                             ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
                             ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
                             ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
@@ -4540,7 +4540,7 @@ if(params.type_of_ionization in (["neg","both"])){
                                 integrate=$params.ipo_integrate_library_neg \\
                                 fitgauss=$params.ipo_fitgauss_library_neg \\
                                 ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg \\
+                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
                                 ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
                                 ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
                                 ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
@@ -4580,7 +4580,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         }
                     }
 
-                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : file("NO_QFILE")
+                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : Channel.from(false)
 
                     process process_masstrace_detection_library_neg_xcms_noncentroided {
                         label 'xcms'
@@ -4596,7 +4596,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
 
                         script:
-                        def filter_argument = paramsQ.name != 'NO_QFILE' ? "ipo_in=${paramsQ}" : ''
+                        def filter_argument = paramsQ.name == 'quant_params_library_neg.json' ? "ipo_in=${paramsQ}" : ''
                         """
                         findPeaks.r \\
                             input=\$PWD/$mzMLFile \\
@@ -4629,7 +4629,7 @@ if(params.type_of_ionization in (["neg","both"])){
                             integrate=$params.ipo_integrate_library_neg \\
                             fitgauss=$params.ipo_fitgauss_library_neg \\
                             ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_l_library_neg \\
+                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
                             ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
                             ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
                             ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
@@ -5227,11 +5227,11 @@ def checkHostname() {
         params.hostnames.each { prof, hnames ->
             hnames.each { hname ->
                 if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
-                    log.error '====================================================\n' +
+                    log.error "${c_red}====================================================${c_reset}\n" +
                             "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
                             "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
                             "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
-                            '============================================================'
+                            "${c_red}====================================================${c_reset}\n"
                 }
             }
         }
