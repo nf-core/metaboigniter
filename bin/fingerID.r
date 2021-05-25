@@ -15,16 +15,33 @@ DatabaseOverwrite<-NA
 IonizationOverwrite<-NA
 numberofCompounds=10
 numberofCompoundsforIon<-numberofCompounds
-timeout=0 # this is timeout for csi.
-siriusPath<-"sh /usr/bin/CSI/bin/sirius.sh"
+timeout=10 # this is timeout for csi.
+timeoutTree<-10
+siriusPath<-"sh /usr/bin/sirius/bin/sirius"
 sirCores<-2
 canopus<-F
+UseHeuristic<-T
+mzToUseHeuristicOnly<-650
+mzToUseHeuristic<-300
 canopusoutputCSV<-NA
 library(tools)
 for(arg in args)
 {
   argCase<-strsplit(x = arg,split = "=")[[1]][1]
   value<-strsplit(x = arg,split = "=")[[1]][2]
+
+  if(argCase=="UseHeuristic")
+  {
+    UseHeuristic=as.logical(value)
+  }
+  if(argCase=="mzToUseHeuristicOnly")
+  {
+    mzToUseHeuristicOnly=as.numeric(value)
+  }
+  if(argCase=="mzToUseHeuristic")
+  {
+    mzToUseHeuristic=as.numeric(value)
+  }
   if(argCase=="canopusOutput")
   {
     canopusoutputCSV=as.character(value)
@@ -49,7 +66,10 @@ if(argCase=="timeout")
   {
     timeout=as.numeric(value)
   }
-
+  if(argCase=="timeoutTree")
+  {
+    timeoutTree=as.numeric(value)
+  }
   if(argCase=="realName")
   {
     realName=as.character(value)
@@ -88,7 +108,7 @@ if(argCase=="timeout")
 
 
 
-tmpdir<-paste(tempdir(),"/",sep="")
+tmpdir<-paste(".","/",sep="")
 
 setwd(tmpdir)
 inputMSMSparamList<-inputMSMSparam
@@ -188,15 +208,20 @@ cat("Creating MS file ...\n")
 toCSI<-paste(">compound ",compound,"\n",
              ">parentmass ",parentmass,"\n",
              ">ionization ",ionization,"\n",
+             ">AdductSettings.detectable ",ionization,"\n",
+             ">AdductSettings.fallback ",ionization,"\n",
              ">MS1MassDeviation.allowedMassDeviation ",ppm," ppm","\n",
              ">MS2MassDeviation.allowedMassDeviation ",ppm_ms2," ppm\n",
              ">NumberOfCandidatesPerIon ",numberofCompoundsforIon,"\n",
              ">StructureSearchDB ",database,"\n",
-             ">Timeout.secondsPerInstance ",timeout,"\n\n",
-             ">collision ",collision,"\n",sep = "")
+             ">Timeout.secondsPerInstance ",timeout,"\n",
+             ">Timeout.secondsPerTree ",timeoutTree,"\n\n",
+             ">collision\n",collision,"\n",sep = "")
 
 write(toCSI,"toCSI.ms",append = T)
 }
+
+
 
 if(!is.numeric(sirCores) & sirCores<1)
 {
@@ -212,21 +237,60 @@ if(!is.numeric(timeout) & timeout<0)
 }else{
   cat("Running CSI with",timeout,"seconds timeout! Ions taking more than",timeout,"seconds will not be considered (0=unlimited)!\n")
 }
+
+if(!is.numeric(timeoutTree) & timeoutTree<0)
+{
+  stop("timeoutTree should be 0 or higher!")
+}else{
+  cat("Running CSI with",timeoutTree,"seconds timeoutTree! Trees taking more than",timeoutTree,"seconds will not be considered (0=unlimited)!\n")
+}
+
+if(UseHeuristic)
+{
+ if((!is.numeric(mzToUseHeuristicOnly) & mzToUseHeuristicOnly<0)|(!is.numeric(mzToUseHeuristic) & mzToUseHeuristic<0))
+ {
+  stop("mzToUseHeuristicOnly and mzToUseHeuristic must be numberic and higher than 0")
+ }else{
+ cat("Using heuristics with ",mzToUseHeuristicOnly, " as mzToUseHeuristicOnly and ",mzToUseHeuristic, "as mzToUseHeuristic!\n")
+ }
+}
+
 inpitToCSIFile<-file_path_as_absolute("toCSI.ms")
 
 
 outputFolder<-paste(getwd(),"/outputTMP1",sep="")
-
 if(canopus)
 {
-  toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config",
 
-                      " formula"," -c ",numberofCompounds," fingerid canopus", " 2>&1",sep="")
+if(UseHeuristic)
+{
+
+
+
+  toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config ",
+  " --UseHeuristic.mzToUseHeuristicOnly ", mzToUseHeuristicOnly, " --UseHeuristic.mzToUseHeuristic ", mzToUseHeuristic," formula"," -c ",numberofCompounds," fingerid canopus", " 2>&1",sep="")
 
 }else{
+toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config",
+                    " formula"," -c ",numberofCompounds," fingerid canopus", " 2>&1",sep="")
+}
+
+}else{
+
+  if(UseHeuristic)
+  {
+
+  toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config", "sirius --UseHeuristic.mzToUseHeuristicOnly ", mzToUseHeuristicOnly, " --UseHeuristic.mzToUseHeuristic ", mzToUseHeuristic,
+
+                      " formula"," -c ",numberofCompounds," fingerid", " 2>&1",sep="")
+  }else{
   toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config",
 
                       " formula"," -c ",numberofCompounds," fingerid", " 2>&1",sep="")
+  }
+
+
+
 }
 
 
@@ -237,49 +301,6 @@ unlink(recursive = T,x = outputFolder)
 
 t1<-try(system(command = toCSICommand,intern = T))
 
-if(any(grepl("remove the database flags -d or --database because database",t1)) & tryOffline==T)
-{
-  stop("Online database is not available now!\n")
-  unlink(recursive = T,x = outputFolder)
-
-
-  if(canopus)
-  {
-    toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config",
-
-                        " formula"," -c ",numberofCompounds," canopus", " 2>&1",sep="")
-
-
-  }else{
-    toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config",
-
-                        " formula"," -c ",numberofCompounds,"", " 2>&1",sep="")
-  }
-
-cat("Running CSI using", toCSICommand, "\n")
-  t1 <- try(system(toCSICommand,intern = T))
-}
-
-if(any(grepl("just do not use any chemical database and omit the --fingerid option",t1)) & tryOffline==T)
-{
-  cat("FingerID is not available now! Trying offline mode without database!\n")
-  unlink(recursive = T,x = outputFolder)
-  if(canopus)
-  {
-    toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config",
-
-                        " formula"," -c ",numberofCompounds," canopus", " 2>&1",sep="")
-
-
-  }else{
-    toCSICommand<-paste(siriusPath," -i ", inpitToCSIFile," --output ",outputFolder, " --cores ",sirCores, " config",
-
-                        " formula"," -c ",numberofCompounds,"", " 2>&1",sep="")
-  }
-
-cat("Running CSI using", toCSICommand, "\n")
-  t1 <- try(system(toCSICommand,intern = T))
-}
 
 
 if(!is.null(attr(t1,which = "status")) && attr(t1,which = "status")==1){

@@ -16,7 +16,7 @@ absDevOverwrite<-NA
 DatabaseOverwrite<-NA
 IonizationOverwrite<-NA
 
-CFMPath<-"cfm-id"
+CFMPath<-"conda run -n cfm cfm-id"
 
 candidate_file<-NA
 candidate_id<-NA
