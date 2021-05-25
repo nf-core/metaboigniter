@@ -20,13 +20,13 @@ This release is the initial version of metaboIGNITER.
 
 metaboIGNITER is used to pre-process untargeted metabolomics data. This version (v1.0.0) of the workflow can perform:
 
-* IPO parameter tuning
-* mass trace detection using XCMS or OpenMS
-* Retention time alignment and grouping
-* Adduct and isotope detection
-* Noise filtering using QC stability, blank filtering, and dilution series
-* Metabolite identification using FINGER:ID, MetFrag, CFM-ID, and Internal library
-* Normalization and transformation
+- IPO parameter tuning
+- mass trace detection using XCMS or OpenMS
+- Retention time alignment and grouping
+- Adduct and isotope detection
+- Noise filtering using QC stability, blank filtering, and dilution series
+- Metabolite identification using FINGER:ID, MetFrag, CFM-ID, and Internal library
+- Normalization and transformation
 
 In addition, the version of nf-core template has been updated to 1.13.3.
 All containers have been merged to one. And some clean up in the main.nf
