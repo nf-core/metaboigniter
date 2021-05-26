@@ -683,17 +683,17 @@
                     "default": 10,
                     "description": "number of seconds that each csi tree can be calculated  (time limit)"
                 },
-                "UseHeuristic_csifingerid_neg_csifingerid": {
+                "useheuristic_csifingerid_neg_csifingerid": {
                     "type": "boolean",
                     "default": false,
                     "description": "If set to true, the heuristic will be used to initially rank the formula candidates"
                 },
-                "mzToUseHeuristicOnly_csifingerid_neg_csifingerid": {
+                "mztouseheuristiconly_csifingerid_neg_csifingerid": {
                     "type": "number",
                     "default": 650,
                     "description": "Set minimum m/z to only use heuristic tree computation"
                 },
-                "mzToUseHeuristic_csifingerid_neg_csifingerid": {
+                "mztouseheuristic_csifingerid_neg_csifingerid": {
                     "type": "number",
                     "default": 300,
                     "description": "Set minimum m/z to enable heuristic preprocessing."
@@ -2043,17 +2043,17 @@
                     "default": 10,
                     "description": "number of seconds that each csi tree can be calculated  (time limit)"
                 },
-                "UseHeuristic_csifingerid_pos_csifingerid": {
+                "useheuristic_csifingerid_pos_csifingerid": {
                     "type": "boolean",
                     "default": false,
                     "description": "If set to true, the heuristic will be used to initially rank the formula candidates"
                 },
-                "mzToUseHeuristicOnly_csifingerid_pos_csifingerid": {
+                "mztouseheuristiconly_csifingerid_pos_csifingerid": {
                     "type": "number",
                     "default": 650,
                     "description": "Set minimum m/z to only use heuristic tree computation"
                 },
-                "mzToUseHeuristic_csifingerid_pos_csifingerid": {
+                "mztouseheuristic_csifingerid_pos_csifingerid": {
                     "type": "number",
                     "default": 300,
                     "description": "Set minimum m/z to enable heuristic preprocessing."

@@ -1352,9 +1352,9 @@ if(params.type_of_ionization in (["pos","both"])){
                     ncores=$params.ncore_csifingerid_pos_csifingerid \\
                     timeout=$params.timeout_csifingerid_pos_csifingerid \\
                     timeoutTree=$params.timeoutTree_csifingerid_pos_csifingerid \\
-                    UseHeuristic=$params.UseHeuristic_csifingerid_pos_csifingerid \\
-                    mzToUseHeuristicOnly=$params.mzToUseHeuristicOnly_csifingerid_pos_csifingerid \\
-                    mzToUseHeuristic=$params.mzToUseHeuristic_csifingerid_pos_csifingerid \\
+                    UseHeuristic=$params.useheuristic_csifingerid_pos_csifingerid \\
+                    mzToUseHeuristicOnly=$params.mztouseheuristiconly_csifingerid_pos_csifingerid \\
+                    mzToUseHeuristic=$params.mztouseheuristic_csifingerid_pos_csifingerid \\
                     canopus=T \\
                     canopusOutput=\$PWD/${parameters.baseName}_class_Csifingerid_pos.csv
 
@@ -3718,9 +3718,9 @@ if(params.type_of_ionization in (["neg","both"])){
                     ncores=$params.ncore_csifingerid_neg_csifingerid  \\
                     timeout=$params.timeout_csifingerid_neg_csifingerid \\
                     timeoutTree=$params.timeoutTree_csifingerid_neg_csifingerid \\
-                    UseHeuristic=$params.UseHeuristic_csifingerid_neg_csifingerid \\
-                    mzToUseHeuristicOnly=$params.mzToUseHeuristicOnly_csifingerid_neg_csifingerid \\
-                    mzToUseHeuristic=$params.mzToUseHeuristic_csifingerid_neg_csifingerid \\
+                    UseHeuristic=$params.useheuristic_csifingerid_neg_csifingerid \\
+                    mzToUseHeuristicOnly=$params.mztouseheuristiconly_csifingerid_neg_csifingerid \\
+                    mzToUseHeuristic=$params.mztouseheuristic_csifingerid_neg_csifingerid \\
                     canopus=T \\
                     canopusOutput=\$PWD/${parameters.baseName}_class_Csifingerid_neg.csv
 
