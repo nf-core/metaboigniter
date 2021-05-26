@@ -5,7 +5,8 @@
 - Sirius was updated to version 4.8.2
 - Error message will be given if no IDs were found for MS2s
 - Added a few options to speed up the identification
-- CFM-ID has also been updated to version 3.0
+- CFM-ID has been updated to version 3.0
+- pyomenms has been updated to 2.4.0
 
 ## [v1.0.1](https://github.com/nf-core/metaboigniter/releases/tag/1.0.1) - 2021-05-11
 
