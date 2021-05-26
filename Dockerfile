@@ -178,5 +178,6 @@ RUN wget \
 RUN conda create --name cfm cfm -c bioconda -c conda-forge -c anaconda -c defaults --yes
 RUN chmod -R o+rX /opt/conda
 RUN chmod --recursive a+rw /opt/conda
+RUN pip install -Iv pyopenms==2.4.0
 RUN /usr/bin/printf '\xfe\xed\xfe\xed\x00\x00\x00\x02\x00\x00\x00\x00\xe2\x68\x6e\x45\xfb\x43\xdf\xa4\xd9\x92\xdd\x41\xce\xb6\xb2\x1c\x63\x30\xd7\x92' > /etc/ssl/certs/java/cacerts
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
