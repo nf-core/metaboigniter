@@ -429,7 +429,7 @@ process get_software_versions  {
     Rscript -e "cat(as.character(packageVersion('MSnbase')),'\\n')" &> v_msnbase.txt
     Rscript -e "cat(as.character(packageVersion('IPO')),'\\n')" &> v_ipo.txt
     OpenMSInfo |  grep -oP -m 1 '([0-9][.][0-9][.][0-9])' &> v_openms.txt
-    sh /usr/bin/CSI/bin/sirius.sh --loglevel=OFF --version 2>1 | grep -oP -m 1 '([0-9][.][0-9][.][0-9])' &> v_sirius.txt
+    sh /usr/bin/sirius/bin/sirius --loglevel=SEVERE --version 2>1 | grep -oP -m 1 '([0-9][.][0-9][.][0-9])' &> v_sirius.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -1327,7 +1327,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_ms2_identification_pos_csifingerid {
                 label 'csifingerid'
-                //label 'process_high'
+                label 'process_verylong'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_pos_csifingerid", mode: params.publish_dir_mode
 
@@ -1351,10 +1351,21 @@ if(params.type_of_ionization in (["pos","both"])){
                     output=\$PWD/outputs/ \\
                     ncores=$params.ncore_csifingerid_pos_csifingerid \\
                     timeout=$params.timeout_csifingerid_pos_csifingerid \\
+                    timeoutTree=$params.timeoutTree_csifingerid_pos_csifingerid \\
+                    UseHeuristic=$params.useheuristic_csifingerid_pos_csifingerid \\
+                    mzToUseHeuristicOnly=$params.mztouseheuristiconly_csifingerid_pos_csifingerid \\
+                    mzToUseHeuristic=$params.mztouseheuristic_csifingerid_pos_csifingerid \\
                     canopus=T \\
                     canopusOutput=\$PWD/${parameters.baseName}_class_Csifingerid_pos.csv
 
-                zip -j -r ${parameters.baseName}_Csifingerid_pos.zip outputs/*.csv
+
+                    if [ -z "\$(ls -A outputs/)" ]; then
+                    printf '%s\n' "No metabolites were identified. Check your settings"
+                    exit 1
+                    else
+                       zip -j -r ${parameters.baseName}_Csifingerid_pos.zip outputs/*.csv
+                    fi
+
                 """
             }
 
@@ -1523,7 +1534,7 @@ if(params.type_of_ionization in (["pos","both"])){
 
             process process_ms2_identification_pos_metfrag {
                 label 'metfrag'
-                //label 'process_high'
+                label 'process_verylong'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_pos_metfrag", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1546,7 +1557,15 @@ if(params.type_of_ionization in (["pos","both"])){
                         -f \$PWD/outputs/{/.}.csv \\
                         -l "\$PWD/$metfrag_database" \\
                         -s "OfflineMetFusionScore"
+
+
+                if [ -z "\$(ls -A outputs/)" ]; then
+                printf '%s\n' "No metabolites were identified. Check your settings"
+                exit 1
+                else
                 zip -j -r ${parameters.baseName}_metfrag_pos.zip outputs/*.csv
+                fi
+
                 """
             }
 
@@ -1704,7 +1723,7 @@ if(params.type_of_ionization in (["pos","both"])){
             */
             process process_ms2_identification_pos_cfmid {
                 label 'cfmid'
-                //label 'process_high'
+                label 'process_verylong'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_pos_cfmid", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -1734,7 +1753,13 @@ if(params.type_of_ionization in (["pos","both"])){
                         databaseInChIColumn=$params.database_inchI_column_identification_pos_cfmid \\
                         scoreType=Jaccard
 
+
+                if [ -z "\$(ls -A outputs/)" ]; then
+                printf '%s\n' "No metabolites were identified. Check your settings"
+                exit 1
+                else
                 zip -j -r ${parameters.baseName}_cfmid_pos.zip outputs/*.csv
+                fi
                 """
             }
 
@@ -3668,7 +3693,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_ms2_identification_neg_csifingerid {
                 label 'csifingerid'
-                //label 'process_high'
+                label 'process_verylong'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_neg_csifingerid", mode: params.publish_dir_mode
 
@@ -3692,10 +3717,20 @@ if(params.type_of_ionization in (["neg","both"])){
                     output=\$PWD/outputs/ \\
                     ncores=$params.ncore_csifingerid_neg_csifingerid  \\
                     timeout=$params.timeout_csifingerid_neg_csifingerid \\
+                    timeoutTree=$params.timeoutTree_csifingerid_neg_csifingerid \\
+                    UseHeuristic=$params.useheuristic_csifingerid_neg_csifingerid \\
+                    mzToUseHeuristicOnly=$params.mztouseheuristiconly_csifingerid_neg_csifingerid \\
+                    mzToUseHeuristic=$params.mztouseheuristic_csifingerid_neg_csifingerid \\
                     canopus=T \\
                     canopusOutput=\$PWD/${parameters.baseName}_class_Csifingerid_neg.csv
 
-                zip -j -r ${parameters.baseName}_Csifingerid_neg.zip outputs/*.csv
+                    if [ -z "\$(ls -A outputs/)" ]; then
+                    printf '%s\n' "No metabolites were identified. Check your settings"
+                    exit 1
+                    else
+                       zip -j -r ${parameters.baseName}_Csifingerid_neg.zip outputs/*.csv
+                    fi
+
                 """
             }
 
@@ -3864,7 +3899,7 @@ if(params.type_of_ionization in (["neg","both"])){
 
             process process_ms2_identification_neg_metfrag {
                 label 'metfrag'
-                //label 'process_high'
+                label 'process_verylong'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_neg_metfrag", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -3888,7 +3923,13 @@ if(params.type_of_ionization in (["neg","both"])){
                         -f \$PWD/outputs/{/.}.csv \\
                         -l "\$PWD/$metfrag_database" \\
                         -s "OfflineMetFusionScore"
+
+                if [ -z "\$(ls -A outputs/)" ]; then
+                printf '%s\n' "No metabolites were identified. Check your settings"
+                exit 1
+                else
                 zip -j -r ${parameters.baseName}_metfrag_neg.zip outputs/*.csv
+                fi
                 """
             }
 
@@ -4046,7 +4087,7 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             process process_ms2_identification_neg_cfmid {
                 label 'cfmid'
-                //label 'process_high'
+                label 'process_verylong'
                 tag "$parameters"
                 publishDir "${params.outdir}/process_ms2_identification_neg_cfmid", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
@@ -4078,7 +4119,13 @@ if(params.type_of_ionization in (["neg","both"])){
                         databaseInChIColumn=$params.database_inchI_column_identification_neg_cfmid \\
                         scoreType=Jaccard
 
+
+                if [ -z "\$(ls -A outputs/)" ]; then
+                printf '%s\n' "No metabolites were identified. Check your settings"
+                exit 1
+                else
                 zip -j -r ${parameters.baseName}_cfmid_neg.zip outputs/*.csv
+                fi
                 """
             }
 

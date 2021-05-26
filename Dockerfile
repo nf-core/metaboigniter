@@ -130,11 +130,10 @@ ADD bin/metfrag.jar /usr/share/metfrag-2.4.5-1/metfrag.jar
 # Install csi
 
 # Install development files needed
-RUN git clone https://github.com/MetaboIGNITER/container-csifingerid.git && cd container-csifingerid && \
-git checkout sirius-4.5.1 && mkdir -p /usr/bin/CSI && cp -a sirius-4.5.1/. /usr/bin/CSI && \
-rm -rf sirius-4.5.1
+ADD https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/ms/sirius/4.8.2/sirius-4.8.2-linux64-headless.zip /tmp
+RUN  unzip /tmp/sirius-4.8.2-linux64-headless.zip -d /usr/bin/
 
-RUN chmod +x /usr/bin/CSI/bin/sirius
+RUN chmod +x /usr/bin/sirius/bin/sirius
 
 
 ## container passatutto
@@ -153,7 +152,7 @@ ADD bin/*.r /usr/bin/
 ADD bin/featurexmltotable.py /usr/bin/featurexmltotable.py
 ADD bin/metfrag /usr/share/metfrag-2.4.5-1/metfrag
 
-RUN chmod +x /usr/bin/*.r && chmod +x /usr/bin/CSI/bin/sirius &&\
+RUN chmod +x /usr/bin/*.r && chmod +x /usr/bin/sirius/bin/sirius &&\
  chmod +x /usr/bin/featurexmltotable.py  &&\
  chmod +x /usr/share/metfrag-2.4.5-1/metfrag  &&\
  chmod +x /usr/bin/run_metfrag.sh  &&\
@@ -169,6 +168,15 @@ ENV PATH=$QT_BASE_DIR/bin:$PATH
 ENV LD_LIBRARY_PATH=$QT_BASE_DIR/lib/x86_64-linux-gnu:$QT_BASE_DIR/lib:$LD_LIBRARY_PATH
 ENV PKG_CONFIG_PATH=$QT_BASE_DIR/lib/pkgconfig:$PKG_CONFIG_PATH
 
+ENV PATH="/opt/conda/bin:${PATH}"
+ARG PATH="/opt/conda/bin:${PATH}"
 
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
+    && rm -f Miniconda3-latest-Linux-x86_64.sh && chmod -R o+rX /opt/conda
+RUN conda create --name cfm cfm -c bioconda -c conda-forge -c anaconda -c defaults --yes
+RUN chmod -R o+rX /opt/conda
+RUN chmod --recursive a+rw /opt/conda
 RUN /usr/bin/printf '\xfe\xed\xfe\xed\x00\x00\x00\x02\x00\x00\x00\x00\xe2\x68\x6e\x45\xfb\x43\xdf\xa4\xd9\x92\xdd\x41\xce\xb6\xb2\x1c\x63\x30\xd7\x92' > /etc/ssl/certs/java/cacerts
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure

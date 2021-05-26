@@ -676,7 +676,27 @@
                 "timeout_csifingerid_neg_csifingerid": {
                     "type": "number",
                     "default": 600,
-                    "description": "number of seconds that each csi ion can rum (time limit)"
+                    "description": "number of seconds that each csi ion can run (time limit)"
+                },
+                "timeoutTree_csifingerid_neg_csifingerid": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "number of seconds that each csi tree can be calculated  (time limit)"
+                },
+                "useheuristic_csifingerid_neg_csifingerid": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to true, the heuristic will be used to initially rank the formula candidates"
+                },
+                "mztouseheuristiconly_csifingerid_neg_csifingerid": {
+                    "type": "number",
+                    "default": 650,
+                    "description": "Set minimum m/z to only use heuristic tree computation"
+                },
+                "mztouseheuristic_csifingerid_neg_csifingerid": {
+                    "type": "number",
+                    "default": 300,
+                    "description": "Set minimum m/z to enable heuristic preprocessing."
                 }
             },
             "help_text": ""
@@ -2016,7 +2036,27 @@
                 "timeout_csifingerid_pos_csifingerid": {
                     "type": "number",
                     "default": 600,
-                    "description": "number of seconds that each csi ion can rum (time limit)"
+                    "description": "number of seconds that each csi ion can run (time limit)"
+                },
+                "timeoutTree_csifingerid_pos_csifingerid": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "number of seconds that each csi tree can be calculated  (time limit)"
+                },
+                "useheuristic_csifingerid_pos_csifingerid": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to true, the heuristic will be used to initially rank the formula candidates"
+                },
+                "mztouseheuristiconly_csifingerid_pos_csifingerid": {
+                    "type": "number",
+                    "default": 650,
+                    "description": "Set minimum m/z to only use heuristic tree computation"
+                },
+                "mztouseheuristic_csifingerid_pos_csifingerid": {
+                    "type": "number",
+                    "default": 300,
+                    "description": "Set minimum m/z to enable heuristic preprocessing."
                 }
             },
             "help_text": ""
