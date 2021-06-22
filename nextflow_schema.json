@@ -1311,7 +1311,6 @@
                 },
                 "center_align_N1_neg_xcms": {
                     "type": "string",
-                    "default": "NULL",
                     "description": "the index of the sample all others will be aligned to. If center==NULL, the sample with the most peaks is chosen as default."
                 },
                 "response_align_N1_neg_xcms": {
@@ -1333,12 +1332,10 @@
                 },
                 "gapInit_align_N1_neg_xcms": {
                     "type": "string",
-                    "default": "NULL",
                     "description": "Penalty for Gap opening"
                 },
                 "gapExtend_align_N1_neg_xcms": {
                     "type": "string",
-                    "default": "NULL",
                     "description": "Penalty for Gap enlargement"
                 },
                 "factorDiag_align_N1_neg_xcms": {
@@ -2666,7 +2663,6 @@
                 },
                 "center_align_N1_pos_xcms": {
                     "type": "string",
-                    "default": "NULL",
                     "description": "the index of the sample all others will be aligned to. If center==NULL, the sample with the most peaks is chosen as default."
                 },
                 "response_align_N1_pos_xcms": {
@@ -2688,12 +2684,10 @@
                 },
                 "gapInit_align_N1_pos_xcms": {
                     "type": "string",
-                    "default": "NULL",
                     "description": "Penalty for Gap opening"
                 },
                 "gapExtend_align_N1_pos_xcms": {
                     "type": "string",
-                    "default": "NULL",
                     "description": "Penalty for Gap enlargement"
                 },
                 "factorDiag_align_N1_pos_xcms": {
