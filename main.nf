@@ -987,6 +987,7 @@ if(params.type_of_ionization in (["pos","both"])){
             localAlignment=$params.localAlignment_align_N1_pos_xcms \\
             $filter_argument \\
             inputraw=$inputs_aggregated
+
         """
     }
 
