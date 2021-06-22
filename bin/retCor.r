@@ -88,7 +88,7 @@ for(arg in args)
   }
   if(argCase=="center")
   {
-    if(as.character(value)!="NULL")
+    if(as.character(value)!="NULL" & as.character(value)!="null")
     {
       center=as.numeric(value)
     }
@@ -103,14 +103,14 @@ for(arg in args)
   }
   if(argCase=="gapInit")
   {
-    if(as.character(value)!="NULL")
+    if(as.character(value)!="NULL" & as.character(value)!="null")
     {
       gapInit=as.numeric(value)
     }
   }
   if(argCase=="gapExtend")
   {
-    if(as.character(value)!="NULL")
+    if(as.character(value)!="NULL" & as.character(value)!="null")
     {
       gapExtend=as.numeric(value)
     }
