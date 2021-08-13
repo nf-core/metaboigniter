@@ -1272,7 +1272,19 @@ if(params.type_of_ionization in (["pos","both"])){
                 inputMS2=$input_args \\
                 output=MapMsms2Camera_pos.rdata \\
                 ppm=$params.ppm_mapmsmstocamera_pos_msnbase \\
-                rt=$params.rt_mapmsmstocamera_pos_msnbase
+                rt=$params.rt_mapmsmstocamera_pos_msnbase \\
+                preprocess_ms2=$params.preprocess_msms_pos_msnbase \\
+                preprocess_msms_centroid=$params.preprocess_msms_centroid_pos_msnbase \\
+                preprocess_msms_merge=$params.preprocess_msms_merge_pos_msnbase \\
+                preprocess_msms_centroid_after_merge=$params.preprocess_msms_centroid_after_merge_pos_msnbase \\
+                preprocess_msms_ppm=$params.preprocess_msms_ppm_pos_msnbase \\
+                preprocess_msms_ppm_precursor=$params.preprocess_msms_ppm_precursor_pos_msnbase \\
+                preprocess_msms_abs_mz=$params.preprocess_msms_abs_mz_pos_msnbase \\
+                preprocess_msms_abs_mz_precursor=$params.preprocess_msms_abs_mz_precursor_pos_msnbase \\
+                preprocess_msms_rt=$params.preprocess_msms_rt_pos_msnbase \\
+                preprocess_msms_centroid_onlymapped=$params.preprocess_msms_centroid_onlymapped_pos_msnbase \\
+                preprocess_msms_merge_onlymapped=$params.preprocess_msms_merge_onlymapped_pos_msnbase \\
+                preprocess_msms_int_threshold=$params.preprocess_msms_int_threshold_pos_msnbase
             """
         }
 
@@ -2491,7 +2503,19 @@ if(params.type_of_ionization in (["pos","both"])){
                         inputMS2=$rdata_files_ms2 \\
                         output=${rdata_files_ms1.baseName}_MapMsms2Camera_library_pos.rdata  \\
                         ppm=$params.ppm_mapmsmstocamera_library_pos_msnbase \\
-                        rt=$params.rt_mapmsmstocamera_library_pos_msnbase
+                        rt=$params.rt_mapmsmstocamera_library_pos_msnbase \\
+                        preprocess_ms2=$params.preprocess_msms_library_pos_msnbase \\
+                        preprocess_msms_centroid=$params.preprocess_msms_centroid_library_pos_msnbase \\
+                        preprocess_msms_merge=$params.preprocess_msms_merge_library_pos_msnbase \\
+                        preprocess_msms_centroid_after_merge=$params.preprocess_msms_centroid_after_merge_library_pos_msnbase \\
+                        preprocess_msms_ppm=$params.preprocess_msms_ppm_library_pos_msnbase \\
+                        preprocess_msms_ppm_precursor=$params.preprocess_msms_ppm_precursor_library_pos_msnbase \\
+                        preprocess_msms_abs_mz=$params.preprocess_msms_abs_mz_library_pos_msnbase \\
+                        preprocess_msms_abs_mz_precursor=$params.preprocess_msms_abs_mz_precursor_library_pos_msnbase \\
+                        preprocess_msms_rt=$params.preprocess_msms_rt_library_pos_msnbase \\
+                        preprocess_msms_centroid_onlymapped=$params.preprocess_msms_centroid_onlymapped_library_pos_msnbase \\
+                        preprocess_msms_merge_onlymapped=$params.preprocess_msms_merge_onlymapped_library_pos_msnbase \\
+                        preprocess_msms_int_threshold=$params.preprocess_msms_int_threshold_library_pos_msnbase
                     """
                 }
 
@@ -3640,7 +3664,19 @@ if(params.type_of_ionization in (["neg","both"])){
                 inputMS2=$input_args \\
                 output=MapMsms2Camera_neg.rdata  \\
                 ppm=$params.ppm_mapmsmstocamera_neg_msnbase \\
-                rt=$params.rt_mapmsmstocamera_neg_msnbase
+                rt=$params.rt_mapmsmstocamera_neg_msnbase \\
+                preprocess_ms2=$params.preprocess_msms_neg_msnbase \\
+                preprocess_msms_centroid=$params.preprocess_msms_centroid_neg_msnbase \\
+                preprocess_msms_merge=$params.preprocess_msms_merge_neg_msnbase \\
+                preprocess_msms_centroid_after_merge=$params.preprocess_msms_centroid_after_merge_neg_msnbase \\
+                preprocess_msms_ppm=$params.preprocess_msms_ppm_neg_msnbase \\
+                preprocess_msms_ppm_precursor=$params.preprocess_msms_ppm_precursor_neg_msnbase \\
+                preprocess_msms_abs_mz=$params.preprocess_msms_abs_mz_neg_msnbase \\
+                preprocess_msms_abs_mz_precursor=$params.preprocess_msms_abs_mz_precursor_neg_msnbase \\
+                preprocess_msms_rt=$params.preprocess_msms_rt_neg_msnbase \\
+                preprocess_msms_centroid_onlymapped=$params.preprocess_msms_centroid_onlymapped_neg_msnbase \\
+                preprocess_msms_merge_onlymapped=$params.preprocess_msms_merge_onlymapped_neg_msnbase \\
+                preprocess_msms_int_threshold=$params.preprocess_msms_int_threshold_neg_msnbase
             """
         }
 
@@ -4841,7 +4877,19 @@ if(params.type_of_ionization in (["neg","both"])){
                     inputMS2=$rdata_files_ms2 \\
                     output=${rdata_files_ms1.baseName}_MapMsms2Camera_library_neg.rdata  \\
                     ppm=$params.ppm_mapmsmstocamera_library_neg_msnbase \\
-                    rt=$params.rt_mapmsmstocamera_library_neg_msnbase
+                    rt=$params.rt_mapmsmstocamera_library_neg_msnbase \\
+                    preprocess_ms2=$params.preprocess_msms_library_neg_msnbase \\
+                    preprocess_msms_centroid=$params.preprocess_msms_centroid_library_neg_msnbase \\
+                    preprocess_msms_merge=$params.preprocess_msms_merge_library_neg_msnbase \\
+                    preprocess_msms_centroid_after_merge=$params.preprocess_msms_centroid_after_merge_library_neg_msnbase \\
+                    preprocess_msms_ppm=$params.preprocess_msms_ppm_library_neg_msnbase \\
+                    preprocess_msms_ppm_precursor=$params.preprocess_msms_ppm_precursor_library_neg_msnbase \\
+                    preprocess_msms_abs_mz=$params.preprocess_msms_abs_mz_library_neg_msnbase \\
+                    preprocess_msms_abs_mz_precursor=$params.preprocess_msms_abs_mz_precursor_library_neg_msnbase \\
+                    preprocess_msms_rt=$params.preprocess_msms_rt_library_neg_msnbase \\
+                    preprocess_msms_centroid_onlymapped=$params.preprocess_msms_centroid_onlymapped_library_neg_msnbase \\
+                    preprocess_msms_merge_onlymapped=$params.preprocess_msms_merge_onlymapped_library_neg_msnbase \\
+                    preprocess_msms_int_threshold=$params.preprocess_msms_int_threshold_library_neg_msnbase
                 """
             }
 

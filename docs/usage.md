@@ -667,6 +667,19 @@ Adduct ruleset to be used:
 adductRules_msmstoparam_pos_msnbase: "primary"
 ```
 
+#### Creating HyperMS2 (positive mode)
+
+Using MetaboIGNITER, one can create and preprocess a consensus MS2 file based on related ions both for regular search engine and library searches.
+To do that, set the following parameter to `true`
+
+```yaml
+preprocess_ms2_pos_msnbase: true
+```
+
+If HyperMS2 creation is enabled, the workflow combines the matched ions (the ions match to an identifical masstrace) into a single MS2 spectra.
+Depdending on the preprocessing options, this spectra can be denoised and centroided, allowing for faster and more accurate search.
+This behavior can be controlled using the parameters starting with `preprocess_msms_`.
+
 #### CSI:FINGERID parameters (positive mode)
 
 This section control FINGERID parameters.

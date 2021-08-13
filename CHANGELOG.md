@@ -8,6 +8,7 @@
 - CFM-ID has been updated to version 3.0
 - pyomenms has been updated to 2.4.0
 - NULL parameters for retention time correction have been change to null
+- Fixed parameter bug in createLibrary
 
 ## [v1.0.1](https://github.com/nf-core/metaboigniter/releases/tag/1.0.1) - 2021-05-11
 

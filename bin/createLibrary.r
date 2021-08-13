@@ -30,7 +30,26 @@ for(arg in args)
 {
   argCase<-strsplit(x = arg,split = "=")[[1]][1]
   value<-strsplit(x = arg,split = "=")[[1]][2]
+  if(argCase=="compundID")
+  {
+    compundID=as.character(value)
 
+  }
+  if(argCase=="compoundName")
+  {
+    compoundName=as.character(value)
+
+  }
+  if(argCase=="rawFileName")
+  {
+    rawFileName=as.character(value)
+
+  }
+  if(argCase=="mzCol")
+  {
+    mzCol=as.character(value)
+
+  }
   if(argCase=="inputMS2")
   {
     inputMS2=as.character(value)
