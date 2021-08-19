@@ -92,14 +92,14 @@ if(outTable)
 {
 if(is.null(allMS2IDs) || nrow(allMS2IDs)<1)
 {
-file.create(args$outputCSV)
+file.create(output)
 }else{
   write.table(x=allMS2IDs,file=output,quote=F,sep="\t")
 }
 }else{
 if(is.null(allMS2IDs) || nrow(allMS2IDs)<1)
 {
-file.create(args$outputCSV)
+file.create(output)
 }else{
   write.csv(x = allMS2IDs,file = output)
 }

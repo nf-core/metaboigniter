@@ -3134,6 +3134,10 @@
                 "need_centroiding": {
                     "type": "boolean",
                     "description": "Set to true if your data is in profile mode (only for quantification!)"
+                },
+                "need_centroiding_msms": {
+                    "type": "boolean",
+                    "description": "Set to true if you want to centroid the MSMS data (only for identification!)"
                 }
             },
             "help_text": ""
@@ -3153,6 +3157,18 @@
                 "peakpicker_ini_file_neg_openms": {
                     "type": "string",
                     "default": "$baseDir/assets/openms/openms_peak_picker_ini_neg.ini",
+                    "description": "Path to the ini file for PeakPickerHiRes",
+                    "hidden": true
+                },
+                "peakpicker_ini_file_msms_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_ini_msms_pos.ini",
+                    "description": "Path to the ini file for PeakPickerHiRes",
+                    "hidden": true
+                },
+                "peakpicker_ini_file_msms_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_ini_msms_neg.ini",
                     "description": "Path to the ini file for PeakPickerHiRes",
                     "hidden": true
                 },

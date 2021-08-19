@@ -2,13 +2,17 @@
 
 ## v1.1.0dev
 
-- Sirius was updated to version 4.8.2
+- Sirius was updated to version 4.9.3
 - Error message will be given if no IDs were found for MS2s
 - Added a few options to speed up the identification
 - CFM-ID has been updated to version 3.0
-- pyomenms has been updated to 2.4.0
+- pyomenms has been updated to 2.6.0
 - NULL parameters for retention time correction have been change to null
 - Fixed parameter bug in createLibrary
+- Fixed bugs in identification aggregation
+- Empty identification will not longer raise error but the pipeline will finish outputting no IDs
+- Fixed duplicated codes to make the pipeline code more compact
+- Added centroiding option for MS2 ions
 
 ## [v1.0.1](https://github.com/nf-core/metaboigniter/releases/tag/1.0.1) - 2021-05-11
 
