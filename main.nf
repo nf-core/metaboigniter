@@ -62,6 +62,8 @@ if (params.need_centroiding == true) {
     }
 }
 
+
+
 /*
  * Create a channel for quantification (positive MS1) input files
  */
@@ -124,6 +126,21 @@ if (params.perform_identification == true) {
  */
 
 if (params.perform_identification == true && params.perform_identification_internal_library == true) {
+  
+  if (params.need_centroiding_msms == true) {
+      if ((params.type_of_ionization in (['pos', 'both']))) {
+          Channel.fromPath(params.peakpicker_ini_file_msms_pos_openms)
+              .ifEmpty { exit 1, 'params.peakpicker_ini_file_msms_pos_openms was empty - no input files supplied' }
+              .set { peakpicker_ini_file_msms_pos_openms }
+      }
+
+      if ((params.type_of_ionization in (['neg', 'both']))) {
+          Channel.fromPath(params.peakpicker_ini_file_msms_neg_openms)
+              .ifEmpty { exit 1, 'params.peakpicker_ini_file_msms_neg_openms was empty - no input files supplied' }
+              .set { peakpicker_ini_file_msms_neg_openms }
+      }
+  }
+
     if ((params.type_of_ionization in (['pos', 'both']))) {
         // for positive data
         if (params.library_charactrized_pos == true) {
@@ -464,7 +481,13 @@ if(params.type_of_ionization in (["pos","both"])){
             PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
             """
         }
+        masstrace_detection_process_pos_openms=masstrace_detection_process_pos
+        param_detection_process_pos_ipo=param_detection_process_pos
+}else{
 
+quant_mzml_files_pos.into{masstrace_detection_process_pos_openms;param_detection_process_pos_ipo}
+
+}
 
 
 
@@ -475,19 +498,19 @@ if(params.type_of_ionization in (["pos","both"])){
 
             param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
-            process process_masstrace_detection_pos_openms_centroided  {
+            process process_masstrace_detection_pos_openms  {
                 label 'openms'
                 //label 'process_low'
                 tag "$mzMLFile"
-                publishDir "${params.outdir}/process_masstrace_detection_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                publishDir "${params.outdir}/process_masstrace_detection_pos_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                 input:
-                file mzMLFile from masstrace_detection_process_pos
+                file mzMLFile from masstrace_detection_process_pos_openms
                 each file(setting_file) from featurefinder_ini_pos_openms
 
                 output:
                 file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion
-                file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms, openms_to_xcms_conversion_raw_pos_centroided
+                file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms, openms_to_xcms_conversion_raw_pos
 
                 """
                 FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
@@ -497,17 +520,17 @@ if(params.type_of_ionization in (["pos","both"])){
             /*
             * STEP 2.5 - convert openms to xcms
             */
-            process process_openms_to_xcms_conversion_pos_centroided  {
+            process process_openms_to_xcms_conversion_pos  {
                 label 'xcmsconvert'
                 //label 'process_low'
                 tag "$mzMLFile"
-                publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
 
 
                 input:
                 file mzMLFile from openms_to_xcms_conversion
-                file mzMLFile2 from openms_to_xcms_conversion_raw_pos_centroided
+                file mzMLFile2 from openms_to_xcms_conversion_raw_pos
                 each file(phenotype_file) from phenotype_design_pos
 
                 output:
@@ -527,21 +550,21 @@ if(params.type_of_ionization in (["pos","both"])){
                 """
             }
 
-        } else {
+        }else {
             /*
             * STEP 2 - feature detection by xcms
             */
             if(ipo_pos_globalQ == true){
 
 
-                process process_ipo_param_pos_ipo_centroided {
+                process process_ipo_param_pos_ipo {
                     label 'ipo'
                     //label 'process_low'
                     tag "A collection of files"
                     publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                     input:
-                    file mzMLFile from param_detection_process_pos.collect()
+                    file mzMLFile from param_detection_process_pos_ipo.collect()
                     each file(phenotype_file) from phenotype_design_pos_param
 
                     output:
@@ -619,14 +642,14 @@ if(params.type_of_ionization in (["pos","both"])){
             param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : Channel.from(false)
             param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
 
-            process process_masstrace_detection_pos_xcms_centroided {
+            process process_masstrace_detection_pos_xcms {
                 label 'xcms'
                 //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                 input:
-                file mzMLFile from masstrace_detection_process_pos
+                file mzMLFile from masstrace_detection_process_pos_openms
                 each file(phenotype_file) from phenotype_design_pos
                 each file(paramsQ) from param_target_to_detection_process_pos
 
@@ -684,222 +707,7 @@ if(params.type_of_ionization in (["pos","both"])){
                 """
             }
         }
-    } else {
 
-        /*
-        * STEP 2 - feature detection by openms if selected by the user
-        */
-        if(params.quantification_openms_xcms_pos == "openms"){
-
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
-
-            process process_masstrace_detection_pos_openms_noncentroided  {
-                label 'openms'
-                //label 'process_low'
-                tag "$mzMLFile"
-                publishDir "${params.outdir}/process_masstrace_detection_pos_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                input:
-                file mzMLFile from quant_mzml_files_pos
-                each file(setting_file) from featurefinder_ini_pos_openms
-
-                output:
-                file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_pos_noncentroided
-                file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms, openms_to_xcms_conversion_raw_pos_uncentroided
-
-                """
-                FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
-                """
-            }
-
-            /*
-             * STEP 2.5 - convert openms to xcms
-             */
-            process process_openms_to_xcms_conversion_pos_noncentroided  {
-                label 'xcmsconvert'
-                //label 'process_low'
-                tag "$mzMLFile"
-                publishDir "${params.outdir}/process_openms_to_xcms_conversion_pos_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                input:
-                file mzMLFile from openms_to_xcms_conversion_pos_noncentroided
-                file mzMLFile2 from openms_to_xcms_conversion_raw_pos_uncentroided
-                each file(phenotype_file) from phenotype_design_pos
-
-                output:
-                file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
-
-
-                """
-                featurexmlToCamera.r \\
-                    input=$mzMLFile \\
-                    realFileName=$mzMLFile \\
-                    mzMLfiles=\$PWD/$mzMLFile2 \\
-                    polarity=positive \\
-                    output=${mzMLFile.baseName}.rdata \\
-                    phenoFile=$phenotype_file \\
-                    phenoDataColumn=$params.phenodatacolumn_quant_pos  \\
-                    sampleClass=$params.sampleclass_quant_pos_xcms \\
-                    changeNameTO=${mzMLFile.baseName}.mzML
-                """
-            }
-        } else {
-            /*
-             * STEP 2 - feature detection by xcms
-             */
-            if(ipo_pos_globalQ == true){
-
-
-                process process_ipo_param_pos_ipo_noncentroided {
-                    label 'ipo'
-                    //label 'process_low'
-                    tag "A collection of files"
-                    publishDir "${params.outdir}/process_ipo_param_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                    input:
-                    file mzMLFile from quant_mzml_files_params_pos.collect()
-                    each file(phenotype_file) from phenotype_design_pos_param
-
-                    output:
-                    file "quant_params_pos.json" into param_to_detection_process_pos
-                    file "rt_params_pos.json" into param_to_rt_process_pos
-
-                    script:
-                    def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-                    """
-                    touch quant_params_pos.json
-                    touch rt_params_pos.json
-
-                    ipo.r \\
-                        input=$inputs_aggregated \\
-                        quantOnly=$ipo_pos_globalAvoidRT \\
-                        allSamples=$params.ipo_allSamples_pos \\
-                        columnToSelect=$params.ipo_columnToSelect_pos  \\
-                        valueToSelect=$params.ipo_valueToSelect_pos \\
-                        phenoFile=$phenotype_file  \\
-                        methodXset=$params.ipo_methodXset_pos \\
-                        methodRT=$params.ipo_methodRT_pos \\
-                        noise_l=$params.ipo_noise_l_pos  \\
-                        noise_h=$params.ipo_noise_h_pos \\
-                        prefilter_l_l=$params.ipo_prefilter_l_l_pos \\
-                        prefilter_l_h=$params.ipo_prefilter_l_h_pos  \\
-                        prefilter_h_l=$params.ipo_prefilter_h_l_pos \\
-                        prefilter_h_h=$params.ipo_prefilter_h_h_pos  \\
-                        snthresh_l=$params.ipo_snthresh_l_pos \\
-                        snthresh_h=$params.ipo_snthresh_h_pos \\
-                        mzCenterFun=$params.ipo_mzCenterFun_pos  \\
-                        integrate=$params.ipo_integrate_pos \\
-                        fitgauss=$params.ipo_fitgauss_pos \\
-                        ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
-                        ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
-                        ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
-                        ipo_ppm_l=$params.ipo_ppm_l_pos  \\
-                        ipo_ppm_h=$params.ipo_ppm_h_pos \\
-                        ipo_mzdiff_l=$params.ipo_mzdiff_l_pos \\
-                        ipo_mzdiff_h=$params.ipo_mzdiff_h_pos \\
-                        ipo_charge_camera=$params.ipo_charge_camera_pos \\
-                        ipo_max_ppm_camera=$params.ipo_max_ppm_camera_pos  \\
-                        response_l=$params.ipo_response_l_pos \\
-                        response_h=$params.ipo_response_h_pos \\
-                        distFunc=$params.ipo_distFunc_pos \\
-                        factorDiag_l=$params.ipo_factorDiag_l_pos \\
-                        factorDiag_h=$params.ipo_factorDiag_h_pos \\
-                        factorGap_l=$params.ipo_factorGap_l_pos  \\
-                        factorGap_h=$params.ipo_factorGap_h_pos \\
-                        localAlignment=$params.ipo_localAlignment_pos \\
-                        ipo_gapInit_l=$params.ipo_gapInit_l_pos \\
-                        ipo_gapInit_h=$params.ipo_gapInit_h_pos \\
-                        ipo_gapExtend_l=$params.ipo_gapExtend_l_pos  \\
-                        ipo_gapExtend_h=$params.ipo_gapExtend_h_pos \\
-                        ipo_profStep_l=$params.ipo_profStep_l_pos \\
-                        ipo_profStep_h=$params.ipo_profStep_h_pos \\
-                        bw_l=$params.ipo_bw_l_pos \\
-                        bw_h=$params.ipo_bw_h_pos \\
-                        minfrac_l=$params.ipo_minfrac_l_pos  \\
-                        minfrac_h=$params.ipo_minfrac_h_pos \\
-                        mzwid_l=$params.ipo_mzwid_l_pos \\
-                        mzwid_h=$params.ipo_mzwid_h_pos \\
-                        minsamp_l=$params.ipo_minsamp_l_pos  \\
-                        minsamp_h=$params.ipo_minsamp_h_pos \\
-                        max_l=$params.ipo_max_l_pos \\
-                        max_h=$params.ipo_max_h_pos \\
-                        ncores=$params.ipo_ncores_pos \\
-                        outputxset=quant_params_pos.json \\
-                        outputrt=rt_params_pos.json
-                    """
-                }
-            }
-
-            param_target_to_detection_process_pos = ipo_pos_globalQ ? param_to_detection_process_pos : Channel.from(false)
-            param_target_to_rt_process_pos = ipo_pos_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_pos
-
-            process process_masstrace_detection_pos_xcms_noncentroided {
-                label 'xcms'
-                //label 'process_low'
-                tag "$mzMLFile"
-                publishDir "${params.outdir}/process_masstrace_detection_pos_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                input:
-                file mzMLFile from quant_mzml_files_pos
-                each file(phenotype_file) from phenotype_design_pos
-                each file(paramsQ) from param_target_to_detection_process_pos
-
-                output:
-                file "${mzMLFile.baseName}.rdata" into collect_rdata_pos_xcms
-                file "${mzMLFile.baseName}.mzML" into rt_rdata_pos_xcms
-
-                script:
-                def filter_argument = paramsQ.name == 'quant_params_pos.json' ? "ipo_in=${paramsQ}" : ''
-                """
-                findPeaks.r \\
-                    input=\$PWD/$mzMLFile \\
-                    output=\$PWD/${mzMLFile.baseName}.rdata \\
-                    ppm=$params.masstrace_ppm_pos_xcms \\
-                    peakwidthLow=$params.peakwidthlow_quant_pos_xcms \\
-                    peakwidthHigh=$params.peakwidthhigh_quant_pos_xcms  \\
-                    noise=$params.noise_quant_pos_xcms \\
-                    polarity=positive \\
-                    realFileName=$mzMLFile \\
-                    phenoFile=$phenotype_file \\
-                    phenoDataColumn=$params.phenodatacolumn_quant_pos  \\
-                    sampleClass=$params.sampleclass_quant_pos_xcms \\
-                    mzdiff=$params.mzdiff_quant_pos_xcms \\
-                    snthresh=$params.snthresh_quant_pos_xcms \\
-                    prefilter_l=$params.prefilter_quant_pos_xcms  \\
-                    prefilter_h=$params.value_of_prefilter_quant_pos_xcms \\
-                    mzCenterFun=$params.mzCenterFun_quant_pos_xcms \\
-                    integrate=$params.integrate_quant_pos_xcms  \\
-                    fitgauss=$params.fitgauss_quant_pos_xcms \\
-                    methodXset=$params.ipo_methodXset_pos \\
-                    methodRT=$params.ipo_methodRT_pos \\
-                    noise_l=$params.ipo_noise_l_pos  \\
-                    noise_h=$params.ipo_noise_h_pos \\
-                    prefilter_l_l=$params.ipo_prefilter_l_l_pos \\
-                    prefilter_l_h=$params.ipo_prefilter_l_h_pos  \\
-                    prefilter_h_l=$params.ipo_prefilter_h_l_pos \\
-                    prefilter_h_h=$params.ipo_prefilter_h_h_pos  \\
-                    snthresh_l=$params.ipo_snthresh_l_pos \\
-                    snthresh_h=$params.ipo_snthresh_h_pos \\
-                    mzCenterFun=$params.ipo_mzCenterFun_pos  \\
-                    integrate=$params.ipo_integrate_pos \\
-                    fitgauss=$params.ipo_fitgauss_pos \\
-                    ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_pos  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_pos \\
-                    ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_pos \\
-                    ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_pos \\
-                    ipo_ppm_l=$params.ipo_ppm_l_pos  \\
-                    ipo_ppm_h=$params.ipo_ppm_h_pos \\
-                    ipo_mzdiff_l=$params.ipo_mzdiff_l_pos \\
-                    ipo_mzdiff_h=$params.ipo_mzdiff_h_pos \\
-                    ipo_charge_camera=$params.ipo_charge_camera_pos \\
-                    ipo_max_ppm_camera=$params.ipo_max_ppm_camera_pos  \\
-                    ipo_inv=$ipo_pos_localQ \\
-                    $filter_argument
-                """
-            }
-        }
-    }
 
     /*
      * STEP 3 - collect xcms objects into a hyper object
@@ -1223,10 +1031,32 @@ if(params.type_of_ionization in (["pos","both"])){
 
 
     if(params.perform_identification == true){
+      /*
+       * STEP 15 - read MSMS and centroid data
+       */
+      if(params.need_centroiding_msms==true){
+          process process_peak_picker_msms_pos_openms  {
+              label 'openms'
+              //label 'process_low'
+              tag "$mzMLFile"
+              publishDir "${params.outdir}/process_peak_picker_msms_pos_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+              stageInMode 'copy'
 
-        /*
-         * STEP 15 - read MSMS data
-         */
+              input:
+              file mzMLFile from id_mzml_files_pos
+              each file(setting_file) from peakpicker_ini_file_msms_pos_openms
+
+              output:
+              file "${mzMLFile}" into id_mzml_files_pos_msnbase
+
+              """
+              PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
+              """
+          }
+        }else{
+          id_mzml_files_pos_msnbase=id_mzml_files_pos
+        }
+
         process process_read_MS2_pos_msnbase {
             label 'msnbase'
             //label 'process_low'
@@ -1234,7 +1064,7 @@ if(params.type_of_ionization in (["pos","both"])){
             publishDir "${params.outdir}/process_read_MS2_pos_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
             input:
-            file mzMLFile from id_mzml_files_pos
+            file mzMLFile from id_mzml_files_pos_msnbase
 
             output:
             file "${mzMLFile.baseName}.rdata" into mapmsmstocamera_rdata_pos_msnbase
@@ -1272,7 +1102,19 @@ if(params.type_of_ionization in (["pos","both"])){
                 inputMS2=$input_args \\
                 output=MapMsms2Camera_pos.rdata \\
                 ppm=$params.ppm_mapmsmstocamera_pos_msnbase \\
-                rt=$params.rt_mapmsmstocamera_pos_msnbase
+                rt=$params.rt_mapmsmstocamera_pos_msnbase \\
+                preprocess_ms2=$params.preprocess_msms_pos_msnbase \\
+                preprocess_msms_centroid=$params.preprocess_msms_centroid_pos_msnbase \\
+                preprocess_msms_merge=$params.preprocess_msms_merge_pos_msnbase \\
+                preprocess_msms_centroid_after_merge=$params.preprocess_msms_centroid_after_merge_pos_msnbase \\
+                preprocess_msms_ppm=$params.preprocess_msms_ppm_pos_msnbase \\
+                preprocess_msms_ppm_precursor=$params.preprocess_msms_ppm_precursor_pos_msnbase \\
+                preprocess_msms_abs_mz=$params.preprocess_msms_abs_mz_pos_msnbase \\
+                preprocess_msms_abs_mz_precursor=$params.preprocess_msms_abs_mz_precursor_pos_msnbase \\
+                preprocess_msms_rt=$params.preprocess_msms_rt_pos_msnbase \\
+                preprocess_msms_centroid_onlymapped=$params.preprocess_msms_centroid_onlymapped_pos_msnbase \\
+                preprocess_msms_merge_onlymapped=$params.preprocess_msms_merge_onlymapped_pos_msnbase \\
+                preprocess_msms_int_threshold=$params.preprocess_msms_int_threshold_pos_msnbase asd=ttt
             """
         }
 
@@ -1362,7 +1204,9 @@ if(params.type_of_ionization in (["pos","both"])){
 
                     if [ -z "\$(ls -A outputs/)" ]; then
                     printf '%s\n' "No metabolites were identified. Check your settings"
-                    exit 1
+                    #exit 1
+                    touch outputs/empty.csv
+                    zip -j -r ${parameters.baseName}_Csifingerid_pos.zip outputs/*.csv
                     else
                        zip -j -r ${parameters.baseName}_Csifingerid_pos.zip outputs/*.csv
                     fi
@@ -1562,7 +1406,9 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 if [ -z "\$(ls -A outputs/)" ]; then
                 printf '%s\n' "No metabolites were identified. Check your settings"
-                exit 1
+                #exit 1
+                touch outputs/empty.csv
+                zip -j -r ${parameters.baseName}_metfrag_pos.zip outputs/*.csv
                 else
                 zip -j -r ${parameters.baseName}_metfrag_pos.zip outputs/*.csv
                 fi
@@ -1757,7 +1603,9 @@ if(params.type_of_ionization in (["pos","both"])){
 
                 if [ -z "\$(ls -A outputs/)" ]; then
                 printf '%s\n' "No metabolites were identified. Check your settings"
-                exit 1
+                #exit 1
+                touch outputs/empty.csv
+                zip -j -r ${parameters.baseName}_cfmid_pos.zip outputs/*.csv
                 else
                 zip -j -r ${parameters.baseName}_cfmid_pos.zip outputs/*.csv
                 fi
@@ -1916,11 +1764,11 @@ if(params.type_of_ionization in (["pos","both"])){
                      * STEP 30 - peakpicking for library
                      */
 
-                    process process_peak_picker_library_pos_openms_centroided  {
+                    process process_peak_picker_library_pos_openms  {
                         label 'openms'
                         //label 'process_low'
                         tag "$mzMLFile"
-                        publishDir "${params.outdir}/process_peak_picker_library_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                        publishDir "${params.outdir}/process_peak_picker_library_pos_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                         stageInMode 'copy'
 
                         input:
@@ -1934,24 +1782,29 @@ if(params.type_of_ionization in (["pos","both"])){
                         PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
                         """
                     }
+                    masstrace_detection_process_library_pos_openms=masstrace_detection_process_library_pos
+                    param_detection_process_library_pos_ipo=param_detection_process_library_pos
+                  } else {
+                    quant_library_mzml_files_pos.into{masstrace_detection_process_library_pos_openms;param_detection_process_library_pos_ipo}
+                  }
 
                     if(params.quantification_openms_xcms_library_pos == "openms"){
                         /*
                          * STEP 31 - feature detection for the library by openms
                          */
-                        process process_masstrace_detection_library_pos_openms_centroided  {
+                        process process_masstrace_detection_library_pos_openms  {
                             label 'openms'
                             //label 'process_low'
                             tag "$mzMLFile"
-                            publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                            publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                             input:
-                            file mzMLFile from masstrace_detection_process_library_pos
+                            file mzMLFile from masstrace_detection_process_library_pos_openms
                             each file(setting_file) from featurefinder_ini_library_pos_openms
 
                             output:
                             file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion
-                            file mzMLFile into openms_to_xcms_conversion_raw_pos_centroided_library
+                            file mzMLFile into openms_to_xcms_conversion_raw_pos_library
 
                             """
                             FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
@@ -1962,15 +1815,15 @@ if(params.type_of_ionization in (["pos","both"])){
                          * STEP 32 - convert openms to xcms
                          */
 
-                        process process_openms_to_xcms_conversion_library_pos_centroided  {
+                        process process_openms_to_xcms_conversion_library_pos  {
                             label 'xcmsconvert'
                             //label 'process_low'
                             tag "$mzMLFile"
-                            publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                            publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                             input:
                             file mzMLFile from openms_to_xcms_conversion
-                            file mzMLFile2 from openms_to_xcms_conversion_raw_pos_centroided_library
+                            file mzMLFile2 from openms_to_xcms_conversion_raw_pos_library
                             //each file(phenotype_file) from phenotype_design_library_pos
 
                             output:
@@ -1995,14 +1848,14 @@ if(params.type_of_ionization in (["pos","both"])){
                         if(ipo_library_pos_globalQ == true){
 
 
-                            process process_ipo_param_library_pos_ipo_centroided {
+                            process process_ipo_param_library_pos_ipo {
                                 label 'ipo'
                                 //label 'process_high'
                                 tag "A collection of files"
                                 publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                                 input:
-                                file mzMLFile from param_detection_process_library_pos.collect()
+                                file mzMLFile from param_detection_process_library_pos_ipo.collect()
 
                                 output:
                                 file "quant_params_library_pos.json" into param_to_detection_process_library_pos
@@ -2073,14 +1926,14 @@ if(params.type_of_ionization in (["pos","both"])){
                         }
 
                         param_target_to_detection_process_library_pos = ipo_library_pos_globalQ ? param_to_detection_process_library_pos : Channel.from(false)
-                        process process_masstrace_detection_library_pos_xcms_centroided {
+                        process process_masstrace_detection_library_pos_xcms {
                             label 'xcms'
                             //label 'process_low'
                             tag "$mzMLFile"
-                            publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                            publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                             input:
-                            file mzMLFile from masstrace_detection_process_library_pos
+                            file mzMLFile from masstrace_detection_process_library_pos_openms
                             each file(paramsQ) from param_target_to_detection_process_library_pos
 
                             output:
@@ -2134,208 +1987,7 @@ if(params.type_of_ionization in (["pos","both"])){
                             """
                         }
                     }
-                } else {
 
-                    if(params.quantification_openms_xcms_library_pos== "openms"){
-                        /*
-                         * STEP 31 - feature detection for the library by openms
-                         */
-                        process process_masstrace_detection_library_pos_openms_noncentroided  {
-                            label 'openms'
-                            //label 'process_low'
-                            tag "$mzMLFile"
-                            publishDir "${params.outdir}/process_masstrace_detection_library_pos_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                            input:
-                            file mzMLFile from quant_library_mzml_files_pos
-                            each file(setting_file) from featurefinder_ini_library_pos_openms
-
-                            output:
-                            file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_library_pos_noncentroided
-                            file "$mzMLFile" into openms_to_xcms_conversion_raw_pos_uncentroided_library
-
-                            """
-                            FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
-                            """
-                        }
-
-                        /*
-                        * STEP 32 - convert openms to xcms
-                        */
-                        process process_openms_to_xcms_conversion_library_pos_noncentroided  {
-                            label 'xcmsconvert'
-                            //label 'process_low'
-                            tag "$mzMLFile"
-                            publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_pos_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                            input:
-                            file mzMLFile from openms_to_xcms_conversion_library_pos_noncentroided
-                            file mzMLFile2 from openms_to_xcms_conversion_raw_pos_uncentroided_library
-
-                            output:
-                            file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
-
-                            """
-                            featurexmlToCamera.r \\
-                                input=$mzMLFile \\
-                                realFileName=$mzMLFile \\
-                                mzMLfiles=\$PWD/$mzMLFile2 \\
-                                polarity=positive \\
-                                output=${mzMLFile.baseName}.rdata \\
-                                sampleClass=library \\
-                                changeNameTO=${mzMLFile.baseName}.mzML
-                            """
-                        }
-                    } else {
-
-                        /*
-                         * STEP 33 - feature detection using xcms
-                         */
-
-                        if(ipo_library_pos_globalQ == true){
-
-
-                            process process_ipo_param_library_pos_ipo_noncentroided {
-                                label 'ipo'
-                                //label 'process_high'
-                                tag "$mzMLFile"
-                                publishDir "${params.outdir}/process_ipo_param_library_pos_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                                input:
-                                file mzMLFile from quant_mzml_files_params_library_pos.collect()
-
-                                output:
-                                file "quant_params_library_pos.json" into param_to_detection_process_library_pos
-                                file "rt_params_library_pos.json" into param_to_rt_process_library_pos
-
-                                script:
-                                def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-                                """
-                                touch quant_params_library_pos.json
-                                touch rt_params_library_pos.json
-
-                                ipo.r \\
-                                    input=$inputs_aggregated \\
-                                    quantOnly=TRUE \\
-                                    allSamples=TRUE  \\
-                                    methodXset=$params.ipo_methodXset_library_pos \\
-                                    methodRT=$params.ipo_methodRT_library_pos \\
-                                    noise_l=$params.ipo_noise_l_library_pos  \\
-                                    noise_h=$params.ipo_noise_h_library_pos \\
-                                    prefilter_l_l=$params.ipo_prefilter_l_l_library_pos \\
-                                    prefilter_l_h=$params.ipo_prefilter_l_h_library_pos  \\
-                                    prefilter_h_l=$params.ipo_prefilter_h_l_library_pos \\
-                                    prefilter_h_h=$params.ipo_prefilter_h_h_library_pos  \\
-                                    snthresh_l=$params.ipo_snthresh_l_library_pos \\
-                                    snthresh_h=$params.ipo_snthresh_h_library_pos \\
-                                    mzCenterFun=$params.ipo_mzCenterFun_library_pos  \\
-                                    integrate=$params.ipo_integrate_library_pos \\
-                                    fitgauss=$params.ipo_fitgauss_library_pos \\
-                                    ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
-                                    ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
-                                    ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
-                                    ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
-                                    ipo_ppm_h=$params.ipo_ppm_h_library_pos \\
-                                    ipo_mzdiff_l=$params.ipo_mzdiff_l_library_pos \\
-                                    ipo_mzdiff_h=$params.ipo_mzdiff_h_library_pos  \\
-                                    ipo_charge_camera=$params.ipo_charge_camera_library_pos \\
-                                    ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_pos  \\
-                                    response_l=$params.ipo_response_l_library_pos \\
-                                    response_h=$params.ipo_response_h_library_pos \\
-                                    distFunc=$params.ipo_distFunc_library_pos  \\
-                                    factorDiag_l=$params.ipo_factorDiag_l_library_pos \\
-                                    factorDiag_h=$params.ipo_factorDiag_h_library_pos \\
-                                    factorGap_l=$params.ipo_factorGap_l_library_pos  \\
-                                    factorGap_h=$params.ipo_factorGap_h_library_pos \\
-                                    localAlignment=$params.ipo_localAlignment_library_pos \\
-                                    ipo_gapInit_l=$params.ipo_gapInit_l_library_pos  \\
-                                    ipo_gapInit_h=$params.ipo_gapInit_h_library_pos \\
-                                    ipo_gapExtend_l=$params.ipo_gapExtend_l_library_pos  \\
-                                    ipo_gapExtend_h=$params.ipo_gapExtend_h_library_pos \\
-                                    ipo_profStep_l=$params.ipo_profStep_l_library_pos \\
-                                    ipo_profStep_h=$params.ipo_profStep_h_library_pos  \\
-                                    bw_l=$params.ipo_bw_l_library_pos \\
-                                    bw_h=$params.ipo_bw_h_library_pos \\
-                                    minfrac_l=$params.ipo_minfrac_l_library_pos  \\
-                                    minfrac_h=$params.ipo_minfrac_h_library_pos \\
-                                    mzwid_l=$params.ipo_mzwid_l_library_pos \\
-                                    mzwid_h=$params.ipo_mzwid_h_library_pos \\
-                                    minsamp_l=$params.ipo_minsamp_l_library_pos  \\
-                                    minsamp_h=$params.ipo_minsamp_h_library_pos \\
-                                    max_l=$params.ipo_max_l_library_pos \\
-                                    max_h=$params.ipo_max_h_library_pos \\
-                                    ncores=$params.ipo_ncores_library_pos \\
-                                    outputxset=quant_params_library_pos.json \\
-                                    outputrt=rt_params_library_pos.json
-                                """
-                            }
-                        }
-
-                        param_target_to_detection_process_library_pos =ipo_library_pos_globalQ ? param_to_detection_process_library_pos : Channel.from(false)
-
-                        process process_masstrace_detection_library_pos_xcms_noncentroided {
-                            label 'xcms'
-                            //label 'process_low'
-                            tag "$mzMLFile"
-                            publishDir "${params.outdir}/process_masstrace_detection_library_pos_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                            input:
-                            file mzMLFile from quant_library_mzml_files_pos
-                            each file(paramsQ) from param_target_to_detection_process_library_pos
-
-                            output:
-                            file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_pos_camera
-
-                            script:
-                            def filter_argument = paramsQ.name == 'quant_params_library_pos.json' ? "ipo_in=${paramsQ}" : ''
-                            """
-                            findPeaks.r \\
-                                input=\$PWD/$mzMLFile \\
-                                output=\$PWD/${mzMLFile.baseName}.rdata \\
-                                ppm=$params.masstrace_ppm_library_pos_xcms \\
-                                peakwidthLow=$params.peakwidthlow_quant_library_pos_xcms  \\
-                                peakwidthHigh=$params.peakwidthhigh_quant_library_pos_xcms \\
-                                noise=$params.noise_quant_library_pos_xcms \\
-                                polarity=positive \\
-                                realFileName=$mzMLFile \\
-                                sampleClass=$params.sampleclass_quant_library_pos_xcms  \\
-                                mzdiff=$params.mzdiff_quant_library_pos_xcms \\
-                                snthresh=$params.snthresh_quant_library_pos_xcms \\
-                                prefilter_l=$params.prefilter_quant_library_pos_xcms \\
-                                prefilter_h=$params.value_of_prefilter_quant_library_pos_xcms  \\
-                                mzCenterFun=$params.mzCenterFun_quant_library_pos_xcms \\
-                                integrate=$params.integrate_quant_library_pos_xcms \\
-                                fitgauss=$params.fitgauss_quant_library_pos_xcms  \\
-                                methodXset=$params.ipo_methodXset_library_pos \\
-                                methodRT=$params.ipo_methodRT_library_pos \\
-                                noise_l=$params.ipo_noise_l_library_pos  \\
-                                noise_h=$params.ipo_noise_h_library_pos \\
-                                prefilter_l_l=$params.ipo_prefilter_l_l_library_pos \\
-                                prefilter_l_h=$params.ipo_prefilter_l_h_library_pos  \\
-                                prefilter_h_l=$params.ipo_prefilter_h_l_library_pos \\
-                                prefilter_h_h=$params.ipo_prefilter_h_h_library_pos  \\
-                                snthresh_l=$params.ipo_snthresh_l_library_pos \\
-                                snthresh_h=$params.ipo_snthresh_h_library_pos \\
-                                mzCenterFun=$params.ipo_mzCenterFun_library_pos  \\
-                                integrate=$params.ipo_integrate_library_pos \\
-                                fitgauss=$params.ipo_fitgauss_library_pos \\
-                                ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_pos  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_pos \\
-                                ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_pos \\
-                                ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_pos \\
-                                ipo_ppm_l=$params.ipo_ppm_l_library_pos  \\
-                                ipo_ppm_h=$params.ipo_ppm_h_library_pos \\
-                                ipo_mzdiff_l=$params.ipo_mzdiff_l_library_pos \\
-                                ipo_mzdiff_h=$params.ipo_mzdiff_h_library_pos \\
-                                ipo_charge_camera=$params.ipo_charge_camera_library_pos  \\
-                                ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_pos  \\
-                                ipo_inv=$ipo_library_pos_localQ \\
-                                $filter_argument
-                            """
-                        }
-                    }
-                }
 
 
 
@@ -2491,7 +2143,19 @@ if(params.type_of_ionization in (["pos","both"])){
                         inputMS2=$rdata_files_ms2 \\
                         output=${rdata_files_ms1.baseName}_MapMsms2Camera_library_pos.rdata  \\
                         ppm=$params.ppm_mapmsmstocamera_library_pos_msnbase \\
-                        rt=$params.rt_mapmsmstocamera_library_pos_msnbase
+                        rt=$params.rt_mapmsmstocamera_library_pos_msnbase \\
+                        preprocess_ms2=$params.preprocess_msms_library_pos_msnbase \\
+                        preprocess_msms_centroid=$params.preprocess_msms_centroid_library_pos_msnbase \\
+                        preprocess_msms_merge=$params.preprocess_msms_merge_library_pos_msnbase \\
+                        preprocess_msms_centroid_after_merge=$params.preprocess_msms_centroid_after_merge_library_pos_msnbase \\
+                        preprocess_msms_ppm=$params.preprocess_msms_ppm_library_pos_msnbase \\
+                        preprocess_msms_ppm_precursor=$params.preprocess_msms_ppm_precursor_library_pos_msnbase \\
+                        preprocess_msms_abs_mz=$params.preprocess_msms_abs_mz_library_pos_msnbase \\
+                        preprocess_msms_abs_mz_precursor=$params.preprocess_msms_abs_mz_precursor_library_pos_msnbase \\
+                        preprocess_msms_rt=$params.preprocess_msms_rt_library_pos_msnbase \\
+                        preprocess_msms_centroid_onlymapped=$params.preprocess_msms_centroid_onlymapped_library_pos_msnbase \\
+                        preprocess_msms_merge_onlymapped=$params.preprocess_msms_merge_onlymapped_library_pos_msnbase \\
+                        preprocess_msms_int_threshold=$params.preprocess_msms_int_threshold_library_pos_msnbase
                     """
                 }
 
@@ -2843,6 +2507,11 @@ if(params.type_of_ionization in (["neg","both"])){
             PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
             """
         }
+        masstrace_detection_process_neg_openms=masstrace_detection_process_neg
+        param_detection_process_neg_ipo=param_detection_process_neg
+      }else{
+        quant_mzml_files_neg.into{masstrace_detection_process_neg_openms;param_detection_process_neg_ipo}
+      }
 
 
 
@@ -2853,19 +2522,19 @@ if(params.type_of_ionization in (["neg","both"])){
         if(params.quantification_openms_xcms_neg == "openms") {
             param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true  ? Channel.from(false) : param_to_rt_process_neg
 
-            process process_masstrace_detection_neg_openms_centroided  {
+            process process_masstrace_detection_neg_openms  {
                 label 'openms'
                 //label 'process_low'
                 tag "$mzMLFile"
-                publishDir "${params.outdir}/process_masstrace_detection_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                publishDir "${params.outdir}/process_masstrace_detection_neg_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                 input:
-                file mzMLFile from masstrace_detection_process_neg
+                file mzMLFile from masstrace_detection_process_neg_openms
                 each file(setting_file) from featurefinder_ini_neg_openms
 
                 output:
                 file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_neg_conversion
-                file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms, openms_to_xcms_conversion_raw_neg_centroided
+                file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms, openms_to_xcms_conversion_raw_neg
 
                 """
                 FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
@@ -2875,15 +2544,15 @@ if(params.type_of_ionization in (["neg","both"])){
             /*
             * STEP 2.5 - convert openms to xcms
             */
-            process process_openms_to_xcms_conversion_neg_centroided  {
+            process process_openms_to_xcms_conversion_neg  {
                 label 'xcmsconvert'
                 //label 'process_low'
                 tag "$mzMLFile"
-                publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                 input:
                 file mzMLFile from openms_to_xcms_neg_conversion
-                file mzMLFile2 from openms_to_xcms_conversion_raw_neg_centroided
+                file mzMLFile2 from openms_to_xcms_conversion_raw_neg
                 each file(phenotype_file) from phenotype_design_neg
 
                 output:
@@ -2909,14 +2578,14 @@ if(params.type_of_ionization in (["neg","both"])){
             */
             if(ipo_neg_globalQ == true){
 
-                process process_ipo_param_neg_ipo_centroided {
+                process process_ipo_param_neg_ipo {
                     label 'ipo'
                     //label 'process_high'
                     tag "A collection of files"
                     publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                     input:
-                    file mzMLFile from param_detection_process_neg.collect()
+                    file mzMLFile from param_detection_process_neg_ipo.collect()
                     each file(phenotype_file) from phenotype_design_neg_param
 
                     output:
@@ -2993,14 +2662,14 @@ if(params.type_of_ionization in (["neg","both"])){
             param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : Channel.from(false)
             param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
 
-            process process_masstrace_detection_neg_xcms_centroided {
+            process process_masstrace_detection_neg_xcms {
                 label 'xcms'
                 //label 'process_low'
                 tag "$mzMLFile"
                 publishDir "${params.outdir}/process_masstrace_detection_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                 input:
-                file mzMLFile from masstrace_detection_process_neg
+                file mzMLFile from masstrace_detection_process_neg_openms
                 each file(phenotype_file) from phenotype_design_neg
                 each file(paramsQ) from param_target_to_detection_process_neg
 
@@ -3058,220 +2727,6 @@ if(params.type_of_ionization in (["neg","both"])){
                 """
             }
         }
-    } else {
-
-        /*
-         * STEP 2 - feature detection by openms if selected by the user
-         */
-        if(params.quantification_openms_xcms_neg == "openms"){
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
-
-            process process_masstrace_detection_neg_openms_noncentroided  {
-                label 'openms'
-                //label 'process_low'
-                tag "$mzMLFile"
-                publishDir "${params.outdir}/process_masstrace_detection_neg_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                input:
-                file mzMLFile from quant_mzml_files_neg
-                each file(setting_file) from featurefinder_ini_neg_openms
-
-                output:
-                file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_neg_noncentroided
-                file "$mzMLFile" into rt_rdata_neg_xcms, openms_to_xcms_conversion_raw_neg_noncentroided
-
-                """
-                FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
-                """
-            }
-
-            /*
-             * STEP 2.5 - convert openms to xcms
-             */
-            process process_openms_to_xcms_conversion_neg_noncentroided  {
-                label 'xcmsconvert'
-                //label 'process_low'
-                tag "$mzMLFile"
-                publishDir "${params.outdir}/process_openms_to_xcms_conversion_neg_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                input:
-                file mzMLFile from openms_to_xcms_conversion_neg_noncentroided
-                file mzMLFile2 from openms_to_xcms_conversion_raw_neg_noncentroided
-                each file(phenotype_file) from phenotype_design_neg
-
-                output:
-                file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
-
-                """
-                featurexmlToCamera.r \\
-                    input=$mzMLFile \\
-                    realFileName=$mzMLFile \\
-                    mzMLfiles=\$PWD/$mzMLFile2 \\
-                    polarity=negative \\
-                    output=${mzMLFile.baseName}.rdata \\
-                    phenoFile=$phenotype_file  \\
-                    phenoDataColumn=$params.phenodatacolumn_quant_neg \\
-                    sampleClass=$params.sampleclass_quant_neg_xcms \\
-                    changeNameTO=${mzMLFile.baseName}.mzML
-                """
-            }
-
-        } else {
-
-            /*
-             * STEP 2 - feature detection by xcms
-             */
-            if(ipo_neg_globalQ == true) {
-
-                process process_ipo_param_neg_ipo_noncentroided {
-                    label 'ipo'
-                    //label 'process_high'
-                    publishDir "${params.outdir}/process_ipo_param_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                    input:
-                    file mzMLFile from quant_mzml_files_params_neg.collect()
-                    each file(phenotype_file) from phenotype_design_neg_param
-
-                    output:
-                    file "quant_params_neg.json" into param_to_detection_process_neg
-                    file "rt_params_neg.json" into param_to_rt_process_neg
-
-                    script:
-                    def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-                    """
-                    touch quant_params_neg.json
-                    touch rt_params_neg.json
-
-                    ipo.r \\
-                        input=$inputs_aggregated \\
-                        quantOnly=$ipo_neg_globalAvoidRT \\
-                        allSamples=$params.ipo_allSamples_neg \\
-                        columnToSelect=$params.ipo_columnToSelect_neg  \\
-                        valueToSelect=$params.ipo_valueToSelect_neg \\
-                        phenoFile=$phenotype_file  \\
-                        methodXset=$params.ipo_methodXset_neg \\
-                        methodRT=$params.ipo_methodRT_neg \\
-                        noise_l=$params.ipo_noise_l_neg  \\
-                        noise_h=$params.ipo_noise_h_neg \\
-                        prefilter_l_l=$params.ipo_prefilter_l_l_neg \\
-                        prefilter_l_h=$params.ipo_prefilter_l_h_neg  \\
-                        prefilter_h_l=$params.ipo_prefilter_h_l_neg \\
-                        prefilter_h_h=$params.ipo_prefilter_h_h_neg  \\
-                        snthresh_l=$params.ipo_snthresh_l_neg \\
-                        snthresh_h=$params.ipo_snthresh_h_neg \\
-                        mzCenterFun=$params.ipo_mzCenterFun_neg  \\
-                        integrate=$params.ipo_integrate_neg \\
-                        fitgauss=$params.ipo_fitgauss_neg \\
-                        ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                        ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
-                        ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
-                        ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
-                        ipo_ppm_l=$params.ipo_ppm_l_neg  \\
-                        ipo_ppm_h=$params.ipo_ppm_h_neg \\
-                        ipo_mzdiff_l=$params.ipo_mzdiff_l_neg \\
-                        ipo_mzdiff_h=$params.ipo_mzdiff_h_neg \\
-                        ipo_charge_camera=$params.ipo_charge_camera_neg \\
-                        ipo_max_ppm_camera=$params.ipo_max_ppm_camera_neg  \\
-                        response_l=$params.ipo_response_l_neg \\
-                        response_h=$params.ipo_response_h_neg \\
-                        distFunc=$params.ipo_distFunc_neg \\
-                        factorDiag_l=$params.ipo_factorDiag_l_neg \\
-                        factorDiag_h=$params.ipo_factorDiag_h_neg \\
-                        factorGap_l=$params.ipo_factorGap_l_neg  \\
-                        factorGap_h=$params.ipo_factorGap_h_neg \\
-                        localAlignment=$params.ipo_localAlignment_neg \\
-                        ipo_gapInit_l=$params.ipo_gapInit_l_neg \\
-                        ipo_gapInit_h=$params.ipo_gapInit_h_neg \\
-                        ipo_gapExtend_l=$params.ipo_gapExtend_l_neg  \\
-                        ipo_gapExtend_h=$params.ipo_gapExtend_h_neg \\
-                        ipo_profStep_l=$params.ipo_profStep_l_neg \\
-                        ipo_profStep_h=$params.ipo_profStep_h_neg \\
-                        bw_l=$params.ipo_bw_l_neg \\
-                        bw_h=$params.ipo_bw_h_neg \\
-                        minfrac_l=$params.ipo_minfrac_l_neg  \\
-                        minfrac_h=$params.ipo_minfrac_h_neg \\
-                        mzwid_l=$params.ipo_mzwid_l_neg \\
-                        mzwid_h=$params.ipo_mzwid_h_neg \\
-                        minsamp_l=$params.ipo_minsamp_l_neg  \\
-                        minsamp_h=$params.ipo_minsamp_h_neg \\
-                        max_l=$params.ipo_max_l_neg \\
-                        max_h=$params.ipo_max_h_neg \\
-                        ncores=$params.ipo_ncores_neg \\
-                        outputxset=quant_params_neg.json \\
-                        outputrt=rt_params_neg.json
-                    """
-                }
-            }
-
-            param_target_to_detection_process_neg = ipo_neg_globalQ ? param_to_detection_process_neg : Channel.from(false)
-            param_target_to_rt_process_neg = ipo_neg_globalAvoidRT == true ? Channel.from(false) : param_to_rt_process_neg
-
-            process process_masstrace_detection_neg_xcms_noncentroided {
-                label 'xcms'
-                //label 'process_low'
-                tag "$mzMLFile"
-                publishDir "${params.outdir}/process_masstrace_detection_neg_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                input:
-                file mzMLFile from quant_mzml_files_neg
-                each file(phenotype_file) from phenotype_design_neg
-                each file(paramsQ) from param_target_to_detection_process_neg
-
-                output:
-                file "${mzMLFile.baseName}.rdata" into collect_rdata_neg_xcms
-                file "${mzMLFile.baseName}.mzML" into rt_rdata_neg_xcms
-
-                script:
-                def filter_argument = paramsQ.name == 'quant_params_neg.json' ? "ipo_in=$paramsQ" : ''
-                """
-                findPeaks.r \\
-                    input=\$PWD/$mzMLFile \\
-                    output=\$PWD/${mzMLFile.baseName}.rdata \\
-                    ppm=$params.masstrace_ppm_neg_xcms \\
-                    peakwidthLow=$params.peakwidthlow_quant_neg_xcms  \\
-                    peakwidthHigh=$params.peakwidthhigh_quant_neg_xcms \\
-                    noise=$params.noise_quant_neg_xcms \\
-                    polarity=negative \\
-                    realFileName=$mzMLFile \\
-                    phenoFile=$phenotype_file \\
-                    phenoDataColumn=$params.phenodatacolumn_quant_neg  \\
-                    sampleClass=$params.sampleclass_quant_neg_xcms \\
-                    mzdiff=$params.mzdiff_quant_neg_xcms \\
-                    snthresh=$params.snthresh_quant_neg_xcms \\
-                    prefilter_l=$params.prefilter_quant_neg_xcms  \\
-                    prefilter_h=$params.value_of_prefilter_quant_neg_xcms \\
-                    mzCenterFun=$params.mzCenterFun_quant_neg_xcms \\
-                    integrate=$params.integrate_quant_neg_xcms \\
-                    fitgauss=$params.fitgauss_quant_neg_xcms  \\
-                    methodXset=$params.ipo_methodXset_neg \\
-                    methodRT=$params.ipo_methodRT_neg \\
-                    noise_l=$params.ipo_noise_l_neg  \\
-                    noise_h=$params.ipo_noise_h_neg \\
-                    prefilter_l_l=$params.ipo_prefilter_l_l_neg \\
-                    prefilter_l_h=$params.ipo_prefilter_l_h_neg  \\
-                    prefilter_h_l=$params.ipo_prefilter_h_l_neg \\
-                    prefilter_h_h=$params.ipo_prefilter_h_h_neg  \\
-                    snthresh_l=$params.ipo_snthresh_l_neg \\
-                    snthresh_h=$params.ipo_snthresh_h_neg \\
-                    mzCenterFun=$params.ipo_mzCenterFun_neg  \\
-                    integrate=$params.ipo_integrate_neg \\
-                    fitgauss=$params.ipo_fitgauss_neg \\
-                    ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_neg  \\
-                    ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_neg \\
-                    ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_neg \\
-                    ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_neg \\
-                    ipo_ppm_l=$params.ipo_ppm_l_neg  \\
-                    ipo_ppm_h=$params.ipo_ppm_h_neg \\
-                    ipo_mzdiff_l=$params.ipo_mzdiff_l_neg \\
-                    ipo_mzdiff_h=$params.ipo_mzdiff_h_neg \\
-                    ipo_charge_camera=$params.ipo_charge_camera_neg \\
-                    ipo_max_ppm_camera=$params.ipo_max_ppm_camera_neg  \\
-                    ipo_inv=$ipo_neg_localQ \\
-                    $filter_argument
-                """
-            }
-        }
-    }
 
     /*
      * STEP 3 - collect xcms objects into a hyper object
@@ -3592,8 +3047,30 @@ if(params.type_of_ionization in (["neg","both"])){
     if(params.perform_identification == true){
 
         /*
-         * STEP 15 - read MSMS data
+         * STEP 15 - read MSMS data and centroid
          */
+         if(params.need_centroiding_msms==true){
+             process process_peak_picker_msms_neg_openms  {
+                 label 'openms'
+                 //label 'process_low'
+                 tag "$mzMLFile"
+                 publishDir "${params.outdir}/process_peak_picker_msms_neg_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                 stageInMode 'copy'
+
+                 input:
+                 file mzMLFile from id_mzml_files_neg
+                 each file(setting_file) from peakpicker_ini_file_msms_neg_openms
+
+                 output:
+                 file "${mzMLFile}" into id_mzml_files_neg_msnbase
+
+                 """
+                 PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
+                 """
+             }
+           }else{
+             id_mzml_files_neg_msnbase=id_mzml_files_neg
+           }
 
         process process_read_MS2_neg_msnbase {
             label 'msnbase'
@@ -3602,7 +3079,7 @@ if(params.type_of_ionization in (["neg","both"])){
             publishDir "${params.outdir}/process_read_MS2_neg_msnbase", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
             input:
-            file mzMLFile from id_mzml_files_neg
+            file mzMLFile from id_mzml_files_neg_msnbase
 
             output:
             file "${mzMLFile.baseName}.rdata" into mapmsmstocamera_rdata_neg_msnbase
@@ -3640,7 +3117,19 @@ if(params.type_of_ionization in (["neg","both"])){
                 inputMS2=$input_args \\
                 output=MapMsms2Camera_neg.rdata  \\
                 ppm=$params.ppm_mapmsmstocamera_neg_msnbase \\
-                rt=$params.rt_mapmsmstocamera_neg_msnbase
+                rt=$params.rt_mapmsmstocamera_neg_msnbase \\
+                preprocess_ms2=$params.preprocess_msms_neg_msnbase \\
+                preprocess_msms_centroid=$params.preprocess_msms_centroid_neg_msnbase \\
+                preprocess_msms_merge=$params.preprocess_msms_merge_neg_msnbase \\
+                preprocess_msms_centroid_after_merge=$params.preprocess_msms_centroid_after_merge_neg_msnbase \\
+                preprocess_msms_ppm=$params.preprocess_msms_ppm_neg_msnbase \\
+                preprocess_msms_ppm_precursor=$params.preprocess_msms_ppm_precursor_neg_msnbase \\
+                preprocess_msms_abs_mz=$params.preprocess_msms_abs_mz_neg_msnbase \\
+                preprocess_msms_abs_mz_precursor=$params.preprocess_msms_abs_mz_precursor_neg_msnbase \\
+                preprocess_msms_rt=$params.preprocess_msms_rt_neg_msnbase \\
+                preprocess_msms_centroid_onlymapped=$params.preprocess_msms_centroid_onlymapped_neg_msnbase \\
+                preprocess_msms_merge_onlymapped=$params.preprocess_msms_merge_onlymapped_neg_msnbase \\
+                preprocess_msms_int_threshold=$params.preprocess_msms_int_threshold_neg_msnbase
             """
         }
 
@@ -3727,7 +3216,9 @@ if(params.type_of_ionization in (["neg","both"])){
 
                     if [ -z "\$(ls -A outputs/)" ]; then
                     printf '%s\n' "No metabolites were identified. Check your settings"
-                    exit 1
+                    #exit 1
+                    touch outputs/empty.csv
+                    zip -j -r ${parameters.baseName}_Csifingerid_neg.zip outputs/*.csv
                     else
                        zip -j -r ${parameters.baseName}_Csifingerid_neg.zip outputs/*.csv
                     fi
@@ -3927,7 +3418,9 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 if [ -z "\$(ls -A outputs/)" ]; then
                 printf '%s\n' "No metabolites were identified. Check your settings"
-                exit 1
+                #exit 1
+                touch outputs/empty.csv
+                zip -j -r ${parameters.baseName}_metfrag_neg.zip outputs/*.csv
                 else
                 zip -j -r ${parameters.baseName}_metfrag_neg.zip outputs/*.csv
                 fi
@@ -4123,7 +3616,9 @@ if(params.type_of_ionization in (["neg","both"])){
 
                 if [ -z "\$(ls -A outputs/)" ]; then
                 printf '%s\n' "No metabolites were identified. Check your settings"
-                exit 1
+                #exit 1
+                touch outputs/empty.csv
+                zip -j -r ${parameters.baseName}_cfmid_neg.zip outputs/*.csv
                 else
                 zip -j -r ${parameters.baseName}_cfmid_neg.zip outputs/*.csv
                 fi
@@ -4275,11 +3770,11 @@ if(params.type_of_ionization in (["neg","both"])){
                 /*
                 * STEP 30 - peakpicking for library
                 */
-                process process_peak_picker_library_neg_openms_centroided  {
+                process process_peak_picker_library_neg_openms  {
                     label 'openms'
                     //label 'process_low'
                     tag "$mzMLFile"
-                    publishDir "${params.outdir}/process_peak_picker_library_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                    publishDir "${params.outdir}/process_peak_picker_library_neg_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
                     stageInMode 'copy'
 
                     input:
@@ -4293,24 +3788,29 @@ if(params.type_of_ionization in (["neg","both"])){
                     PeakPickerHiRes -in $mzMLFile -out $mzMLFile -ini $setting_file
                     """
                 }
+                masstrace_detection_process_library_neg_openms=masstrace_detection_process_library_neg
+                param_detection_process_library_neg_ipo=param_detection_process_library_neg
+              }else{
+                quant_library_mzml_files_neg.into{masstrace_detection_process_library_neg_openms;param_detection_process_library_neg_ipo}
+              }
 
                 if(params.quantification_openms_xcms_library_neg=="openms") {
                     /*
                     * STEP 31 - feature detection for the library by openms
                     */
-                    process process_masstrace_detection_library_neg_openms_centroided  {
+                    process process_masstrace_detection_library_neg_openms  {
                         label 'openms'
                         //label 'process_low'
                         tag "$mzMLFile"
-                        publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                        publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                         input:
-                        file mzMLFile from masstrace_detection_process_library_neg
+                        file mzMLFile from masstrace_detection_process_library_neg_openms
                         each file(setting_file) from featurefinder_ini_library_neg_openms
 
                         output:
                         file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion
-                        file "$mzMLFile" into openms_to_xcms_conversion_raw_neg_centroided_library
+                        file "$mzMLFile" into openms_to_xcms_conversion_raw_neg_library
 
                         """
                         FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
@@ -4320,15 +3820,15 @@ if(params.type_of_ionization in (["neg","both"])){
                     /*
                     * STEP 32 - convert openms to xcms
                     */
-                    process process_openms_to_xcms_conversion_library_neg_centroided  {
+                    process process_openms_to_xcms_conversion_library_neg  {
                         label 'xcmsconvert'
                         //label 'process_low'
                         tag "$mzMLFile"
-                        publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                        publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                         input:
                         file mzMLFile from openms_to_xcms_conversion
-                        file mzMLFile2 from openms_to_xcms_conversion_raw_neg_centroided_library
+                        file mzMLFile2 from openms_to_xcms_conversion_raw_neg_library
 
                         output:
                         file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
@@ -4352,14 +3852,14 @@ if(params.type_of_ionization in (["neg","both"])){
                     if(ipo_library_neg_globalQ == true){
 
 
-                        process process_ipo_param_library_neg_ipo_centroided {
+                        process process_ipo_param_library_neg_ipo {
                             label 'ipo'
                             //label 'process_high'
                             tag "A collection of files"
                             publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                             input:
-                            file mzMLFile from param_detection_process_library_neg.collect()
+                            file mzMLFile from param_detection_process_library_neg_ipo.collect()
 
                             output:
                             file "quant_params_library_neg.json" into param_to_detection_process_library_neg
@@ -4431,14 +3931,14 @@ if(params.type_of_ionization in (["neg","both"])){
 
                     param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : Channel.from(false)
 
-                    process process_masstrace_detection_library_neg_xcms_centroided {
+                    process process_masstrace_detection_library_neg_xcms {
                         label 'xcms'
                         //label 'process_low'
                         tag "$mzMLFile"
-                        publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_centroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
+                        publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
 
                         input:
-                        file mzMLFile from masstrace_detection_process_library_neg
+                        file mzMLFile from masstrace_detection_process_library_neg_openms
                         each file(paramsQ) from param_target_to_detection_process_library_neg
 
                         output:
@@ -4492,206 +3992,7 @@ if(params.type_of_ionization in (["neg","both"])){
                         """
                     }
                 }
-            } else {
 
-                if(params.quantification_openms_xcms_library_neg =="openms"){
-                    /*
-                    * STEP 31 - feature detection for the library by openms
-                    */
-                    process process_masstrace_detection_library_neg_openms_noncentroided  {
-                        label 'openms'
-                        //label 'process_low'
-                        tag "$mzMLFile"
-                        publishDir "${params.outdir}/process_masstrace_detection_library_neg_openms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                        input:
-                        file mzMLFile from quant_library_mzml_files_neg
-                        each file(setting_file) from featurefinder_ini_library_neg_openms
-
-                        output:
-                        file "${mzMLFile.baseName}.featureXML" into openms_to_xcms_conversion_library_neg_noncentroided
-                        file "$mzMLFile" into openms_to_xcms_conversion_raw_neg_noncentroided_library
-
-                        """
-                        FeatureFinderMetabo -in $mzMLFile -out ${mzMLFile.baseName}.featureXML -ini $setting_file
-                        """
-                    }
-
-                    /*
-                    * STEP 32 - convert openms to xcms
-                    */
-                    process process_openms_to_xcms_conversion_library_neg_noncentroided  {
-                        label 'xcmsconvert'
-                        //label 'process_low'
-                        tag "$mzMLFile"
-                        publishDir "${params.outdir}/process_openms_to_xcms_conversion_library_neg_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                        input:
-                        file mzMLFile from openms_to_xcms_conversion_library_neg_noncentroided
-                        file mzMLFile2 from openms_to_xcms_conversion_raw_neg_noncentroided_library
-
-                        output:
-                        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
-
-                        """
-                        featurexmlToCamera.r \\
-                            input=$mzMLFile \\
-                            realFileName=$mzMLFile \\
-                            mzMLfiles=\$PWD/$mzMLFile2 \\
-                            polarity=negative \\
-                            output=${mzMLFile.baseName}.rdata \\
-                            sampleClass=library \\
-                            changeNameTO=${mzMLFile.baseName}.mzML
-                        """
-                    }
-                } else {
-
-                    /*
-                    * STEP 33 - feature detection using xcms
-                    */
-                    if(ipo_library_neg_globalQ == true){
-
-                        process process_ipo_param_library_neg_ipo_noncentroided {
-                            label 'ipo'
-                            //label 'process_high'
-                            tag "A collection of files"
-                            publishDir "${params.outdir}/process_ipo_param_library_neg_ipo", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                            input:
-                            file mzMLFile from quant_mzml_files_params_library_neg.collect()
-
-                            output:
-                            file "quant_params_library_neg.json" into param_to_detection_process_library_neg
-                            file "rt_params_library_neg.json" into param_to_rt_process_library_neg
-
-                            script:
-                            def inputs_aggregated = mzMLFile.collect{ "$it" }.join(",")
-                            """
-                            touch quant_params_library_neg.json
-                            touch rt_params_library_neg.json
-
-                            ipo.r \\
-                                input=$inputs_aggregated \\
-                                quantOnly=TRUE \\
-                                allSamples=TRUE  \\
-                                methodXset=$params.ipo_methodXset_library_neg \\
-                                methodRT=$params.ipo_methodRT_library_neg \\
-                                noise_l=$params.ipo_noise_l_library_neg  \\
-                                noise_h=$params.ipo_noise_h_library_neg \\
-                                prefilter_l_l=$params.ipo_prefilter_l_l_library_neg \\
-                                prefilter_l_h=$params.ipo_prefilter_l_h_library_neg  \\
-                                prefilter_h_l=$params.ipo_prefilter_h_l_library_neg \\
-                                prefilter_h_h=$params.ipo_prefilter_h_h_library_neg  \\
-                                snthresh_l=$params.ipo_snthresh_l_library_neg \\
-                                snthresh_h=$params.ipo_snthresh_h_library_neg \\
-                                mzCenterFun=$params.ipo_mzCenterFun_library_neg  \\
-                                integrate=$params.ipo_integrate_library_neg \\
-                                fitgauss=$params.ipo_fitgauss_library_neg \\
-                                ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                                ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
-                                ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
-                                ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
-                                ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
-                                ipo_ppm_h=$params.ipo_ppm_h_library_neg \\
-                                ipo_mzdiff_l=$params.ipo_mzdiff_l_library_neg \\
-                                ipo_mzdiff_h=$params.ipo_mzdiff_h_library_neg \\
-                                ipo_charge_camera=$params.ipo_charge_camera_library_neg \\
-                                ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_neg  \\
-                                response_l=$params.ipo_response_l_library_neg \\
-                                response_h=$params.ipo_response_h_library_neg \\
-                                distFunc=$params.ipo_distFunc_library_neg \\
-                                factorDiag_l=$params.ipo_factorDiag_l_library_neg \\
-                                factorDiag_h=$params.ipo_factorDiag_h_library_neg \\
-                                factorGap_l=$params.ipo_factorGap_l_library_neg  \\
-                                factorGap_h=$params.ipo_factorGap_h_library_neg \\
-                                localAlignment=$params.ipo_localAlignment_library_neg \\
-                                ipo_gapInit_l=$params.ipo_gapInit_l_library_neg \\
-                                ipo_gapInit_h=$params.ipo_gapInit_h_library_neg \\
-                                ipo_gapExtend_l=$params.ipo_gapExtend_l_library_neg  \\
-                                ipo_gapExtend_h=$params.ipo_gapExtend_h_library_neg \\
-                                ipo_profStep_l=$params.ipo_profStep_l_library_neg \\
-                                ipo_profStep_h=$params.ipo_profStep_h_library_neg \\
-                                bw_l=$params.ipo_bw_l_library_neg \\
-                                bw_h=$params.ipo_bw_h_library_neg \\
-                                minfrac_l=$params.ipo_minfrac_l_library_neg  \\
-                                minfrac_h=$params.ipo_minfrac_h_library_neg \\
-                                mzwid_l=$params.ipo_mzwid_l_library_neg \\
-                                mzwid_h=$params.ipo_mzwid_h_library_neg \\
-                                minsamp_l=$params.ipo_minsamp_l_library_neg  \\
-                                minsamp_h=$params.ipo_minsamp_h_library_neg \\
-                                max_l=$params.ipo_max_l_library_neg \\
-                                max_h=$params.ipo_max_h_library_neg \\
-                                ncores=$params.ipo_ncores_library_neg \\
-                                outputxset=quant_params_library_neg.json \\
-                                outputrt=rt_params_library_neg.json
-                            """
-                        }
-                    }
-
-                    param_target_to_detection_process_library_neg = ipo_library_neg_globalQ ? param_to_detection_process_library_neg : Channel.from(false)
-
-                    process process_masstrace_detection_library_neg_xcms_noncentroided {
-                        label 'xcms'
-                        //label 'process_low'
-                        tag "$mzMLFile"
-                        publishDir "${params.outdir}/process_masstrace_detection_library_neg_xcms_noncentroided", mode: params.publish_dir_mode, enabled: params.publishDir_intermediate
-
-                        input:
-                        file mzMLFile from quant_library_mzml_files_neg
-                        each file(paramsQ) from param_target_to_detection_process_library_neg
-
-                        output:
-                        file "${mzMLFile.baseName}.rdata" into annotation_rdata_library_neg_camera
-
-                        script:
-                        def filter_argument = paramsQ.name == 'quant_params_library_neg.json' ? "ipo_in=${paramsQ}" : ''
-                        """
-                        findPeaks.r \\
-                            input=\$PWD/$mzMLFile \\
-                            output=\$PWD/${mzMLFile.baseName}.rdata \\
-                            ppm=$params.masstrace_ppm_library_neg_xcms \\
-                            peakwidthLow=$params.peakwidthlow_quant_library_neg_xcms  \\
-                            peakwidthHigh=$params.peakwidthhigh_quant_library_neg_xcms \\
-                            noise=$params.noise_quant_library_neg_xcms \\
-                            polarity=negative \\
-                            realFileName=$mzMLFile \\
-                            sampleClass=$params.sampleclass_quant_library_neg_xcms  \\
-                            mzdiff=$params.mzdiff_quant_library_neg_xcms \\
-                            snthresh=$params.snthresh_quant_library_neg_xcms \\
-                            prefilter_l=$params.prefilter_quant_library_neg_xcms \\
-                            prefilter_h=$params.value_of_prefilter_quant_library_neg_xcms  \\
-                            mzCenterFun=$params.mzCenterFun_quant_library_neg_xcms \\
-                            integrate=$params.integrate_quant_library_neg_xcms \\
-                            fitgauss=$params.fitgauss_quant_library_neg_xcms  \\
-                            methodXset=$params.ipo_methodXset_library_neg \\
-                            methodRT=$params.ipo_methodRT_library_neg \\
-                            noise_l=$params.ipo_noise_l_library_neg  \\
-                            noise_h=$params.ipo_noise_h_library_neg \\
-                            prefilter_l_l=$params.ipo_prefilter_l_l_library_neg \\
-                            prefilter_l_h=$params.ipo_prefilter_l_h_library_neg  \\
-                            prefilter_h_l=$params.ipo_prefilter_h_l_library_neg \\
-                            prefilter_h_h=$params.ipo_prefilter_h_h_library_neg  \\
-                            snthresh_l=$params.ipo_snthresh_l_library_neg \\
-                            snthresh_h=$params.ipo_snthresh_h_library_neg \\
-                            mzCenterFun=$params.ipo_mzCenterFun_library_neg  \\
-                            integrate=$params.ipo_integrate_library_neg \\
-                            fitgauss=$params.ipo_fitgauss_library_neg \\
-                            ipo_min_peakwidth_l=$params.ipo_min_peakwidth_l_library_neg  \\
-                            ipo_min_peakwidth_h=$params.ipo_min_peakwidth_h_library_neg \\
-                            ipo_max_peakwidth_l=$params.ipo_max_peakwidth_l_library_neg \\
-                            ipo_max_peakwidth_h=$params.ipo_max_peakwidth_h_library_neg \\
-                            ipo_ppm_l=$params.ipo_ppm_l_library_neg  \\
-                            ipo_ppm_h=$params.ipo_ppm_h_library_neg \\
-                            ipo_mzdiff_l=$params.ipo_mzdiff_l_library_neg \\
-                            ipo_mzdiff_h=$params.ipo_mzdiff_h_library_neg \\
-                            ipo_charge_camera=$params.ipo_charge_camera_library_neg  \\
-                            ipo_max_ppm_camera=$params.ipo_max_ppm_camera_library_neg  \\
-                            ipo_inv=$ipo_library_neg_localQ \\
-                            $filter_argument
-                        """
-                    }
-                }
-            }
 
             /*
              * STEP 34 - convert xcms to camera
@@ -4841,7 +4142,19 @@ if(params.type_of_ionization in (["neg","both"])){
                     inputMS2=$rdata_files_ms2 \\
                     output=${rdata_files_ms1.baseName}_MapMsms2Camera_library_neg.rdata  \\
                     ppm=$params.ppm_mapmsmstocamera_library_neg_msnbase \\
-                    rt=$params.rt_mapmsmstocamera_library_neg_msnbase
+                    rt=$params.rt_mapmsmstocamera_library_neg_msnbase \\
+                    preprocess_ms2=$params.preprocess_msms_library_neg_msnbase \\
+                    preprocess_msms_centroid=$params.preprocess_msms_centroid_library_neg_msnbase \\
+                    preprocess_msms_merge=$params.preprocess_msms_merge_library_neg_msnbase \\
+                    preprocess_msms_centroid_after_merge=$params.preprocess_msms_centroid_after_merge_library_neg_msnbase \\
+                    preprocess_msms_ppm=$params.preprocess_msms_ppm_library_neg_msnbase \\
+                    preprocess_msms_ppm_precursor=$params.preprocess_msms_ppm_precursor_library_neg_msnbase \\
+                    preprocess_msms_abs_mz=$params.preprocess_msms_abs_mz_library_neg_msnbase \\
+                    preprocess_msms_abs_mz_precursor=$params.preprocess_msms_abs_mz_precursor_library_neg_msnbase \\
+                    preprocess_msms_rt=$params.preprocess_msms_rt_library_neg_msnbase \\
+                    preprocess_msms_centroid_onlymapped=$params.preprocess_msms_centroid_onlymapped_library_neg_msnbase \\
+                    preprocess_msms_merge_onlymapped=$params.preprocess_msms_merge_onlymapped_library_neg_msnbase \\
+                    preprocess_msms_int_threshold=$params.preprocess_msms_int_threshold_library_neg_msnbase
                 """
             }
 

@@ -463,6 +463,72 @@
                     "default": 5,
                     "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace)",
                     "hidden": true
+                },
+                "preprocess_msms_library_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Select whether to preform preprocessing of MS2 ions",
+                    "hidden": true
+                },
+                "preprocess_msms_centroid_library_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If each individual ion should be centroided first",
+                    "hidden": true
+                },
+                "preprocess_msms_merge_library_neg_msnbase": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "If set to TRUE, MS2s will be merge to HyperMS2",
+                    "hidden": true
+                },
+                "preprocess_msms_centroid_after_merge_library_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to TRUE, a centroiding will be done on each HyperMS2",
+                    "hidden": true
+                },
+                "preprocess_msms_ppm_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm tolerance for matching MS2s ions for smoothing"
+                },
+                "preprocess_msms_ppm_precursor_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_abs_mz_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Absolute tolerance for matching MS2s"
+                },
+                "preprocess_msms_abs_mz_precursor_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Absolute tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_rt_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Retention time tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_centroid_onlymapped_library_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to TRUE to performed centroiding only for mapped MS2s",
+                    "hidden": true
+                },
+                "preprocess_msms_merge_onlymapped_library_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to TRUE to performed merging only for mapped MS2s",
+                    "hidden": true
+                },
+                "preprocess_msms_int_threshold_library_neg_msnbase": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "he absolute intensity threshold for removing MS2 signals"
                 }
             },
             "help_text": ""
@@ -716,6 +782,72 @@
                     "type": "number",
                     "default": 5,
                     "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace)"
+                },
+                "preprocess_msms_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Select whether to preform preprocessing of MS2 ions",
+                    "hidden": true
+                },
+                "preprocess_msms_centroid_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If each individual ion should be centroided first",
+                    "hidden": true
+                },
+                "preprocess_msms_merge_neg_msnbase": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "If set to TRUE, MS2s will be merge to HyperMS2",
+                    "hidden": true
+                },
+                "preprocess_msms_centroid_after_merge_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to TRUE, a centroiding will be done on each HyperMS2",
+                    "hidden": true
+                },
+                "preprocess_msms_ppm_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm tolerance for matching MS2s ions for smoothing"
+                },
+                "preprocess_msms_ppm_precursor_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_abs_mz_neg_msnbase": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Absolute tolerance for matching MS2s"
+                },
+                "preprocess_msms_abs_mz_precursor_neg_msnbase": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Absolute tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_rt_neg_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Retention time tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_centroid_onlymapped_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to TRUE to performed centroiding only for mapped MS2s",
+                    "hidden": true
+                },
+                "preprocess_msms_merge_onlymapped_neg_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to TRUE to performed merging only for mapped MS2s",
+                    "hidden": true
+                },
+                "preprocess_msms_int_threshold_neg_msnbase": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "he absolute intensity threshold for removing MS2 signals"
                 },
                 "precursorppm_msmstoparam_neg_msnbase": {
                     "type": "number",
@@ -1820,6 +1952,72 @@
                     "default": 5,
                     "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace)",
                     "hidden": true
+                },
+                "preprocess_msms_library_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Select whether to preform preprocessing of MS2 ions",
+                    "hidden": true
+                },
+                "preprocess_msms_centroid_library_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If each individual ion should be centroided first",
+                    "hidden": true
+                },
+                "preprocess_msms_merge_library_pos_msnbase": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "If set to TRUE, MS2s will be merge to HyperMS2",
+                    "hidden": true
+                },
+                "preprocess_msms_centroid_after_merge_library_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to TRUE, a centroiding will be done on each HyperMS2",
+                    "hidden": true
+                },
+                "preprocess_msms_ppm_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm tolerance for matching MS2s ions for smoothing"
+                },
+                "preprocess_msms_ppm_precursor_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_abs_mz_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Absolute tolerance for matching MS2s"
+                },
+                "preprocess_msms_abs_mz_precursor_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Absolute tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_rt_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Retention time tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_centroid_onlymapped_library_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to TRUE to performed centroiding only for mapped MS2s",
+                    "hidden": true
+                },
+                "preprocess_msms_merge_onlymapped_library_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to TRUE to performed merging only for mapped MS2s",
+                    "hidden": true
+                },
+                "preprocess_msms_int_threshold_library_pos_msnbase": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "he absolute intensity threshold for removing MS2 signals"
                 }
             },
             "help_text": ""
@@ -2073,6 +2271,72 @@
                     "type": "number",
                     "default": 5,
                     "description": "rt difference (in second) for mapping MS2 parent ion to a mass trace (the mass trace is a range, star and end of the trace)"
+                },
+                "preprocess_msms_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Select whether to preform preprocessing of MS2 ions",
+                    "hidden": true
+                },
+                "preprocess_msms_centroid_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If each individual ion should be centroided first",
+                    "hidden": true
+                },
+                "preprocess_msms_merge_pos_msnbase": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "If set to TRUE, MS2s will be merge to HyperMS2",
+                    "hidden": true
+                },
+                "preprocess_msms_centroid_after_merge_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to TRUE, a centroiding will be done on each HyperMS2",
+                    "hidden": true
+                },
+                "preprocess_msms_ppm_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm tolerance for matching MS2s ions for smoothing"
+                },
+                "preprocess_msms_ppm_precursor_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "ppm tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_abs_mz_pos_msnbase": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Absolute tolerance for matching MS2s"
+                },
+                "preprocess_msms_abs_mz_precursor_pos_msnbase": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Absolute tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_rt_pos_msnbase": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Retention time tolerance for matching precursors only for unmapped MS2s"
+                },
+                "preprocess_msms_centroid_onlymapped_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to TRUE to performed centroiding only for mapped MS2s",
+                    "hidden": true
+                },
+                "preprocess_msms_merge_onlymapped_pos_msnbase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set to TRUE to performed merging only for mapped MS2s",
+                    "hidden": true
+                },
+                "preprocess_msms_int_threshold_pos_msnbase": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "he absolute intensity threshold for removing MS2 signals"
                 },
                 "precursorppm_msmstoparam_pos_msnbase": {
                     "type": "number",
@@ -2870,6 +3134,10 @@
                 "need_centroiding": {
                     "type": "boolean",
                     "description": "Set to true if your data is in profile mode (only for quantification!)"
+                },
+                "need_centroiding_msms": {
+                    "type": "boolean",
+                    "description": "Set to true if you want to centroid the MSMS data (only for identification!)"
                 }
             },
             "help_text": ""
@@ -2889,6 +3157,18 @@
                 "peakpicker_ini_file_neg_openms": {
                     "type": "string",
                     "default": "$baseDir/assets/openms/openms_peak_picker_ini_neg.ini",
+                    "description": "Path to the ini file for PeakPickerHiRes",
+                    "hidden": true
+                },
+                "peakpicker_ini_file_msms_pos_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_ini_msms_pos.ini",
+                    "description": "Path to the ini file for PeakPickerHiRes",
+                    "hidden": true
+                },
+                "peakpicker_ini_file_msms_neg_openms": {
+                    "type": "string",
+                    "default": "$baseDir/assets/openms/openms_peak_picker_ini_msms_neg.ini",
                     "description": "Path to the ini file for PeakPickerHiRes",
                     "hidden": true
                 },

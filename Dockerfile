@@ -6,8 +6,8 @@ LABEL authors="Payam Emami" \
 RUN sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list && \
       	apt-get update && \
       	apt-get -y upgrade && \
-      	apt-get install -y byobu curl git htop man unzip vim wget && \
-      	apt-get install -y cmake flex bison python-numpy python-dev sqlite3 \
+      	apt-get install -y  --allow-unauthenticated byobu curl git htop man unzip vim wget && \
+      	apt-get install -y --allow-unauthenticated cmake flex bison python-numpy python-dev sqlite3 \
         libsqlite3-dev libboost-dev libboost-system-dev libboost-thread-dev libboost-serialization-dev libboost-python-dev libboost-regex-dev && \
  apt-get -y update &&  apt-get install -y software-properties-common && add-apt-repository ppa:beineri/opt-qt59-xenial && \
 apt-get -y update && 	apt-get install -y --no-install-recommends \
@@ -19,9 +19,10 @@ apt-get -y update && apt-get install -y qt59base qt59imageformats qt59quickcontr
     apt-get install -y subversion libboost-filesystem-dev software-properties-common && \
     add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && apt-get -y install wget openjdk-11-jdk parallel && \
 
+ R -e 'source("https://bioconductor.org/biocLite.R");biocLite("devtools")'&& \
+ R -e 'devtools::install_version("MALDIquant",version="1.16")' && \
  R -e 'source("https://bioconductor.org/biocLite.R"); biocLite(c("MSnbase","mzR","MassSpecWavelet","S4Vectors","BiocStyle","faahKO","msdata"))' && \
  R -e 'source("https://bioconductor.org/biocLite.R");biocLite(c("lattice","RColorBrewer","plyr","RANN","multtest","knitr","ncdf4","microbenchmark","RUnit"))'&& \
- R -e 'source("https://bioconductor.org/biocLite.R");biocLite("devtools")'&& \
  R -e 'source("https://bioconductor.org/biocLite.R");biocLite("ncdf4")'&& \
  R -e 'devtools::install_version("latticeExtra")'&& \
  R -e 'library(devtools); source("https://bioconductor.org/biocLite.R"); biocLite("xcms")' && \
@@ -119,7 +120,7 @@ RUN cd /engine/cfm-id-code/cfm/supplementary_material/trained_models/esi_msms_mo
 
 ENV software_version="3.4.4-1trusty0"
 
-RUN pip install -Iv pyopenms==2.1.0
+
 
 ## Metfrag
 ADD bin/jni-inchi-0.8.jar /root
@@ -127,11 +128,13 @@ RUN mkdir -p /root/.jnati/repo/ && jar xf /root/jni-inchi-0.8.jar && mv META-INF
 
 ADD bin/metfrag.jar /usr/share/metfrag-2.4.5-1/metfrag.jar
 
+RUN pip install -Iv pyopenms==2.1.0
+
 # Install csi
 
 # Install development files needed
-ADD https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/ms/sirius/4.8.2/sirius-4.8.2-linux64-headless.zip /tmp
-RUN  unzip /tmp/sirius-4.8.2-linux64-headless.zip -d /usr/bin/
+ADD https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/ms/sirius/4.9.3/sirius-4.9.3-linux64-headless.zip /tmp
+RUN  unzip /tmp/sirius-4.9.3-linux64-headless.zip -d /usr/bin/
 
 RUN chmod +x /usr/bin/sirius/bin/sirius
 
@@ -178,6 +181,6 @@ RUN wget \
 RUN conda create --name cfm cfm -c bioconda -c conda-forge -c anaconda -c defaults --yes
 RUN chmod -R o+rX /opt/conda
 RUN chmod --recursive a+rw /opt/conda
-RUN pip install -Iv pyopenms==2.4.0
+RUN pip install -Iv pyopenms==2.6.0
 RUN /usr/bin/printf '\xfe\xed\xfe\xed\x00\x00\x00\x02\x00\x00\x00\x00\xe2\x68\x6e\x45\xfb\x43\xdf\xa4\xd9\x92\xdd\x41\xce\xb6\xb2\x1c\x63\x30\xd7\x92' > /etc/ssl/certs/java/cacerts
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure

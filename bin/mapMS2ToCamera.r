@@ -11,6 +11,23 @@ inputCamera<-NA
 output<-NA
 ppm<-10
 rt<-10
+
+
+###
+
+preprocess_ms2<-FALSE
+preprocess_msms_centroid<-FALSE
+preprocess_msms_merge<-TRUE
+preprocess_msms_centroid_after_merge<-FALSE
+preprocess_msms_ppm<-10
+preprocess_msms_ppm_precursor<-10
+preprocess_msms_abs_mz<-0.01
+preprocess_msms_abs_mz_precursor<-0.01
+preprocess_msms_rt<-10
+preprocess_msms_centroid_onlymapped<-FALSE
+preprocess_msms_merge_onlymapped<-FALSE
+preprocess_msms_int_threshold<-0
+
 for(arg in args)
 {
   argCase<-strsplit(x = arg,split = "=")[[1]][1]
@@ -53,6 +70,85 @@ for(arg in args)
   {
     output=as.character(value)
   }
+
+
+
+  if(argCase=="preprocess_ms2")
+  {
+    preprocess_ms2=as.logical(value)
+    if(!is.logical(preprocess_ms2)){
+      stop("preprocess_ms2 must be TRUE or FALSE!")
+    }
+  }
+
+  if(argCase=="preprocess_msms_centroid")
+  {
+    preprocess_msms_centroid=as.logical(value)
+  }
+
+  if(argCase=="preprocess_msms_merge")
+  {
+    preprocess_msms_merge=as.logical(value)
+  }
+
+  if(argCase=="preprocess_msms_centroid_after_merge")
+  {
+    preprocess_msms_centroid_after_merge=as.logical(value)
+  }
+
+  if(argCase=="preprocess_msms_ppm")
+  {
+
+    preprocess_msms_ppm=as.numeric(value)
+
+  }
+
+  if(argCase=="preprocess_msms_ppm_precursor")
+  {
+
+    preprocess_msms_ppm_precursor=as.numeric(value)
+
+  }
+
+  if(argCase=="preprocess_msms_abs_mz")
+  {
+
+    preprocess_msms_abs_mz=as.numeric(value)
+
+  }
+
+  if(argCase=="preprocess_msms_abs_mz_precursor")
+  {
+
+    preprocess_msms_abs_mz_precursor=as.numeric(value)
+
+  }
+
+  if(argCase=="preprocess_msms_rt")
+  {
+
+    preprocess_msms_rt=as.numeric(value)
+
+  }
+
+  if(argCase=="preprocess_msms_int_threshold")
+  {
+
+    preprocess_msms_int_threshold=as.numeric(value)
+
+  }
+
+  if(argCase=="preprocess_msms_centroid_onlymapped")
+  {
+    preprocess_msms_centroid_onlymapped=as.logical(value)
+  }
+
+  if(argCase=="preprocess_msms_merge_onlymapped")
+  {
+    preprocess_msms_merge_onlymapped=as.logical(value)
+  }
+
+
 }
 
 if(is.na(rDataFilesMS2) | is.na(inputCamera) | is.na(output)) stop("Both input (CAMERA and MS2 ) and output need to be specified!\n")
@@ -132,6 +228,30 @@ for(MS2 in rDataFilesMS2)
                      MinusTime = rt,ppm = ppm,listOfMS2Mapped = mappingResult$mapped,
                      listOfUnMapped = mappingResult$unmapped)
 }
+
+# preprocess MS2s
+
+if(preprocess_ms2==T)
+{
+source("/usr/bin/preprocessMS2.r")
+
+mappingResult<-preprocess_msms(mapped_msms=mappingResult,
+centroid=preprocess_msms_centroid,
+merge=preprocess_msms_merge,
+centroid_after_merge=preprocess_msms_centroid_after_merge,
+ppm=preprocess_msms_ppm,
+ppm_precursor=preprocess_msms_ppm_precursor,
+abs_mz=preprocess_msms_abs_mz,
+abs_mz_precursor=preprocess_msms_abs_mz_precursor,
+rt=preprocess_msms_rt,
+centroid_onlymapped=preprocess_msms_centroid_onlymapped,
+merge_onlymapped=preprocess_msms_merge_onlymapped,
+int_threshold=preprocess_msms_int_threshold,
+verbose=FALSE)
+
+}
+
+
 
 preprocessingSteps<-preprocessingStepsTMP
 preprocessingSteps<-c(preprocessingSteps,"mappedMS2")

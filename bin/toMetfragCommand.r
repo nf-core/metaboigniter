@@ -8,12 +8,12 @@ validate.adduct <- function(adduct) {
     return (adduct)
 }
 
-parameterToCommand<-function(param,outputName="")
+parameterToCommand<-function(param,outputName="",longName=outputName)
 {
  param$MetFragPeakListReader<-"de.ipbhalle.metfraglib.peaklistreader.FilteredStringTandemMassPeakListReader"
  param$MetFragCandidateWriter<-"CSV"
  param$PeakListString<-paste(apply(param$PeakList,1,paste,collapse="_"),collapse = ";")
- param$SampleName<-outputName
+ param$SampleName<-longName
  param[[which(names(param)=="PeakList")]]<-NULL
 
  param$MetFragDatabaseType
@@ -38,6 +38,7 @@ toMetfragCommand<-function(mappedMS2=NA,
 {
   peakList<-getPeaklist(cameraObject)
   file.origin<-""
+  file.origin.longName<-""
   numberSpectraWritten <- 0
   if(includeMapped)
   {
@@ -156,19 +157,32 @@ toMetfragCommand<-function(mappedMS2=NA,
           if(mode == "neg") {modeSuffix<-"-"}
 	        settingsObject[["PrecursorIonType"]]<-validate.adduct(adduct)
           fileName<-""
+          fileNameLong<-""
           # add id, rt, neu_mass, intensity, orig file name
 	  file.origin <- gsub("\\?.*", "", gsub(".*/", "", attributes(MSMS)$fileName))
+    file.origin.longName<-file.origin
+    if(length(strsplit(x = file.origin,split = ";",fixed = T)[[1]])>1)
+    {
+    file.origin<-"multipleFiles"
+
+    }
           if(file.origin == "") {
 		      fileName<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),".txt",sep="")
+          fileNameLong<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),".txt",sep="")
 	       } else {
 		      fileName<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),"_",file.origin,".txt",sep="")
+          fileNameLong<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),"_",file.origin.longName,".txt",sep="")
          }
          if(savePath!="")
-          fileName<-paste(savePath,"/",fileName,sep="")
+         {
+         fileName<-paste(savePath,"/",fileName,sep="")
+         fileNameLong<-paste(savePath,"/",fileNameLong,sep="")
+         }
+
          if(!is.na(maxPrecursorMass) & maxPrecursorMass < neutralMASS) { next }
          if(!is.na(minPrecursorMass) & minPrecursorMass > neutralMASS) { next }
 	       if(is.na(maxSpectra) || maxSpectra > numberSpectraWritten) {
-         	parameterToCommand(settingsObject,fileName)
+         	parameterToCommand(settingsObject,fileName,fileNameLong)
 	 	      numberSpectraWritten<-numberSpectraWritten+1
 	       }
         } else if(searchChargeFlag & searchMultipleChargeAdducts)
@@ -188,18 +202,30 @@ toMetfragCommand<-function(mappedMS2=NA,
             if(mode == "neg") {modeSuffix<-"-"}
             settingsObject[["PrecursorIonType"]]<-paste("[",validate.adduct(as.character(allAdductForSearch[k,"adductName"])),"]", modeSuffix, sep="")
             fileName<-""
+            fileNameLong<-""
             file.origin <- gsub("\\?.*", "", gsub(".*/", "", attributes(MSMS)$fileName))
+            file.origin.longName<-file.origin
+            if(length(strsplit(x = file.origin,split = ";",fixed = T)[[1]])>1)
+            {
+            file.origin<-"multipleFiles"
+
+            }
             if(file.origin == "") {
                  fileName<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),".txt",sep="")
+                 fileNameLong<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),".txt",sep="")
             } else {
                  fileName<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),"_",file.origin,".txt",sep="")
+                 fileNameLong<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),"_",file.origin.longName,".txt",sep="")
             }
             if(savePath!="")
-              fileName<-paste(savePath,"/",fileName,sep="")
+            {
+            fileName<-paste(savePath,"/",fileName,sep="")
+            fileNameLong<-paste(savePath,"/",fileNameLong,sep="")
+            }
             if(!is.na(maxPrecursorMass) & maxPrecursorMass < mass) { next }
             if(!is.na(minPrecursorMass) & minPrecursorMass > mass) { next }
             if(is.na(maxSpectra) || maxSpectra > numberSpectraWritten) {
-	    	      parameterToCommand(settingsObject,fileName)
+	    	      parameterToCommand(settingsObject,fileName,fileNameLong)
 	    	      numberSpectraWritten<-numberSpectraWritten+1
 	          }
           }
@@ -236,18 +262,24 @@ toMetfragCommand<-function(mappedMS2=NA,
         if(mode == "neg") {settingsObject[["IsPositiveIonMode"]]<-"False"}
 	      settingsObject[["PrecursorIonType"]]<-adduct
         fileName<-""
+        fileNameLong<-""
         intb<-MSMS@precursorIntensity
 	      if(file.origin == "") {
              fileName<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),".txt",sep="")
+             fileNameLong<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),".txt",sep="")
         } else {
              fileName<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),"_",file.origin,".txt",sep="")
+             fileNameLong<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),"_",file.origin.longName,".txt",sep="")
         }
         if(savePath!="")
-          fileName<-paste(savePath,"/",fileName,sep="")
+        {
+        fileName<-paste(savePath,"/",fileName,sep="")
+        fileNameLong<-paste(savePath,"/",fileNameLong,sep="")
+        }
         if(!is.na(maxPrecursorMass) & maxPrecursorMass < neutralMASS) { next }
         if(!is.na(minPrecursorMass) & minPrecursorMass > neutralMASS) { next }
 	      if(is.na(maxSpectra) || maxSpectra > numberSpectraWritten) {
-		      parameterToCommand(settingsObject,fileName)
+		      parameterToCommand(settingsObject,fileName,fileNameLong)
           numberSpectraWritten<-numberSpectraWritten+1
 	      }
       }else if(searchMultipleChargeAdducts)
@@ -266,17 +298,23 @@ toMetfragCommand<-function(mappedMS2=NA,
 	        if(mode == "neg") {modeSuffix<-"-"}
 	        settingsObject[["PrecursorIonType"]]<-paste("[",as.character(allAdductForSearch[k,"adductName"]),"]", modeSuffix, sep="")
           fileName<-""
+          fileNameLong<-""
           if(file.origin == "") {
              fileName<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),".txt",sep="")
+             fileNameLong<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),".txt",sep="")
           } else {
              fileName<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),"_",file.origin,".txt",sep="")
+             fileNameLong<-paste(as.character(numberSpectraWritten+1),"_",as.character(MSMS@rt),"_",as.character(round(MSMS@precursorMz,4)),"_",as.character(intb),"_",file.origin.longName,".txt",sep="")
           }
           if(savePath!="")
-            fileName<-paste(savePath,"/",fileName,sep="")
+          {
+          fileName<-paste(savePath,"/",fileName,sep="")
+          fileNameLong<-paste(savePath,"/",fileNameLong,sep="")
+          }
           if(!is.na(maxPrecursorMass) & maxPrecursorMass < mass) { next }
           if(!is.na(minPrecursorMass) & minPrecursorMass > mass) { next }
           if(is.na(maxSpectra) || maxSpectra > numberSpectraWritten) {
-		        parameterToCommand(settingsObject,fileName)
+		        parameterToCommand(settingsObject,fileName,fileNameLong)
 	 	        numberSpectraWritten<-numberSpectraWritten+1
 	        }
         }

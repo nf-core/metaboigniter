@@ -289,7 +289,7 @@ We use the OpenMS _"PeakPickHiRes"_ tool to perform that. Set `need_centroiding`
 need_centroiding: true
 ```
 
-Please be aware that setting `need_centroiding` to `true` will do centroiding on all of your data including both ionizations, identification etc.
+Please be aware that setting `need_centroiding` to `true` will do centroiding on all of your data including both ionizations and library. See the identification section for centroiding MSMS data.
 
 If you want non-defualt values, to control the parameters centroiding you can edit `openms_peak_picker_ini_pos.ini` and `openms_peak_picker_ini_neg.ini` files located under `metaboigniter/assets/openms`.
 The description of the parameters can be found on [OpenMS website](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_PeakPickerHiRes.html).
@@ -450,6 +450,15 @@ id_mzml_files_neg: "/User/XXX/myfiles/id_mzml_files_neg/*mzML"
 ```
 
 If you quantification files also includes MS2 data, you can set `id_mzml_files_pos` and `id_mzml_files_neg` to the path of MS1 data (of course to respective ionization modes).
+
+### MSMS data Centroiding
+
+You can centroid your MSMS data using `need_centroiding` option.
+We use the OpenMS _"PeakPickHiRes"_ tool to perform centroiding. Make sure to also set ini file for _"PeakPickHiRes"_ (e.g. `peakpicker_ini_file_msms_pos_openms).
+
+```yaml
+need_centroiding_msms: true
+```
 
 ### Select your search engine
 
@@ -666,6 +675,19 @@ Adduct ruleset to be used:
 ```yaml
 adductRules_msmstoparam_pos_msnbase: "primary"
 ```
+
+#### Creating HyperMS2 (positive mode)
+
+Using MetaboIGNITER, one can create and preprocess a consensus MS2 file based on related ions both for regular search engine and library searches.
+To do that, set the following parameter to `true`
+
+```yaml
+preprocess_msms_pos_msnbase: true
+```
+
+If HyperMS2 creation is enabled, the workflow combines the matched ions (the ions match to an identifical masstrace) into a single MS2 spectra.
+Depdending on the preprocessing options, this spectra can be denoised and centroided, allowing for faster and more accurate search.
+This behavior can be controlled using the parameters starting with `preprocess_msms_`.
 
 #### CSI:FINGERID parameters (positive mode)
 
