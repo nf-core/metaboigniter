@@ -13,6 +13,7 @@
 - Empty identification will not longer raise error but the pipeline will finish outputting no IDs
 - Fixed duplicated codes to make the pipeline code more compact
 - Added centroiding option for MS2 ions
+- Fixed empty MS2 handling in createLibrary
 
 ## [v1.0.1](https://github.com/nf-core/metaboigniter/releases/tag/1.0.1) - 2021-05-11
 

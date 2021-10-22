@@ -172,6 +172,22 @@ source("/usr/bin/createLibraryFun.r")
 library(stringr)
 
 
+MappedMS2s$mapped<-lapply(MappedMS2s$mapped,function(x){
+
+  lst_filtered<-lapply(x,function(y){if(y@peaksCount>minPeaks){y}})
+  lst_filtered[lengths(lst_filtered) != 0]
+
+})
+
+index_of_not_null<-which(!sapply(MappedMS2s$mapped,function(x){all(sapply(x,function(y){(is.null(y))}))}))
+if(length(index_of_not_null)==0)
+{
+  stop("All MS2s are empty!")
+}
+
+MappedMS2s$mapped<-MappedMS2s$mapped[index_of_not_null]
+
+
 createLibrary(MSMSdata = MappedMS2s,libraryInfo,requiredHeader,whichmz=whichmz,
                    cameraObject = cameraObject,includeUnmapped = F,savePath=output,
                    includeMapped = T,preprocess = F, minPeaks=minPeaks,
