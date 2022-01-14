@@ -20,8 +20,12 @@ parser <- ArgumentParser()
 
 # set require arguments.
 
-parser$add_argument("-v", "--verbose", action="store_true", default=TRUE,
+parser$add_argument("-v", "--verbose", action="store_true", #default=TRUE,
                     help="Print extra output [default]")
+
+
+parser$add_argument("-ui", "--useions", action="store_true",
+                                        help="Whether to use features or MS2 precursor for mz and RT deviation [default features]")
 
 parser$add_argument("-q", "--quietly", action="store_false",
                     dest="verbose", help="Print little output")
@@ -40,7 +44,7 @@ parser$add_argument("-ri", "--readNameOftheMS2", type="character",
 parser$add_argument("-out", "--outputCSV", type="character",
                     help="The results the search engine. If inputMS2 is zip, then the output will be concatenated unless option split is set.")
 
-parser$add_argument("-s", "--split", type="logical", default=FALSE,
+parser$add_argument("-s", "--split", action="store_true",# default=FALSE,
                     help="Set if you DONT want the output to be concatenated")
 
 
@@ -55,17 +59,17 @@ parser$add_argument("-mzfa", "--fragmentabsTol", type="double", default=0.07,
                     help="Fragments absolute tolerance")
 
 
-parser$add_argument("-rt", "--precursorRTTol", type="double", default=0.07,
+parser$add_argument("-rt", "--precursorRTTol", type="double", default=20,
                     help="Precursors RT tolerance in sec")
 
 
-parser$add_argument("-sr", "--searchRange", type="logical", default=T,
+parser$add_argument("-sr", "--searchRange", action="store_true",
                     help="search based on feature RT or parent MS2")
 
-parser$add_argument("-pr", "--preprocess", type="logical", default=F,
+parser$add_argument("-pr", "--preprocess", action="store_true",#type="logical", default=F,
                     help="preprocess MS2 intensities")
 
-parser$add_argument("-dec", "--outputSemiDecoy", type="logical", default=F,
+parser$add_argument("-dec", "--outputSemiDecoy",action="store_true",# type="logical", default=F,
                     help="estimate e-value for each MS2. This will take a lot of time unless you set low resampling number")
 
 
@@ -88,7 +92,7 @@ parser$add_argument("-im", "--ionMode", type="character", default="pos",
 parser$add_argument("-ncore", "--numberOfCores", type="integer", default=1,
                     help="Number of cores")
 
-parser$add_argument("-outT", "--outTable", type="logical", default=T,
+parser$add_argument("-outT", "--outTable",action="store_true", #type="logical", default=T,
                     help="If set, the aggregatated results will be written as table otherwise CSV")
 
 
@@ -340,11 +344,20 @@ main<-function()
 
     # libdata for parallel package
     libdata<-NULL
+
+    useions=F
+
+
     # read the parameters
     for(arg in names(args))
     {
       argCase<-arg
       value<-args[[argCase]]
+
+      if(argCase=="useions" & !is.null(value))
+      {
+        useions=as.logical(value)
+      }
 
       if(argCase=="inputMS2" & !is.null(value))
       {
@@ -488,6 +501,17 @@ main<-function()
     # if spectrum is empty do not continue
     isMS2Emtpy<-MS2TMP==""
 
+    # extract feature rt and mz
+    if(any(!c("min_rt_f","max_rt_f","mid_rt_f","max_mz_f","min_mz_f","mid_mz_f")%in%colnames(MS2DataFrame)))stop("RT information is not in the parameter file!")
+    min_rt_f<-as.numeric(MS2DataFrame[2,"min_rt_f"])
+    max_rt_f<-as.numeric(MS2DataFrame[2,"max_rt_f"])
+    mid_rt_f<-as.numeric(MS2DataFrame[2,"mid_rt_f"])
+
+    min_mz_f<-as.numeric(MS2DataFrame[2,"min_mz_f"])
+    max_mz_f<-as.numeric(MS2DataFrame[2,"max_mz_f"])
+    mid_mz_f<-as.numeric(MS2DataFrame[2,"mid_mz_f"])
+
+
     # define a function for calculating ppm!
 
     ppmCal<-function(run,ppm)
@@ -512,9 +536,26 @@ main<-function()
       targetMS2DataFrame<-data.frame(mz=temp[,1],intensity=temp[,2])
       targetMS2DataFrame<- matrix(c(temp[,1],temp[,2]), nrow = length(temp[,2]), dimnames = list(1:length(temp[,2]), c("mz","intensity")))
       #names(targetMS2DataFrame)<-c("mz","intensity")
+      mzTarget<-NA
+      rtTarget<-NA
       # set search interval for MS2
+      if(useions)
+      {
       mzTarget<-Intervals_full(cbind(precursorMZ,precursorMZ))
       rtTarget<-Intervals_full(cbind(precursorRT,precursorRT))
+      }else{
+      if(searchRange)
+      {
+
+      mzTarget<-Intervals_full(cbind(min_mz_f,max_mz_f))
+      rtTarget<-Intervals_full(cbind(min_rt_f,max_rt_f))
+
+      }else{
+      mzTarget<-Intervals_full(cbind(mid_mz_f,mid_mz_f))
+      rtTarget<-Intervals_full(cbind(mid_rt_f,mid_rt_f))
+      }
+      }
+
 
       # set search interval for library that is either as range or centroid
       mzLib<-NA
