@@ -18,7 +18,7 @@ jobs:
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/metaboigniter') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_VER: "20.04.0" #${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
     strategy:
       matrix:
