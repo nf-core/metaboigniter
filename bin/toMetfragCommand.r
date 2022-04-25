@@ -52,6 +52,23 @@ toMetfragCommand<-function(mappedMS2=NA,
       seachCharge<-NA
       searchChargeFlag<-F
       intb <- peakList[as.numeric(x),"intb"]
+      min_rt<- peakList[as.numeric(x),"rtmin"]
+      max_rt<- peakList[as.numeric(x),"rtmax"]
+      mid_rt<-peakList[as.numeric(x),"rt"]
+      settingsObject[["min_rt_f"]]<-min_rt
+      settingsObject[["max_rt_f"]]<-max_rt
+      settingsObject[["mid_rt_f"]]<-mid_rt
+
+
+
+      min_mz<- peakList[as.numeric(x),"mzmin"]
+max_mz<- peakList[as.numeric(x),"mzmax"]
+mid_mz<-peakList[as.numeric(x),"mz"]
+settingsObject[["min_mz_f"]]<-min_mz
+settingsObject[["max_mz_f"]]<-max_mz
+settingsObject[["mid_mz_f"]]<-mid_mz
+
+
       if(peakList[as.numeric(x),"adduct"]=="" & peakList[as.numeric(x),"isotopes"]=="")
       {
         adduct<-NA
@@ -249,6 +266,24 @@ toMetfragCommand<-function(mappedMS2=NA,
 
       }
       neutralMASS<-MSMS@precursorMz
+      ret_inf<-MSMS@rt
+
+
+
+       min_rt<- ret_inf
+       max_rt<- ret_inf
+       mid_rt<-ret_inf
+       settingsObject[["min_rt_f"]]<-min_rt
+       settingsObject[["max_rt_f"]]<-max_rt
+       settingsObject[["mid_rt_f"]]<-mid_rt
+
+       min_mz<- neutralMASS
+       max_mz<- neutralMASS
+       mid_mz<-neutralMASS
+       settingsObject[["min_mz_f"]]<-min_mz
+       settingsObject[["max_mz_f"]]<-max_mz
+       settingsObject[["mid_mz_f"]]<-mid_mz
+
       MS2<-as.matrix(cbind(MSMS@mz,MSMS@intensity))
       adduct<-"[M+H]+"
       if(mode == "neg") {adduct<-"[M-H]-"}

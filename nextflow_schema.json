@@ -889,6 +889,11 @@
                     "type": "number",
                     "default": 2,
                     "description": "ions with less that this number will be removed"
+                },
+                "rtsec_msmstoparam_neg_msnbase": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "RT deviation for library based identification. This is in seconds. Only used if doing library-based approach"
                 }
             },
             "help_text": ""
@@ -2377,6 +2382,11 @@
                     "type": "number",
                     "default": 2,
                     "description": "ions with less that this number will be removed"
+                },
+                "rtsec_msmstoparam_pos_msnbase": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "RT deviation for library based identification. This is in seconds. Only used if doing library-based approach"
                 }
             },
             "help_text": ""

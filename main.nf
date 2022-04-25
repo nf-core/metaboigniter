@@ -126,7 +126,7 @@ if (params.perform_identification == true) {
  */
 
 if (params.perform_identification == true && params.perform_identification_internal_library == true) {
-  
+
   if (params.need_centroiding_msms == true) {
       if ((params.type_of_ionization in (['pos', 'both']))) {
           Channel.fromPath(params.peakpicker_ini_file_msms_pos_openms)
@@ -2289,7 +2289,9 @@ quant_mzml_files_pos.into{masstrace_detection_process_pos_openms;param_detection
                         -im pos \\
                         -ts Scoredotproduct \\
                         -rs 1000 \\
-                        -ncore $params.ncore_searchengine_library_pos_msnbase
+                        -ncore $params.ncore_searchengine_library_pos_msnbase \\
+                        -rt $params.rtsec_msmstoparam_pos_msnbase \\
+                        -outT
 
                     sed -i '/^\$/d' aggregated_identification_library_pos.csv
                     """
@@ -2323,7 +2325,9 @@ quant_mzml_files_pos.into{masstrace_detection_process_pos_openms;param_detection
                         -im pos \\
                         -ts Scoredotproduct \\
                         -rs 1000 \\
-                        -ncore $params.ncore_searchengine_library_pos_msnbase
+                        -ncore $params.ncore_searchengine_library_pos_msnbase \\
+                        -rt $params.rtsec_msmstoparam_pos_msnbase \\
+                        -outT
 
                     sed -i '/^\$/d' aggregated_identification_library_pos.csv
                     """
@@ -4285,7 +4289,10 @@ if(params.type_of_ionization in (["neg","both"])){
                     -im neg  \\
                     -ts Scoredotproduct \\
                     -rs 1000 \\
-                    -ncore $params.ncore_searchengine_library_neg_msnbase
+                    -ncore $params.ncore_searchengine_library_neg_msnbase \\
+                    -rt $params.rtsec_msmstoparam_neg_msnbase \\
+                    -outT
+
                 sed -i '/^\$/d' aggregated_identification_library_neg.csv
                 """
             }
@@ -4317,7 +4324,10 @@ if(params.type_of_ionization in (["neg","both"])){
                     -im neg \\
                     -ts Scoredotproduct \\
                     -rs 1000 \\
-                    -ncore $params.ncore_searchengine_library_neg_msnbase
+                    -ncore $params.ncore_searchengine_library_neg_msnbase \\
+                    -rt $params.rtsec_msmstoparam_neg_msnbase \\
+                    -outT
+
                 sed -i '/^\$/d' aggregated_identification_library_neg.csv
                 """
             }
