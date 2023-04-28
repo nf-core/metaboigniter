@@ -4,7 +4,6 @@
     nf-core/metaboigniter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/metaboigniter
-
     Website: https://nf-co.re/metaboigniter
     Slack  : https://nfcore.slack.com/channels/metaboigniter
 ----------------------------------------------------------------------------------------
