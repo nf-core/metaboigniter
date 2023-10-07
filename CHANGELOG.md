@@ -1,19 +1,33 @@
 # nf-core/metaboigniter: Changelog
 
-## v1.1.0dev
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-- Sirius was updated to version 4.9.3
-- Error message will be given if no IDs were found for MS2s
-- Added a few options to speed up the identification
-- CFM-ID has been updated to version 3.0
-- pyomenms has been updated to 2.6.0
-- NULL parameters for retention time correction have been change to null
-- Fixed parameter bug in createLibrary
-- Fixed bugs in identification aggregation
-- Empty identification will not longer raise error but the pipeline will finish outputting no IDs
-- Fixed duplicated codes to make the pipeline code more compact
-- Added centroiding option for MS2 ions
-- Fixed empty MS2 handling in createLibrary
+## v2.0dev - [date]
+
+Initial release of DSL 2 version nf-core/metaboigniter including major modifications.
+The support for the previous parameters in version 1.0.1 has been deprecated.
+
+### `Added`
+
+- Inputs are given using a CSV file
+- mapAlignerPoseClustering
+- featureLinkerUnlabeledkd
+- MetaboliteAdductDecharger
+- MS2Query
+
+### `Fixed`
+
+- SIRIUS APIs have been fixed
+
+### `Deprecated`
+
+- XCMS
+- IPO
+- MetFrag
+- CFMID
+- IPO
+- Internal library search
 
 ## [v1.0.1](https://github.com/nf-core/metaboigniter/releases/tag/1.0.1) - 2021-05-11
 

@@ -1,30 +1,19 @@
 name: nf-core AWS full size tests
 # This workflow is triggered on published releases.
-# It can be additionally triggered manually with GitHub actions workflow dispatch.
+# It can be additionally triggered manually with GitHub actions workflow dispatch button.
 # It runs the -profile 'test_full' on AWS batch
 
 on:
-  workflow_run:
-    workflows: ["nf-core Docker push (release)"]
-    types: [completed]
+  release:
+    types: [published]
   workflow_dispatch:
-
-
-env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  TOWER_ACCESS_TOKEN: ${{ secrets.AWS_TOWER_TOKEN }}
-  AWS_JOB_DEFINITION: ${{ secrets.AWS_JOB_DEFINITION }}
-  AWS_JOB_QUEUE: ${{ secrets.AWS_JOB_QUEUE }}
-  AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-
-
 jobs:
-  run-awstest:
+  run-tower:
     name: Run AWS full tests
     if: github.repository == 'nf-core/metaboigniter'
     runs-on: ubuntu-latest
     steps:
+<<<<<<< HEAD
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -40,3 +29,29 @@ jobs:
             --job-queue $AWS_JOB_QUEUE \
             --job-definition $AWS_JOB_DEFINITION \
             --container-overrides '{"command": ["nf-core/metaboigniter", "-r '"${GITHUB_SHA}"' -profile test_full --outdir s3://'"${AWS_S3_BUCKET}"'/metaboigniter/results-'"${GITHUB_SHA}"' -w s3://'"${AWS_S3_BUCKET}"'/metaboigniter/work-'"${GITHUB_SHA}"' -with-tower"], "environment": [{"name": "TOWER_ACCESS_TOKEN", "value": "'"$TOWER_ACCESS_TOKEN"'"}]}'
+=======
+      - name: Launch workflow via tower
+        uses: seqeralabs/action-tower-launch@v2
+        # TODO nf-core: You can customise AWS full pipeline tests as required
+        # Add full size test data (but still relatively small datasets for few samples)
+        # on the `test_full.config` test runs with only one set of parameters
+        with:
+          workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
+          access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
+          compute_env: ${{ secrets.TOWER_COMPUTE_ENV }}
+          revision: ${{ github.sha }}
+          workdir: s3://${{ secrets.AWS_S3_BUCKET }}/work/metaboigniter/work-${{ github.sha }}
+          parameters: |
+            {
+              "hook_url": "${{ secrets.MEGATESTS_ALERTS_SLACK_HOOK_URL }}",
+              "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/metaboigniter/results-${{ github.sha }}"
+            }
+          profiles: test_full
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Tower debug log file
+          path: |
+            tower_action_*.log
+            tower_action_*.json
+>>>>>>> 74c6005ac02d52f02a82b3b1f1c02fd3318047b8
