@@ -14,20 +14,6 @@ jobs:
       - name: Launch workflow via tower
         uses: seqeralabs/action-tower-launch@v2
         with:
-<<<<<<< HEAD
-          auto-update-conda: true
-          python-version: 3.7
-      - name: Install awscli
-        run: conda install -c conda-forge awscli
-      - name: Start AWS batch job
-        run: |
-          aws batch submit-job \
-          --region eu-west-1 \
-          --job-name nf-core-metaboigniter \
-          --job-queue $AWS_JOB_QUEUE \
-          --job-definition $AWS_JOB_DEFINITION \
-          --container-overrides '{"command": ["nf-core/metaboigniter", "-r '"${GITHUB_SHA}"' -profile test --outdir s3://'"${AWS_S3_BUCKET}"'/metaboigniter/results-'"${GITHUB_SHA}"' -w s3://'"${AWS_S3_BUCKET}"'/metaboigniter/work-'"${GITHUB_SHA}"' -with-tower"], "environment": [{"name": "TOWER_ACCESS_TOKEN", "value": "'"$TOWER_ACCESS_TOKEN"'"}]}'
-=======
           workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
           access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
           compute_env: ${{ secrets.TOWER_COMPUTE_ENV }}
@@ -45,4 +31,3 @@ jobs:
           path: |
             tower_action_*.log
             tower_action_*.json
->>>>>>> 74c6005ac02d52f02a82b3b1f1c02fd3318047b8

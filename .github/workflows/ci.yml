@@ -21,12 +21,6 @@ jobs:
     # Only run on push if this is the nf-core dev branch (merged PRs)
     if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/metaboigniter') }}"
     runs-on: ubuntu-latest
-<<<<<<< HEAD
-    env:
-      NXF_VER: "20.04.0" #${{ matrix.nxf_ver }}
-      NXF_ANSI_LOG: false
-=======
->>>>>>> 74c6005ac02d52f02a82b3b1f1c02fd3318047b8
     strategy:
       matrix:
         NXF_VER:
@@ -34,27 +28,7 @@ jobs:
           - "latest-everything"
     steps:
       - name: Check out pipeline code
-<<<<<<< HEAD
-        uses: actions/checkout@v2
-
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v4
-        with:
-          FILES: |
-            Dockerfile
-
-      - name: Build new docker image
-        if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/metaboigniter:dev
-
-      - name: Pull docker image
-        if: ${{ !env.MATCHED_FILES }}
-        run: |
-          docker pull nfcore/metaboigniter:dev
-          docker tag nfcore/metaboigniter:dev nfcore/metaboigniter:dev
-=======
         uses: actions/checkout@v3
->>>>>>> 74c6005ac02d52f02a82b3b1f1c02fd3318047b8
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v1
@@ -62,5 +36,7 @@ jobs:
           version: "${{ matrix.NXF_VER }}"
 
       - name: Run pipeline with test data
+        # For example: adding multiple test runs with different parameters
+        # Remember that you can parallelise this by using strategy.matrix
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results
