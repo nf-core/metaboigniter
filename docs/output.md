@@ -10,17 +10,20 @@ The directories listed below will be created in the results directory after the 
 
 The pipeline consists of various steps each will produce multiple files types.
 
-- [Preprocessing](#preprocessing)
-  - [centroiding](#centroiding) - Centroid data
-- [Quantification](#quantification) - Mass trace and feature detection
-  - [quantification](#quantification) - Mass trace and feature detection
-  - [requantification](#requantification) - Mass trace and feature detection for missing masses
-- [Annotation](#annotation) - Adduct detection
-- [Alignment and linking](#alignment-and-linking)
-  - [Alignment](#alignment) - Retention time alignment of the data
-  - [Linking](#linking) - Link features across samples
-- [Expression output](#expression-output)
-- [Pipeline information](#pipeline-information)
+- [nf-core/metaboigniter: Output](#nf-coremetaboigniter-output)
+  - [Introduction](#introduction)
+  - [Pipeline overview](#pipeline-overview)
+  - [Preprocessing](#preprocessing)
+    - [Centroiding](#centroiding)
+  - [Quantification](#quantification)
+    - [Quantification](#quantification-1)
+    - [Requantification](#requantification)
+    - [Annotation](#annotation)
+  - [Alignment and linking](#alignment-and-linking)
+    - [Alignment](#alignment)
+    - [Linking](#linking)
+  - [Expression output](#expression-output)
+  - [Pipeline information](#pipeline-information)
 
 ## Preprocessing
 
@@ -100,10 +103,10 @@ These can be found under `TABLE_OUTPUT`.
 
 Depending on the pipeline parameters, it can contain one, and up to four different files.
 
-- the file starting with `sirius_` contains the formula identification by SIRIUS
-- the file starting with `fingerid_` contains the structural identification by FINGERID
-- the file starting with `ms2query_` contains the analogue identification by MS2Query
-- the last file contains quantification information
+- the file starting with `output_sirius_` contains the formula identification by SIRIUS
+- the file starting with `output_fingerid_` contains the structural identification by FINGERID
+- the file starting with `output_ms2query_` contains the analogue identification by MS2Query
+- the last file starting with `output_quantification_` contains quantification information
 
 All files are TSV (tab separate files) and have a column called "id". This ID can be used to match rows across different files.
 

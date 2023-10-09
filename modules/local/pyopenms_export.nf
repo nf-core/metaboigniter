@@ -16,7 +16,7 @@ process PYOPENMS_EXPORT {
     tuple val(meta_ms2qurry), path(ms2qurry)
 
     output:
-    tuple val(meta), path("output/*.tsv")     , emit: tsv
+    tuple val(meta), path("output_*.tsv")     , emit: tsv
     path  "versions.yml"               , emit: versions
 
     when:
@@ -25,17 +25,16 @@ process PYOPENMS_EXPORT {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def sirius_id = sirius ? "output/${meta_sirius.id}.tsv": '""'
-    def finger_id = fingerid ? "output/${meta_fingerid.id}.tsv": '""'
-    def ms2query_id = ms2qurry ? "output/${meta_ms2qurry.id}.tsv": '""'
+    def sirius_id = sirius ? "output_${meta_sirius.id}.tsv": '""'
+    def finger_id = fingerid ? "output_${meta_fingerid.id}.tsv": '""'
+    def ms2query_id = ms2qurry ? "output_${meta_ms2qurry.id}.tsv": '""'
     def sirius_file = sirius ? sirius: '""'
     def finger_file = fingerid ? fingerid: '""'
     def ms2query_file = ms2qurry ? ms2qurry: '""'
 
         """
 
-        mkdir output
-        cleanup.py --input_consensus $consensusxml --output output/${prefix}.tsv --sirius_id $sirius_id --finger_id $finger_id --ms2query_id $ms2query_id --sirius_file $sirius_file --finger_file $finger_file --ms2query_file $ms2query_file  $args
+        cleanup.py --input_consensus $consensusxml --output output_quantification_${prefix}.tsv --sirius_id $sirius_id --finger_id $finger_id --ms2query_id $ms2query_id --sirius_file $sirius_file --finger_file $finger_file --ms2query_file $ms2query_file  $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
