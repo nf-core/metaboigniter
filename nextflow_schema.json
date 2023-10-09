@@ -1200,8 +1200,6 @@
                     "description": "Save intermediate files",
                     "hidden": true
                 }
-
-
             }
         },
         "institutional_config_options": {
