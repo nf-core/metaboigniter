@@ -1,0 +1,9 @@
+model_files
+https://zenodo.org/api/files/3362c738-84c9-4072-bc9f-8f5a2596a54e/library_GNPS_15_12_2021_ms2ds_embeddings.pickle
+https://zenodo.org/api/files/3362c738-84c9-4072-bc9f-8f5a2596a54e/library_GNPS_15_12_2021_s2v_embeddings.pickle
+https://zenodo.org/api/files/3362c738-84c9-4072-bc9f-8f5a2596a54e/ms2ds_model_GNPS_15_12_2021.hdf5
+https://zenodo.org/api/files/3362c738-84c9-4072-bc9f-8f5a2596a54e/ms2query_library.sqlite
+https://zenodo.org/api/files/3362c738-84c9-4072-bc9f-8f5a2596a54e/ms2query_random_forest_model.onnx
+https://zenodo.org/api/files/3362c738-84c9-4072-bc9f-8f5a2596a54e/spec2vec_model_GNPS_15_12_2021.model
+https://zenodo.org/api/files/3362c738-84c9-4072-bc9f-8f5a2596a54e/spec2vec_model_GNPS_15_12_2021.model.syn1neg.npy
+https://zenodo.org/api/files/3362c738-84c9-4072-bc9f-8f5a2596a54e/spec2vec_model_GNPS_15_12_2021.model.wv.vectors.npy
