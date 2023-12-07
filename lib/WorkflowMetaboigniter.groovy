@@ -11,8 +11,6 @@ class WorkflowMetaboigniter {
     // Check and validate parameters
     //
     public static void initialise(params, log) {
-
-
         if (!params.identification && (params.run_ms2query || params.run_sirius || params.sirius_runfid)) {
             log.warn "Sirius, CSI:FingerID or MS2Query enabled, but no `--identification` flag set."
         }
@@ -71,7 +69,7 @@ class WorkflowMetaboigniter {
         // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
         // Uncomment function in methodsDescriptionText to render in MultiQC report
         def reference_text = [
-              ].join(' ').trim()
+            ].join(' ').trim()
 
         return reference_text
     }

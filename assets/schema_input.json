@@ -11,13 +11,13 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "unique": true,
-                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "errorMessage": "sample name must be provided and cannot contain spaces",
                 "meta": ["sample_name"]
             },
             "type": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Type must be provided and cannot contain spaces",
+                "errorMessage": "type must be provided and cannot contain spaces",
                 "meta": ["type"]
             },
             "level": {
@@ -31,10 +31,9 @@
                 "unique": true,
                 "format": "file-path",
                 "exists": true,
-                "errorMessage": "mzML file must be provided, cannot contain spaces and must have extension '.mzML'",
-
+                "errorMessage": "mzML file must be provided (msfile), cannot contain spaces and must have extension '.mzML'"
             }
         },
-        "required": ["sample", "type","level","msfile"]
+        "required": ["sample", "type", "level", "msfile"]
     }
 }
