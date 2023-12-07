@@ -2,8 +2,6 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-
-
 import os
 import pyopenms as py
 import argparse
