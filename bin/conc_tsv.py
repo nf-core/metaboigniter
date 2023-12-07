@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+
+
+# Written by Payam Emami and Axel Walter and released under the MIT license.
+
+
+
 import argparse
 import pandas as pd
 import glob

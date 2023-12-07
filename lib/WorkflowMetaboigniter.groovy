@@ -12,11 +12,13 @@ class WorkflowMetaboigniter {
     //
     public static void initialise(params, log) {
 
-        genomeExistsError(params, log)
 
+        if (!params.identification && (params.run_ms2query || params.run_sirius || params.sirius_runfid)) {
+            log.warn "Sirius, CSI:FingerID or MS2Query enabled, but no `--identification` flag set."
+        }
 
-        if (!params.fasta) {
-            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if ((params.run_sirius || params.sirius_runfid) && (!params.sirius_email || !params.sirius_password)) {
+            log.warn "No Sirius user account information found. Please enter `--sirius_email` and `sirius_password`."
         }
     }
 
@@ -57,9 +59,6 @@ class WorkflowMetaboigniter {
         // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
         // Uncomment function in methodsDescriptionText to render in MultiQC report
         def citation_text = [
-                "Tools used in the workflow included:",
-                "FastQC (Andrews 2010),",
-                "MultiQC (Ewels et al. 2016)",
                 "."
             ].join(' ').trim()
 
@@ -72,9 +71,7 @@ class WorkflowMetaboigniter {
         // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
         // Uncomment function in methodsDescriptionText to render in MultiQC report
         def reference_text = [
-                "<li>Andrews S, (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).</li>",
-                "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
-            ].join(' ').trim()
+              ].join(' ').trim()
 
         return reference_text
     }

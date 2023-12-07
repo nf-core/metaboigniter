@@ -5,7 +5,7 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
     conda  "bioconda::openms=3.0.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/openms:3.0.0--h8964181_0' :
-        'quay.io/biocontainers/openms:3.0.0--h8964181_0' }"
+        'biocontainers/openms:3.0.0--h8964181_0' }"
 
     input:
     tuple val(meta), path(featurexml)
