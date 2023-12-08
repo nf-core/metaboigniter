@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Payam Emami and Axel Walter and released under the MIT license.
+
 import os
 import numpy as np
 import pandas as pd

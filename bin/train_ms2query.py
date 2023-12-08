@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Payam Emami and Axel Walter and released under the MIT license.
+
 import argparse
 from os.path import join
 from ms2query.create_new_library.library_files_creator import LibraryFilesCreator

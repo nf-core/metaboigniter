@@ -5,7 +5,7 @@ process SIRIUS_SEARCH{
     conda "bioconda::sirius-csifingerid=5.8.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/sirius-csifingerid:5.8.2--h3bb291f_0' :
-        'quay.io/biocontainers/sirius-csifingerid:5.8.2--h3bb291f_0' }"
+        'biocontainers/sirius-csifingerid:5.8.2--h3bb291f_0' }"
 
     input:
     tuple val(meta), path(input_target)
