@@ -31,13 +31,13 @@
      showgrid="false"
      inkscape:zoom="1.2574257"
      inkscape:cx="380.93701"
-     inkscape:cy="137.18504"
+     inkscape:cy="153.09055"
      inkscape:window-width="1792"
      inkscape:window-height="1039"
      inkscape:window-x="0"
      inkscape:window-y="25"
      inkscape:window-maximized="0"
-     inkscape:current-layer="switch862" />
+     inkscape:current-layer="g1056" />
   <defs
      id="defs826">
     <style
@@ -1197,7 +1197,8 @@
            font-family="Helvetica"
            font-size="12px"
            text-anchor="middle"
-           id="text1038">csv</text>
+           id="text1038"
+           style="fill:#fefefe;fill-opacity:1">csv</text>
       </switch>
     </g>
     <path
@@ -1269,7 +1270,8 @@
            font-family="Helvetica"
            font-size="12px"
            text-anchor="middle"
-           id="text1052">csv</text>
+           id="text1052"
+           style="fill:#fdfdfd;fill-opacity:1">csv</text>
       </switch>
     </g>
     <path
@@ -1337,11 +1339,13 @@
         <text
            x="55"
            y="242"
-           fill="rgb(0, 0, 0)"
+           fill="#000000"
            font-family="Helvetica"
            font-size="12px"
            text-anchor="middle"
-           id="text1066">mzML</text>
+           id="text1066"><tspan
+             style="fill:#fbfbfb;fill-opacity:1"
+             id="tspan6746">mzML</tspan></text>
       </switch>
     </g>
     <rect
