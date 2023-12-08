@@ -1,6 +1,4 @@
 reports:
-  samplesheet.csv:
-    display: "Auto-created samplesheet with collated metadata and FASTQ paths"
   "**/TABLE_OUTPUT/output_quantification_*.tsv":
     display: "Quantification data"
   "**/TABLE_OUTPUT/output_sirius_*.tsv":
