@@ -1,0 +1,9 @@
+reports:
+  "**/TABLE_OUTPUT/output_quantification_*.tsv":
+    display: "Quantification data"
+  "**/TABLE_OUTPUT/output_sirius_*.tsv":
+    display: "SIRIUS identification data"
+  "**/TABLE_OUTPUT/output_fingerid_*.tsv":
+    display: "FINGERID identification data"
+  "**/TABLE_OUTPUT/output_ms2query_*.tsv":
+    display: "MS2Query identification data"
