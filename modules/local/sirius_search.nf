@@ -1,7 +1,6 @@
 process SIRIUS_SEARCH{
     tag "$meta.id"
-    label 'process_long'
-
+    label 'process_high_long'
     conda "bioconda::sirius-csifingerid=5.8.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/sirius-csifingerid:5.8.2--h3bb291f_0' :
@@ -24,7 +23,7 @@ process SIRIUS_SEARCH{
     def prefix = task.ext.prefix ?: "${meta.id}"
         """
     mkdir siris_project
-    siriussearch.py --input $input_target --output sirius_${input_target.baseName}.tsv --outputfid fingerid_${input_target.baseName}.tsv --prfolder siris_project --project_processors $task.cpus $args
+    siriussearch.sh --input $input_target --output sirius_${input_target.baseName}.tsv --outputfid fingerid_${input_target.baseName}.tsv --prfolder siris_project --project_processors $task.cpus $args
 
 
     cat <<-END_VERSIONS > versions.yml

@@ -42,7 +42,10 @@ if(mgf_splitmgf_pyopenms>1 && sirius_split)
 {
 
 output_sirius = SIRIUS_SEARCH.out.sirius_tsv.groupTuple(by:0)
-output_fingerid = SIRIUS_SEARCH.out.output_fingerid.groupTuple(by:0)
+output_sirius = output_sirius.map{meta,file->[[id:"sirius_${meta.id}"],file]}
+output_fingerid = SIRIUS_SEARCH.out.fingerid_tsv.groupTuple(by:0)
+output_fingerid = output_fingerid.map{meta,file->[[id:"fingerid_${meta.id}"],file]}
+
 
 }
 PYOPENMS_CONCTSVSIRIUS(output_sirius,"tsv","tsv")
