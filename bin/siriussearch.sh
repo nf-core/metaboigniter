@@ -110,7 +110,7 @@ done
 
 # Login if email and password are provided
 if [ -n "$email" ] && [ -n "$password" ]; then
-   $executable login --email="$email" --password="$password"
+    $executable login --email="$email" --password="$password"
 fi
 
 # Construct command line
