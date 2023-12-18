@@ -105,7 +105,7 @@ while [ "$#" -gt 0 ]; do
         --email) email="$2"; shift ;;
         --password) password="$2"; shift ;;
         --executable) executable="$2"; shift ;;
-	--workspace) workspace_sirius="$2"; shift ;;
+        --workspace) workspace_sirius="$2"; shift ;;
         *) echo "Unknown option: $1"; exit 1 ;;
     esac
     shift
