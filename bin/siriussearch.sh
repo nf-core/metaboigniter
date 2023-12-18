@@ -6,6 +6,7 @@ convert_arg_name() {
 }
 
 # Default values
+workspace_sirius_default="./workspace"
 output_default="sirius.tsv"
 outputfid_default="fingerid.tsv"
 prfolder_default="./output"
@@ -38,6 +39,7 @@ password_default=""
 executable_default="sirius"
 
 # Initialize variables to defaults
+workspace_sirius=$workspace_sirius_default
 output=$output_default
 outputfid=$outputfid_default
 prfolder=$prfolder_default
@@ -103,6 +105,7 @@ while [ "$#" -gt 0 ]; do
         --email) email="$2"; shift ;;
         --password) password="$2"; shift ;;
         --executable) executable="$2"; shift ;;
+	--workspace) workspace_sirius="$2"; shift ;;
         *) echo "Unknown option: $1"; exit 1 ;;
     esac
     shift
@@ -110,11 +113,11 @@ done
 
 # Login if email and password are provided
 if [ -n "$email" ] && [ -n "$password" ]; then
-    $executable login --email="$email" --password="$password"
+$executable  --noCite --workspace "$workspace_sirius"  login --email="$email" --password="$password"
 fi
 
 # Construct command line
-command_line="$executable --noCite"
+command_line="$executable --noCite --workspace $workspace_sirius "
 
 # Add project-related options if not default
 for key in maxmz processors loglevel ignore_formula; do
