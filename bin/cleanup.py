@@ -60,7 +60,7 @@ def modify_tsv_column(input_file, output_file, old_column_name, new_column_name,
         for row in reader:
             # Rearrange the row data based on new headers
             value_to_move = row.pop(old_position)
-            value_to_move.replace("e_", "")
+            value_to_move = value_to_move.replace("e_", "")
             row.insert(new_position, value_to_move)
 
             writer.writerow(row)
