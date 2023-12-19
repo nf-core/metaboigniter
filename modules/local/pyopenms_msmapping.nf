@@ -31,7 +31,7 @@ process PYOPENMS_MSMAPPING{
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyopenms: \$(python -c "import pyopenms; print(pyopenms.__version__)" 2>/dev/null)
+        pyopenms: \$(python -c "import pyopenms; print(pyopenms.__version__)" 2>&1 | grep -v "Warning:")
     END_VERSIONS
         """
 }

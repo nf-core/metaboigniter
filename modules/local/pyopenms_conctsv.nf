@@ -33,7 +33,7 @@ process PYOPENMS_CONCTSV {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyopenms: \$(python -c "import ms2query; print(ms2query.__version__)" 2>/dev/null)
+        pyopenms: \$(python -c "import pyopenms; print(pyopenms.__version__)" 2>&1 | grep -v "Warning:")
     END_VERSIONS
         """
 }
