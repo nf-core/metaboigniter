@@ -47,7 +47,7 @@
                 },
                 "ms2_collection_model": {
                     "type": "string",
-                    "default": "separate",
+                    "default": "paired",
                     "enum": ["separate", "paired"],
                     "description": "Set wether the MS2 collections have been done on all the MS1 data. If there is a separate MS2 file, set to separate"
                 }
@@ -302,7 +302,7 @@
                 },
                 "algorithm_metabolitefeaturedeconvolution_charge_max_metaboliteadductdecharger_openms": {
                     "type": "integer",
-                    "default": 3,
+                    "default": 1,
                     "hidden": false,
                     "description": "Maximal possible charge"
                 },
@@ -339,7 +339,7 @@
                 },
                 "algorithm_metabolitefeaturedeconvolution_unit_metaboliteadductdecharger_openms": {
                     "type": "string",
-                    "default": "Da",
+                    "default": "ppm",
                     "hidden": false,
                     "description": "Unit of the 'max_difference' parameter",
                     "enum": ["Da", "ppm"]
@@ -375,7 +375,7 @@
                 },
                 "algorithm_metabolitefeaturedeconvolution_default_map_label_metaboliteadductdecharger_openms": {
                     "type": "string",
-                    "default": "decharged features",
+                    "default": "'decharged features'",
                     "hidden": true,
                     "description": "Label of map in output consensus file where all features are put by default"
                 },
@@ -386,7 +386,7 @@
                 },
                 "adducts_neg": {
                     "type": "string",
-                    "default": "H-1:-:1 H-2O-1:0:0.05 CH2O2:0:0.5",
+                    "default": "H-1:-:0.8 H-3O-1:-:0.2",
                     "description": "possible negative adducts for adduct detection in the format of adduct:charge:probablity"
                 }
             }
@@ -477,7 +477,7 @@
                     "type": "number",
                     "hidden": false,
                     "description": "Never pair features with a larger RT distance (in seconds).",
-                    "default": 100.1
+                    "default": 100.0
                 },
                 "algorithm_pairfinder_distance_rt_exponent_mapalignerposeclustering_openms": {
                     "type": "number",
@@ -552,13 +552,13 @@
                     "type": "number",
                     "hidden": false,
                     "description": "Width of RT tolerance window (sec)",
-                    "default": 100.1
+                    "default": 100.0
                 },
                 "algorithm_warp_mz_tol_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": false,
                     "description": "m/z tolerance (in ppm or Da)",
-                    "default": 100
+                    "default": 5.0
                 },
                 "algorithm_warp_max_pairwise_log_fc_featurelinkerunlabeledkd_openms": {
                     "type": "number",
@@ -1176,9 +1176,9 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
+                    "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/metaboigniter/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
@@ -1195,6 +1195,11 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                },
+                "multiqc_title": {
+                    "type": "string",
+                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
+                    "fa_icon": "fas fa-file-signature"
                 },
                 "save_intermeds": {
                     "type": "boolean",
@@ -1368,6 +1373,32 @@
                     "description": "Validation of parameters in lenient more.",
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
+                },
+                "max_multiqc_email_size": {
+                    "type": "string",
+                    "description": "File size limit when attaching MultiQC reports to summary emails.",
+                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
+                    "default": "25.MB",
+                    "fa_icon": "fas fa-file-upload",
+                    "hidden": true
+                },
+                "multiqc_config": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
+                },
+                "multiqc_logo": {
+                    "type": "string",
+                    "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
+                    "fa_icon": "fas fa-image",
+                    "hidden": true
+                },
+                "multiqc_methods_description": {
+                    "type": "string",
+                    "description": "Custom MultiQC yaml file containing HTML including a methods description.",
+                    "fa_icon": "fas fa-cog"
                 }
             }
         }

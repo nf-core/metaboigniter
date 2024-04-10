@@ -37,7 +37,6 @@ if(ms2_collection_model=="separate" && !skip_alignment)
      idd=mzml.baseName
      [[map_id:idd], mzml]}).map{it[1,3]}
 
-
     ch_versions       = ch_versions.mix(OPENMS_MAPALIGNERPOSECLUSTERINGMZML.out.versions.first())
 
 }
@@ -58,18 +57,14 @@ if(ms2_collection_model=="paired" && !skip_alignment)
 
     ch_versions       = ch_versions.mix(OPENMS_MAPALIGNERPOSECLUSTERING.out.versions.first())
 
-  combined_data =quantified_features.map{meta,featurexml->
-    idd=featurexml.baseName
-    [[map_id:idd],meta]}
+   combined_data =quantified_features.map{meta,featurexml->
+   tuple(featurexml.baseName, meta)}
     .join(OPENMS_MAPALIGNERPOSECLUSTERING.out.featurexml.map{it[1]}.flatten().map{featurexml ->
-     idd=featurexml.baseName
-     [[map_id:idd], featurexml]})
+    tuple(featurexml.baseName, featurexml)})
      .join(OPENMS_MAPALIGNERPOSECLUSTERING.out.trafoxml.map{it[1]}.flatten().map{trafoxml ->
-    idd=trafoxml.baseName
-    [[map_id:idd], trafoxml]})
+    tuple(trafoxml.baseName, trafoxml)})
     .join(quantificaiton_data.map{meta,mzml->
-     idd=mzml.baseName
-     [[map_id:idd],mzml]}).map{it[1..4]}
+ tuple(mzml.baseName, mzml)}).map{it[1..4]}
 
 
     combined_data.map{it[0,2,3]} | OPENMS_MAPRTTRANSFORMER

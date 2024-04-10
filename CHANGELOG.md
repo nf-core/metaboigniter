@@ -3,7 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v2.1.0dev]
+## v2.1.0dev - [date]
+
+- Several bug fixes
+- Default change: negative adducts have been changed to H-1:-:0.8 H-3O-1:-:0.2
 
 ## [v2.0.0](https://github.com/nf-core/metaboigniter/releases/tag/2.0.0) - 2023-12-18
 
