@@ -590,5 +590,4 @@ for key, values in map_index_rm.items():
 #   f_mgf.close()
 #
 
-if exist_one_spectra == False:
-    raise Exception("No MS2 peak were found in the data!")
+

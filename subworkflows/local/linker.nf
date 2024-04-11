@@ -23,22 +23,22 @@ if(parallel_linking)
 {
 
      quantification_information.map{it[0,1]} | PYOPENMS_EXTRACTFEATUREMZ
-        ch_versions       = ch_versions.mix(PYOPENMS_EXTRACTFEATUREMZ.out.versions.first())
+    ch_versions       = ch_versions.mix(PYOPENMS_EXTRACTFEATUREMZ.out.versions.first())
 
 
 
 
 PYOPENMS_CONCTSV_MZ(Channel.of([id:"merged_mz_range"]).combine(PYOPENMS_EXTRACTFEATUREMZ.out.tsv.collect{it[1]}.toList()),"tsv","tsv")
-
+ch_versions       = ch_versions.mix(PYOPENMS_CONCTSV_MZ.out.versions.first())
 PYOPENMS_CONCTSV_MZ.out.csv | PYOPENMS_CALCULATEBOUNDRIES
-
+ch_versions       = ch_versions.mix(PYOPENMS_CALCULATEBOUNDRIES.out.versions.first())
 
 
 
 PYOPENMS_SPLITFEATUREXML(quantification_information.map{it[0,1]},
     PYOPENMS_CALCULATEBOUNDRIES.out.tsv.map{it[1]}
 )
-
+ch_versions       = ch_versions.mix(PYOPENMS_SPLITFEATUREXML.out.versions.first())
 
 
 
@@ -48,7 +48,7 @@ def n1 = (file.baseName =~ /\d+/)[-1] as Integer
         a.baseName <=> b.baseName
     }]} | OPENMS_FEATURELINKERUNLABELEDKDPARTS
 
-
+ch_versions       = ch_versions.mix(OPENMS_FEATURELINKERUNLABELEDKDPARTS.out.versions.first())
 
 
 
@@ -72,7 +72,7 @@ OPENMS_FEATURELINKERUNLABELEDKDPARTS.out.consensusxml.map{it[1]}.collect()
 }.toList())
 
 PYOPENMS_FILEMERGER(to_be_merged)
-
+ch_versions       = ch_versions.mix(PYOPENMS_FILEMERGER.out.versions.first())
 
 consensusxml=   PYOPENMS_FILEMERGER.out.consensusxml.map{meta,consensusxml->[[id:consensusxml.baseName],consensusxml]}
 

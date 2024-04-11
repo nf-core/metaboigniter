@@ -2,10 +2,10 @@
 process SIRIUS_SEARCH{
     tag "$meta.id"
     label 'process_high_long'
-    conda "bioconda::sirius-csifingerid=5.8.2"
+    conda "bioconda::sirius-csifingerid=5.8.6"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/sirius-csifingerid:5.8.5--h3bb291f_0' :
-        'biocontainers/sirius-csifingerid:5.8.5--h3bb291f_0' }"
+        'https://depot.galaxyproject.org/singularity/sirius-csifingerid:5.8.6--h3bb291f_0' :
+        'biocontainers/sirius-csifingerid:5.8.6--h3bb291f_0' }"
 
     input:
     tuple val(meta), path(input_target)

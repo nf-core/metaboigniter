@@ -3,9 +3,6 @@ include { OPENMS_FEATUREFINDERMETABO       } from '../../modules/local/openms_fe
 include { OPENMS_MAPALIGNERPOSECLUSTERING       } from '../../modules/local/openms_mapalignerposeclustering.nf'
 include { OPENMS_MAPALIGNERPOSECLUSTERINGMZML       } from '../../modules/local/openms_mapalignerposeclusteringmzml.nf'
 include { OPENMS_MAPRTTRANSFORMER       } from '../../modules/local/openms_maprttransformer.nf'
-include { OPENMS_METABOLITEADDUCTDECHARGER       } from '../../modules/local/openms_metaboliteadductdecharger.nf'
-
-include {     MERGEMS1MS2   } from '../../subworkflows/local/mergems1ms2.nf'
 
 workflow QUANTIFICATION {
     take:

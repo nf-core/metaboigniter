@@ -141,6 +141,13 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     //genomeExistsError()
+            if (!params.identification && (params.run_ms2query || params.run_sirius || params.sirius_runfid)) {
+            log.warn "Sirius, CSI:FingerID or MS2Query enabled, but no `--identification` flag set."
+        }
+
+        if ((params.run_sirius || params.sirius_runfid) && (!params.sirius_email || !params.sirius_password)) {
+            log.warn "No Sirius user account information found. Please enter `--sirius_email` and `sirius_password`."
+        }
 }
 
 //

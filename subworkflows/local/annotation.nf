@@ -1,7 +1,5 @@
 
 include { OPENMS_METABOLITEADDUCTDECHARGER       } from '../../modules/local/openms_metaboliteadductdecharger.nf'
-include { OPENMS_IDMAPPER       } from '../../modules/local/openms_idmapper.nf'
-include { OPENMS_IDMAPPERCONSENSUS } from '../../modules/local/openms_idmapperconsensus.nf'
 include { PYOPENMS_C13DETECTION } from '../../modules/local/pyopenms_c13detection.nf'
 
 

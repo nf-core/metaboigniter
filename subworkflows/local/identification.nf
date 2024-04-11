@@ -1,13 +1,8 @@
 
-include { PYOPENMS_SPLIT } from '../../modules/local/pyopenms_split.nf'
 include { OPENMS_FILEFILTER } from '../../modules/local/openms_filefilter.nf'
-include { MS2QUERY_EXPORT } from '../../modules/local/ms2query_export.nf'
-include { PYOPENMS_SPLITMGF } from '../../modules/local/pyopenms_splitmgf.nf'
-include { PYOPENMS_CONCTSV } from '../../modules/local/pyopenms_conctsv.nf'
 include {PYOPENMS_MSMAPPING } from '../../modules/local/pyopenms_msmapping.nf'
 include {PYOPENMS_GENERATESEARCHPARAMS } from '../../modules/local/pyopenms_generatesearchparams.nf'
 include {PYOPENMS_GENERATESEARCHPARAMSUNMAPPED } from '../../modules/local/pyopenms_generatesearchparamsunmapped.nf'
-include {PYOPENMS_ISOMAPPING } from '../../modules/local/pyopenms_isomapping.nf'
 include { PYOPENMS_SPLITCONSENSUS } from '../../modules/local/pyopenms_splitconsensus.nf'
 include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSV_UNMAPPED } from '../../modules/local/pyopenms_conctsv.nf'
 include { GENERAL_MERGEFILE as GENERAL_MERGEMSFILE } from '../../modules/local/general_mergefile.nf'

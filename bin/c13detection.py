@@ -130,8 +130,8 @@ for i in range(features.size()):
     iso = extract_precursor_isotope_pattern(mz, exp, args.iterations, charge_f, args.ppm, rt_min, rt_max)
 
     peptide = py.PeptideIdentification()
-    peptide.setRT(mz)
-    peptide.setMZ(rt)
+    peptide.setRT(rt)
+    peptide.setMZ(mz)
     iso_mz = []
     iso_in = []
     if len(iso) > 0:

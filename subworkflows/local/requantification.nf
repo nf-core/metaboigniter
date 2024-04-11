@@ -15,6 +15,7 @@ workflow REQUANTIFICATION {
 
 consensusxml_data | PYOPENMS_SPLIT
  data_split=PYOPENMS_SPLIT.out.consensusxml
+ch_versions       = ch_versions.mix(PYOPENMS_SPLIT.out.versions.first())
 
 quantified_features.combine(data_split.map{it[1]}) |  PYOPENMS_RELOADMAPS
 

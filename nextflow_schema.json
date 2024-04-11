@@ -108,6 +108,12 @@
                     "hidden": true,
                     "description": "Match using RT and m/z of sub-features instead of consensus RT and m/z. A consensus feature matches if any of its sub-features matches."
                 },
+                "ignore_msms_mapping_charge_pyopenms": {
+                    "type": "boolean",
+                    "default": false,
+                    "hidden": true,
+                    "description": "When mapping MS2 precursors to consensus elements, ignore the charge. Specially beneficial in negative mode, if the charges of the consensus features are and spectra are different"
+                },
                 "ms2_use_feature_ionization": {
                     "type": "boolean",
                     "description": "If set, detected adduct will be used in identification"
@@ -375,7 +381,7 @@
                 },
                 "algorithm_metabolitefeaturedeconvolution_default_map_label_metaboliteadductdecharger_openms": {
                     "type": "string",
-                    "default": "'decharged features'",
+                    "default": "decharged features",
                     "hidden": true,
                     "description": "Label of map in output consensus file where all features are put by default"
                 },
@@ -1126,8 +1132,8 @@
                 },
                 "algorithm_ffm_isotope_filtering_model_featurefindermetabo_openms": {
                     "type": "string",
-                    "default": "'metabolites (5% RMS)'",
-                    "enum": ["'metabolites (2% RMS)'", "'metabolites (5% RMS)'", "peptides", "none"],
+                    "default": "metabolites (5% RMS)",
+                    "enum": ["metabolites (2% RMS)", "metabolites (5% RMS)", "peptides", "none"],
                     "hidden": false,
                     "description": "Remove/score candidate assemblies based on isotope intensities. SVM isotope models for metabolites were trained with either 2% or 5% RMS error. For peptides, an averagine cosine scoring is used. Select the appropriate noise model according to the quality of measurement or MS device."
                 },
