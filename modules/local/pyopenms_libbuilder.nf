@@ -25,7 +25,7 @@ process PYOPENMS_LIBBUILDER{
         """
 
     lib_generator.py \\
-     --input $consensusxml  --output ${prefix}.tsv $args
+    --input $consensusxml  --output ${prefix}.tsv $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

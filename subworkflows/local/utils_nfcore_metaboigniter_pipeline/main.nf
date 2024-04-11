@@ -85,7 +85,7 @@ workflow PIPELINE_INITIALISATION {
         .map{
             meta, msfile ->
             meta.id=msfile.baseName
-           return [ meta, msfile ]
+            return [ meta, msfile ]
         }
         .set { ch_samplesheet }
 

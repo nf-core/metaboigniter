@@ -42,7 +42,7 @@ ch_versions = Channel.empty()
 
 
 
- // Map the MS2 to consensus
+// Map the MS2 to consensus
 consensusxml_data.combine(mzml_files.filter{meta,file->meta.level == "MS2" | meta.level == "MS12"}.collect{it[1]}
 .map { files ->
     files.sort { a, b ->
@@ -104,7 +104,7 @@ if(split_consensus_parts>1)
 {
 
 generated_params = OPENMS_FILEFILTER.out.consensusxml.map{it[0]}.combine(
- PYOPENMS_GENERATESEARCHPARAMS.out.csv.collect{it[1]}
+PYOPENMS_GENERATESEARCHPARAMS.out.csv.collect{it[1]}
 .map { files ->
     files.sort { a, b ->
     def n1 = (a.baseName =~ /\d+/)[-1] as Integer

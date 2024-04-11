@@ -22,7 +22,7 @@ workflow LINKER {
 if(parallel_linking)
 {
 
-     quantification_information.map{it[0,1]} | PYOPENMS_EXTRACTFEATUREMZ
+    quantification_information.map{it[0,1]} | PYOPENMS_EXTRACTFEATUREMZ
     ch_versions       = ch_versions.mix(PYOPENMS_EXTRACTFEATUREMZ.out.versions.first())
 
 
@@ -78,7 +78,7 @@ consensusxml=   PYOPENMS_FILEMERGER.out.consensusxml.map{meta,consensusxml->[[id
 
 }else{
 
-  Channel.of([id:"Linked_data"]).combine(quantification_information.collect{it[1]}.map { files ->
+Channel.of([id:"Linked_data"]).combine(quantification_information.collect{it[1]}.map { files ->
     files.sort { a, b ->
         a.baseName <=> b.baseName
     }
