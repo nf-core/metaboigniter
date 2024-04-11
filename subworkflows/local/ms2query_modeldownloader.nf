@@ -5,6 +5,7 @@ workflow MS2QUERY_MODELDOWNLOADER {
     polarity
 
     main:
+    ch_versions = Channel.empty()
 
     if(polarity=="positive")
     {
@@ -20,9 +21,10 @@ workflow MS2QUERY_MODELDOWNLOADER {
     model_files = MS2QUERY_DOWNLOADMODEL.out.model_files
     }
 
+    ch_versions       = ch_versions.mix(MS2QUERY_DOWNLOADMODEL.out.versions.first())
 
     emit:
     model_files
-    versions = MS2QUERY_DOWNLOADMODEL.out.versions
+    versions = ch_versions
 }
 

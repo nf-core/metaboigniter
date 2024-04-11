@@ -403,10 +403,7 @@ for cons_i in range(consensus_map.size()):
     if feature.metaValueExists("best ion") == True and use_feature_ionization == True:
         ionization = ">ionization " + feature.getMetaValue("best ion")
 
-    if polarity == "positive" and charge_f == 0:
-        charge_f = 1
-    elif polarity == "negative" and charge_f == 0:
-        charge_f = -1
+    charge_f = (1 if polarity == "positive" else -1) * (1 if charge_f == 0 else abs(charge_f))
 
     # extract the top feature
     int_of_features = [sub_feature.getIntensity() for sub_feature in feature.getFeatureList()]
@@ -593,5 +590,4 @@ for key, values in map_index_rm.items():
 #   f_mgf.close()
 #
 
-if exist_one_spectra == False:
-    raise Exception("No MS2 peak were found in the data!")
+
