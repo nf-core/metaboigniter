@@ -11,7 +11,7 @@ process OPENMS_PEAKPICKERHIRES {
     tuple val(meta), path(mzml)
 
     output:
-    tuple val(meta), path("output/*.centroided.mzML"), emit: mzml
+    tuple val(meta), path("output/*.mzML"), emit: mzml
     path  "versions.yml"                      , emit: versions
 
     when:

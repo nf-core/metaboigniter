@@ -15,7 +15,7 @@ parser.add_argument("--rt_tolerance", type=float, help="The retention time toler
 parser.add_argument("--mz_tolerance", type=float, help="The m/z tolerance")
 parser.add_argument("--annotate_ids_with_subelements", action="store_true", help="Annotate IDs with sub-elements")
 parser.add_argument("--measure_from_subelements", action="store_true", help="Measure from sub-elements")
-
+parser.add_argument("--ignore_charge", action="store_true", help="For feature/consensus maps: Assign an ID independently of whether its charge state matches that of the (consensus) feature.")
 
 # Parse the arguments
 args = parser.parse_args()
@@ -28,7 +28,7 @@ mz_tolerance = args.mz_tolerance
 rt_tolerance = args.rt_tolerance
 annotate_ids_with_subelements = args.annotate_ids_with_subelements
 measure_from_subelements = args.measure_from_subelements
-
+ignore_charge = str(args.ignore_charge).lower()
 
 protein_ids = []
 peptide_ids = []
@@ -39,6 +39,7 @@ mapper = py.IDMapper()
 parameters = mapper.getParameters()
 parameters.setValue("rt_tolerance", rt_tolerance)
 parameters.setValue("mz_tolerance", mz_tolerance)
+parameters.setValue("ignore_charge", ignore_charge)
 
 mapper.setParameters(parameters)
 

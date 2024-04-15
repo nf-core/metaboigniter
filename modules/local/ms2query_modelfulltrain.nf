@@ -2,10 +2,10 @@ process MS2QUERY_MODELFULLTRAIN {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::ms2query=1.2.0"
+    conda "bioconda::ms2query=1.2.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ms2query:1.2.0--pyhdfd78af_0' :
-        'biocontainers/ms2query:1.2.0--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/ms2query:1.2.3--pyhdfd78af_0' :
+        'biocontainers/ms2query:1.2.3--pyhdfd78af_0' }"
 
 
     input:

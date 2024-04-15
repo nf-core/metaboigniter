@@ -1,11 +1,7 @@
 
-include { PYOPENMS_SPLIT } from '../../modules/local/pyopenms_split.nf'
 include { MS2QUERY_CHECKMODELFILES } from '../../modules/local/ms2query_checkmodelfiles.nf'
 include { MS2QUERY_SEARCH } from '../../modules/local/ms2query_search.nf'
 include { MS2QUERY_MODELTRAIN } from '../../modules/local/ms2query_modeltrain.nf'
-include { MS2QUERY_MODELFULLTRAIN } from '../../modules/local/ms2query_modelfulltrain.nf'
-include { PYOPENMS_EXPORT } from '../../modules/local/pyopenms_export.nf'
-include { MS2QUERY_EXPORT } from '../../modules/local/ms2query_export.nf'
 include { PYOPENMS_SPLITMGF } from '../../modules/local/pyopenms_splitmgf.nf'
 include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSVMS2QUERY } from '../../modules/local/pyopenms_conctsv.nf'
 include { MS2QUERY_MODELDOWNLOADER } from '../../subworkflows/local/ms2query_modeldownloader.nf'
@@ -35,6 +31,7 @@ if(!offline_model_ms2query)
 {
 
 MS2QUERY_MODELDOWNLOADER(polarity)
+ch_versions       = ch_versions.mix(MS2QUERY_MODELDOWNLOADER.out.versions.first())
 
 MS2QUERY_MODELDOWNLOADER.out.model_files.collect() |  MS2QUERY_CHECKMODELFILES
 ch_versions       = ch_versions.mix(MS2QUERY_CHECKMODELFILES.out.versions.first())
