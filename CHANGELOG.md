@@ -5,7 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v2.0.1](https://github.com/nf-core/metaboigniter/releases/tag/2.0.1) - 2024-04-12
 
-- Several bug fixes
+- Problems with missing output data after peak picking have been resolved
+- The issue with long file names has been fixed
+- Charge state handling in negative mode has been improved
+- C13 detection is now only applied if identification flag is set
+- nf-validation version has been pinned
 - Default change: negative adducts have been changed to H-1:-:0.8 H-3O-1:-:0.2
 - SIRIUS has been updated to 5.8.6
 - MS2QUERY has been updated to 1.2.3
