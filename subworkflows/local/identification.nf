@@ -120,8 +120,8 @@ PYOPENMS_GENERATESEARCHPARAMS.out.csv.collect{it[1]}
         return s1 <=> s2
     }
     }
-}.toList()).map{it[1]}.flatten().
-map{file ->
+}.toList()).map{it[1]}.flatten()
+.map{file ->
 def matcher = file.baseName =~ /(.*)_part\d+/
 def filename = matcher ? matcher[0][1] : null
 [[id:filename],file]}.groupTuple(by: 0)
@@ -151,8 +151,8 @@ PYOPENMS_GENERATESEARCHPARAMS.out.ms.collect{it[1]}
         return s1 <=> s2
     }
     }
-}.toList()).map{it[1]}.flatten().
-map{file ->
+}.toList()).map{it[1]}.flatten()
+.map{file ->
 def matcher = file.baseName =~ /(.*)_part\d+/
 def filename = matcher ? matcher[0][1] : null
 [[id:filename],file]}.groupTuple(by: 0) | GENERAL_MERGEMSFILE
@@ -179,8 +179,8 @@ PYOPENMS_GENERATESEARCHPARAMS.out.mgf.collect{it[1]}
         return s1 <=> s2
     }
     }
-}.toList()).map{it[1]}.flatten().
-map{file ->
+}.toList()).map{it[1]}.flatten()
+.map{file ->
 def matcher = file.baseName =~ /(.*)_part\d+/
 def filename = matcher ? matcher[0][1] : null
 [[id:filename],file]}.groupTuple(by: 0) | GENERAL_MERGEMGFFILE

@@ -29,9 +29,9 @@ if(ms2_collection_model=="separate" && !skip_alignment)
 
 
     mzml_files = mzml_files.map{meta,mzml->
-    idd=mzml.baseName
+    def idd=mzml.baseName
     [[map_id:idd],meta,mzml]}.join(OPENMS_MAPALIGNERPOSECLUSTERINGMZML.out.mzml.map{it[1]}.flatten().map{mzml ->
-    idd=mzml.baseName
+    def idd=mzml.baseName
     [[map_id:idd], mzml]}).map{it[1,3]}
 
     ch_versions       = ch_versions.mix(OPENMS_MAPALIGNERPOSECLUSTERINGMZML.out.versions.first())
