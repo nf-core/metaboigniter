@@ -11,7 +11,7 @@ process MS2QUERY_SEARCH {
 
     input:
     tuple val(meta), path(msms)
-    tuple path(modelfiles,stageAs: "model/*")
+    path(modelfiles, stageAs: "model/*")
     output:
     tuple val(meta), path("output/*.csv"), emit: csv
     path  "versions.yml"               , emit: versions
