@@ -23,7 +23,7 @@ process PYOPENMS_FILEMERGER {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: meta.id
-    def inputs        = consensusxml_input.collect { it }.join(' ')
+    def inputs        = consensusxml_input.collect { it -> it }.join(' ')
 
         """
         mkdir output
