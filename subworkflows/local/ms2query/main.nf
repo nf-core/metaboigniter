@@ -1,10 +1,10 @@
 
-include { MS2QUERY_CHECKMODELFILES } from '../../modules/local/ms2query_checkmodelfiles.nf'
-include { MS2QUERY_SEARCH } from '../../modules/local/ms2query_search.nf'
-include { MS2QUERY_MODELTRAIN } from '../../modules/local/ms2query_modeltrain.nf'
-include { PYOPENMS_SPLITMGF } from '../../modules/local/pyopenms_splitmgf.nf'
-include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSVMS2QUERY } from '../../modules/local/pyopenms_conctsv.nf'
-include { MS2QUERY_MODELDOWNLOADER } from '../../subworkflows/local/ms2query_modeldownloader.nf'
+include { MS2QUERY_CHECKMODELFILES } from '../../../modules/local/ms2query_checkmodelfiles/main'
+include { MS2QUERY_SEARCH } from '../../../modules/local/ms2query_search/main'
+include { MS2QUERY_MODELTRAIN } from '../../../modules/local/ms2query_modeltrain/main'
+include { PYOPENMS_SPLITMGF } from '../../../modules/local/pyopenms_splitmgf/main'
+include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSVMS2QUERY } from '../../../modules/local/pyopenms_conctsv/main'
+include { MS2QUERY_MODELDOWNLOADER } from '../ms2query_modeldownloader/main'
 
 
 workflow MS2QUERY {

@@ -1,8 +1,8 @@
-include { OPENMS_PEAKPICKERHIRES       } from '../../modules/local/openms_peakpickerhires.nf'
-include { OPENMS_FEATUREFINDERMETABO       } from '../../modules/local/openms_featurefindermetabo.nf'
-include { OPENMS_MAPALIGNERPOSECLUSTERING       } from '../../modules/local/openms_mapalignerposeclustering.nf'
-include { OPENMS_MAPALIGNERPOSECLUSTERINGMZML       } from '../../modules/local/openms_mapalignerposeclusteringmzml.nf'
-include { OPENMS_MAPRTTRANSFORMER       } from '../../modules/local/openms_maprttransformer.nf'
+include { OPENMS_PEAKPICKERHIRES       } from '../../../modules/local/openms_peakpickerhires/main'
+include { OPENMS_FEATUREFINDERMETABO       } from '../../../modules/local/openms_featurefindermetabo/main'
+include { OPENMS_MAPALIGNERPOSECLUSTERING       } from '../../../modules/local/openms_mapalignerposeclustering/main'
+include { OPENMS_MAPALIGNERPOSECLUSTERINGMZML       } from '../../../modules/local/openms_mapalignerposeclusteringmzml/main'
+include { OPENMS_MAPRTTRANSFORMER       } from '../../../modules/local/openms_maprttransformer/main'
 
 workflow QUANTIFICATION {
     take:

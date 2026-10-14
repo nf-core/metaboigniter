@@ -1,4 +1,4 @@
-include { MS2QUERY_DOWNLOADMODEL } from '../../modules/local/ms2query_downloadmodel.nf'
+include { MS2QUERY_DOWNLOADMODEL } from '../../../modules/local/ms2query_downloadmodel/main'
 
 workflow MS2QUERY_MODELDOWNLOADER {
     take:

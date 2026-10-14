@@ -1,8 +1,8 @@
 
-include {SIRIUS_SEARCH } from '../../modules/local/sirius_search.nf'
-include { PYOPENMS_SPLITMGF as PYOPENMS_SPLITMS } from '../../modules/local/pyopenms_splitmgf.nf'
-include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSVSIRIUS } from '../../modules/local/pyopenms_conctsv.nf'
-include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSVFINGERID } from '../../modules/local/pyopenms_conctsv.nf'
+include {SIRIUS_SEARCH } from '../../../modules/local/sirius_search/main'
+include { PYOPENMS_SPLITMGF as PYOPENMS_SPLITMS } from '../../../modules/local/pyopenms_splitmgf/main'
+include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSVSIRIUS } from '../../../modules/local/pyopenms_conctsv/main'
+include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSVFINGERID } from '../../../modules/local/pyopenms_conctsv/main'
 
 workflow SIRIUS {
 

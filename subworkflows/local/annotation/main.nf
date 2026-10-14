@@ -1,6 +1,6 @@
 
-include { OPENMS_METABOLITEADDUCTDECHARGER       } from '../../modules/local/openms_metaboliteadductdecharger.nf'
-include { PYOPENMS_C13DETECTION } from '../../modules/local/pyopenms_c13detection.nf'
+include { OPENMS_METABOLITEADDUCTDECHARGER       } from '../../../modules/local/openms_metaboliteadductdecharger/main'
+include { PYOPENMS_C13DETECTION } from '../../../modules/local/pyopenms_c13detection/main'
 
 
 workflow ANNOTATION {
