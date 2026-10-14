@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "REQUANTIFICATION"
+description: Fills missing values by targeted re-extraction of linked features with OpenMS FeatureFinderMetaboIdent
+keywords:
+  - metabolomics
+  - requantification
+  - missing values
+  - openms
+components:
+  - pyopenms/split
+  - pyopenms/libbuilder
+  - pyopenms/reloadmaps
+  - openms/featurefindermetaboident
+  - pyopenms/merge
+input:
+  - consensusxml_data:
+      type: channel
+      description: |
+        [ meta, consensusXML ] of linked features
+  - quantified_features:
+      type: channel
+      description: |
+        [ meta, featureXML ] per sample
+  - quantificaiton_data:
+      type: channel
+      description: |
+        [ meta, mzML ] per sample
+output:
+  - quantified_features:
+      type: channel
+      description: |
+        [ meta, featureXML ] per sample including requantified features
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"
