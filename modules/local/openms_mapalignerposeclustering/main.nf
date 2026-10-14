@@ -13,8 +13,8 @@ process OPENMS_MAPALIGNERPOSECLUSTERING {
     tuple val(meta), path(featurexml)
 
     output:
-    tuple val(meta), path({meta.id.collect { 'output/'+it+'.trafoXML' }}), emit: trafoxml
-    tuple val(meta), path({meta.id.collect { 'output/'+it+'.featureXML' }}), emit: featurexml
+    tuple val(meta), path({meta.id.collect { map_id -> 'output/'+map_id+'.trafoXML' }}), emit: trafoxml
+    tuple val(meta), path({meta.id.collect { map_id -> 'output/'+map_id+'.featureXML' }}), emit: featurexml
     path  "versions.yml"                      , emit: versions
 
 
@@ -24,9 +24,9 @@ process OPENMS_MAPALIGNERPOSECLUSTERING {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: meta.id
-    def featurexml_input        = featurexml.collect { it }.join(' ')
-    def trafoxml_output        = prefix.collect { 'output/'+it+'.trafoXML' }.join(' ')
-    def featurexml_output        = prefix.collect { 'output/'+it+'.featureXML' }.join(' ')
+    def featurexml_input        = featurexml.collect { it -> it }.join(' ')
+    def trafoxml_output        = prefix.collect { it -> 'output/'+it+'.trafoXML' }.join(' ')
+    def featurexml_output        = prefix.collect { it -> 'output/'+it+'.featureXML' }.join(' ')
 
         """
     mkdir output

@@ -19,7 +19,6 @@ process PYOPENMS_SPLITCONSENSUS {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
         """
         mkdir output
         split_consensus.py --consensus_file_path $consensusxml --output output/  $args

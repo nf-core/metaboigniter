@@ -27,7 +27,7 @@ process PYOPENMS_CONCTSV {
 
         """
 
-        conc_tsv.py --input_dir inputs/ --output_file ${prefix}.contc.csv --input_type $separator_in --output_type $separator_out
+        conc_tsv.py --input_dir inputs/ --output_file ${prefix}.contc.csv --input_type $separator_in --output_type $separator_out $args
 
 
 

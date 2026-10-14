@@ -21,7 +21,6 @@ workflow IDENTIFICATION {
     take:
     consensusxml_data
     mzml_files
-    quantification_information
     offline_model_ms2query
     models_dir_ms2query
     train_library_ms2query
@@ -39,13 +38,13 @@ workflow IDENTIFICATION {
 
     main:
 
-ch_versions = Channel.empty()
+ch_versions = channel.empty()
 
 // The search parameter scripts read MS2 spectra with OnDiscMSExperiment,
 // which only works on indexed mzML, so add an index where it is missing (#95)
 ms2_files_by_index = mzml_files
-    .filter { meta, file -> meta.level == "MS2" || meta.level == "MS12" }
-    .branch { meta, file ->
+    .filter { meta, _file -> meta.level == "MS2" || meta.level == "MS12" }
+    .branch { _meta, file ->
         indexed: isIndexedMzml(file)
         not_indexed: true
     }
@@ -58,7 +57,7 @@ ms2_files = ms2_files_by_index.indexed.mix(OPENMS_FILECONVERTER.out.mzml)
 
 
 // Map the MS2 to consensus
-consensusxml_data.combine(ms2_files.collect{it[1]}
+consensusxml_data.combine(ms2_files.collect{ it -> it[1]}
 .map { files ->
     files.sort { a, b ->
         a.baseName <=> b.baseName
@@ -82,7 +81,7 @@ OPENMS_FILEFILTER.out.consensusxml | PYOPENMS_SPLITCONSENSUS
 
 ch_versions       = ch_versions.mix(PYOPENMS_SPLITCONSENSUS.out.versions.first())
 
-filtered_consensus = PYOPENMS_SPLITCONSENSUS.out.consensusxml.map{it[1]}.flatten().map{ file ->
+filtered_consensus = PYOPENMS_SPLITCONSENSUS.out.consensusxml.map{ it -> it[1]}.flatten().map{ file ->
     def matcher = file.baseName =~ /_part(\d+)/
     def partNumber = matcher ? matcher[0][1] : ''  // Extracts the numeric part after "_part"
     [[id: file.baseName, part: partNumber], file]
@@ -102,24 +101,24 @@ ms2_files.map{tuple ->
         }
     }
     .map { sortedTuples ->
-        def metas = sortedTuples.collect { it[0] }
-        def files = sortedTuples.collect { it[1] }
+        def metas = sortedTuples.collect { it -> it[0] }
+        def files = sortedTuples.collect { it -> it[1] }
         return [metas, files]
     }
 )
 
 ch_versions       = ch_versions.mix(PYOPENMS_GENERATESEARCHPARAMS.out.versions.first())
 
-csv_unmmaped_channel = PYOPENMS_GENERATESEARCHPARAMS.out.csv.map{it[1]}.flatten().map{file -> [[id:file.baseName],file]}
-ms_mmaped_channel = PYOPENMS_GENERATESEARCHPARAMS.out.ms.map{it[1]}.flatten().map{file -> [[id:file.baseName],file]}
-mgf_mmaped_channel = PYOPENMS_GENERATESEARCHPARAMS.out.mgf.map{it[1]}.flatten().map{file -> [[id:file.baseName],file]}
+csv_unmmaped_channel = PYOPENMS_GENERATESEARCHPARAMS.out.csv.map{ it -> it[1]}.flatten().map{file -> [[id:file.baseName],file]}
+ms_mmaped_channel = PYOPENMS_GENERATESEARCHPARAMS.out.ms.map{ it -> it[1]}.flatten().map{file -> [[id:file.baseName],file]}
+mgf_mmaped_channel = PYOPENMS_GENERATESEARCHPARAMS.out.mgf.map{ it -> it[1]}.flatten().map{file -> [[id:file.baseName],file]}
 
 // merge files, if they have been split
 if(split_consensus_parts>1)
 {
 
-generated_params = OPENMS_FILEFILTER.out.consensusxml.map{it[0]}.combine(
-PYOPENMS_GENERATESEARCHPARAMS.out.csv.collect{it[1]}
+generated_params = OPENMS_FILEFILTER.out.consensusxml.map{ it -> it[0]}.combine(
+PYOPENMS_GENERATESEARCHPARAMS.out.csv.collect{ it -> it[1]}
 .map { files ->
     files.sort { a, b ->
     def n1 = (a.baseName =~ /\d+/)[-1] as Integer
@@ -135,7 +134,7 @@ PYOPENMS_GENERATESEARCHPARAMS.out.csv.collect{it[1]}
         return s1 <=> s2
     }
     }
-}.toList()).map{it[1]}.flatten()
+}.toList()).map{ it -> it[1]}.flatten()
 .map{file ->
 def matcher = file.baseName =~ /(.*)_part\d+/
 def filename = matcher ? matcher[0][1] : null
@@ -149,8 +148,8 @@ csv_unmmaped_channel = PYOPENMS_CONCTSV_UNMAPPED.out.csv
 
 // merge ms
 
-OPENMS_FILEFILTER.out.consensusxml.map{it[0]}.combine(
-PYOPENMS_GENERATESEARCHPARAMS.out.ms.collect{it[1]}
+OPENMS_FILEFILTER.out.consensusxml.map{ it -> it[0]}.combine(
+PYOPENMS_GENERATESEARCHPARAMS.out.ms.collect{ it -> it[1]}
 .map { files ->
     files.sort { a, b ->
     def n1 = (a.baseName =~ /\d+/)[-1] as Integer
@@ -166,7 +165,7 @@ PYOPENMS_GENERATESEARCHPARAMS.out.ms.collect{it[1]}
         return s1 <=> s2
     }
     }
-}.toList()).map{it[1]}.flatten()
+}.toList()).map{ it -> it[1]}.flatten()
 .map{file ->
 def matcher = file.baseName =~ /(.*)_part\d+/
 def filename = matcher ? matcher[0][1] : null
@@ -177,8 +176,8 @@ ch_versions       = ch_versions.mix(GENERAL_MERGEMSFILE.out.versions.first())
 ms_mmaped_channel = GENERAL_MERGEMSFILE.out.mergedfile
 
 
-OPENMS_FILEFILTER.out.consensusxml.map{it[0]}.combine(
-PYOPENMS_GENERATESEARCHPARAMS.out.mgf.collect{it[1]}
+OPENMS_FILEFILTER.out.consensusxml.map{ it -> it[0]}.combine(
+PYOPENMS_GENERATESEARCHPARAMS.out.mgf.collect{ it -> it[1]}
 .map { files ->
     files.sort { a, b ->
     def n1 = (a.baseName =~ /\d+/)[-1] as Integer
@@ -194,7 +193,7 @@ PYOPENMS_GENERATESEARCHPARAMS.out.mgf.collect{it[1]}
         return s1 <=> s2
     }
     }
-}.toList()).map{it[1]}.flatten()
+}.toList()).map{ it -> it[1]}.flatten()
 .map{file ->
 def matcher = file.baseName =~ /(.*)_part\d+/
 def filename = matcher ? matcher[0][1] : null
@@ -213,7 +212,7 @@ if(run_umapped_spectra)
 ms2_files
 .map{meta,file->[[id:file.baseName],meta,file]}.join(
     csv_unmmaped_channel, by:0
-).map{it[1,2,3]} | PYOPENMS_GENERATESEARCHPARAMSUNMAPPED
+).map{ it -> it[1,2,3]} | PYOPENMS_GENERATESEARCHPARAMSUNMAPPED
 
 ch_versions       = ch_versions.mix(PYOPENMS_GENERATESEARCHPARAMSUNMAPPED.out.versions.first())
 
@@ -222,8 +221,8 @@ mgf_unmmaped_channel = PYOPENMS_GENERATESEARCHPARAMSUNMAPPED.out.mgf
 
 }
 
-output_sirius = Channel.empty()
-output_fingerid = Channel.empty()
+output_sirius = channel.empty()
+output_fingerid = channel.empty()
 if(run_sirius)
 {
 SIRIUSMAPPED(ms_mmaped_channel,mgf_splitmgf_pyopenms,sirius_split)
@@ -238,7 +237,7 @@ ch_versions = ch_versions.mix(SIRIUSUNMAPPED.out.versions)
 
 }
 
-ms2query = Channel.empty()
+ms2query = channel.empty()
 if(run_ms2query)
 {
 MS2QUERYMAPPED(mgf_mmaped_channel,offline_model_ms2query,models_dir_ms2query,train_library_ms2query,library_path_ms2query,polarity,mgf_splitmgf_pyopenms)

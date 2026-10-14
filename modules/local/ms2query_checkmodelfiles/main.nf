@@ -28,7 +28,7 @@ process MS2QUERY_CHECKMODELFILES {
 
     script:
     def args = task.ext.args ?: ''
-    def model_files        = modelfiles.collect { it }.join(' ')
+    def model_files        = modelfiles.collect { it -> it }.join(' ')
         """
 
     checkfiles_ms2query.py $model_files $args
