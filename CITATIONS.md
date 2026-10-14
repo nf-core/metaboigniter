@@ -16,6 +16,10 @@
 
   > Pfeuffer, J., Bielow, C., Wein, S. et al. OpenMS 3 enables reproducible analysis of large-scale mass spectrometry data. Nature Methods 21, 365–367, 2024. doi:10.1038/s41592-024-02197-7
 
+- [pyOpenMS](https://pyopenms.readthedocs.io/)
+
+  > Röst, H.L., Schmitt, U., Aebersold, R., Malmström, L. pyOpenMS: a Python-based interface to the OpenMS mass-spectrometry algorithm library. Proteomics, 14(1), 74–77, 2014. doi:10.1002/pmic.201300246
+
 - [SIRIUS](https://bio.informatik.uni-jena.de/software/sirius/)
 
   > Kai Dührkop, Markus Fleischauer, Marcus Ludwig, Alexander A. Aksenov, Alexey V. Melnik, Marvin Meusel, Pieter C. Dorrestein, Juho Rousu, and Sebastian Böcker, SIRIUS 4: Turning tandem mass spectra into metabolite structure information. Nature Methods 16, 299–302, 2019.
@@ -23,6 +27,10 @@
 - [MS2Query](https://github.com/iomega/ms2query)
 
   > de Jonge NF, Louwen JJR, Chekmeneva E, Camuzeaux S, Vermeir FJ, Jansen RS, Huber F, van der Hooft JJJ. MS2Query: reliable and scalable MS2 mass spectra-based analogue search. Nat Commun. 2023 Mar 29;14(1):1752. doi: 10.1038/s41467-023-37446-4. PMID: 36990978; PMCID: PMC10060387.
+
+- [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
+
+  > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
 
 ## Software packaging/containerisation tools
 
