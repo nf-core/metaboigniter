@@ -181,6 +181,10 @@ def validateInputParameters() {
     if ((params.run_sirius || params.sirius_runfid) && (!params.sirius_email || !params.sirius_password)) {
         log.warn "No Sirius user account information found. Please enter `--sirius_email` and `sirius_password`."
     }
+
+    if (params.run_ms2query && params.train_library_ms2query && !params.library_path_ms2query) {
+        error("`--train_library_ms2query` needs a spectral library to train on. Please set `--library_path_ms2query` to an MGF file.")
+    }
 }
 
 //
