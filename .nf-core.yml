@@ -19,3 +19,4 @@ template:
   version: 2.1.0dev
   skip_features:
     - igenomes
+    - fastqc

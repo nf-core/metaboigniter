@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Removed`
 
+- Unused nf-core `fastqc` module; FastQC is declared as a skipped template feature
 - Unused local modules (`MS2QUERY_EXPORT`, `MS2QUERY_MODELFULLTRAIN`, `OPENMS_GNPSEXPORT`, `OPENMS_IDMAPPER`, `OPENMS_IDMAPPERCONSENSUS`, `OPENMS_SIRIUSPARAMS`, `PYOPENMS_EXTRACTMAPPING`, `PYOPENMS_ISOMAPPING`, `PYOPENMS_REMOVEDUP`) and the `bin/` scripts only they used
 - `--hook_url`, `--max_cpus`, `--max_memory`, `--max_time` and the nf-validation `--validation*` parameters (dropped by the nf-core template)
 
