@@ -23,7 +23,8 @@ def get_tol_window(val, tol, ppm):
 def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm, rt_min, rt_max):
     tolerance_window = get_tol_window(test_mz, tolerance, ppm)
 
-    peaks_in_window = spectrum.get2DPeakDataLong(rt_min, rt_max, tolerance_window[0], tolerance_window[1])
+    # MS level 1 was the implicit default before pyopenms 3, which made it a required argument
+    peaks_in_window = spectrum.get2DPeakDataLong(rt_min, rt_max, tolerance_window[0], tolerance_window[1], 1)
 
     if len(peaks_in_window[0]) == 0:
         return []
@@ -85,12 +86,14 @@ py.FeatureXMLFile().load(args.input_feature, features)
 exp = py.MSExperiment()
 py.MzMLFile().load(args.input_mzml, exp)
 
-exp.updateRanges(1)
-max_rt_exp = exp.getMaxRT()
-min_rt_exp = exp.getMinRT()
+# pyopenms 3 dropped updateRanges(ms_level); the per-level ranges come from the range manager
+exp.updateRanges()
+ms1_ranges = exp.spectrumRanges().byMSLevel(1)
+max_rt_exp = ms1_ranges.getMaxRT()
+min_rt_exp = ms1_ranges.getMinRT()
 
-max_mz_exp = exp.getMaxMZ()
-min_mz_exp = exp.getMinMZ()
+max_mz_exp = ms1_ranges.getMaxMZ()
+min_mz_exp = ms1_ranges.getMinMZ()
 
 
 empty_protein_id = py.ProteinIdentification()
@@ -155,7 +158,7 @@ for i in range(features.size()):
 
     peptide.setIdentifier(empty_protein_id.getIdentifier())
 
-    sl_feature.setPeptideIdentifications([peptide])
+    sl_feature.setPeptideIdentifications(py.PeptideIdentificationList([peptide]))
     features[i] = sl_feature
 
 py.FeatureXMLFile().store(args.output_feature, features)
