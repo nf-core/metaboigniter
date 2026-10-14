@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#95](https://github.com/nf-core/metaboigniter/issues/95) MS2 input files without an mzML index are indexed with OpenMS `FileConverter` before identification instead of failing in `PYOPENMS_GENERATESEARCHPARAMS`
 - [#103](https://github.com/nf-core/metaboigniter/issues/103) `PYOPENMS_MSMAPPING` maps MS2 precursors through an m/z index and reads spectra without peak data; same output, about 10x faster on the six-file test set and no longer quadratic in features x spectra
 - [#112](https://github.com/nf-core/metaboigniter/issues/112) Use logical `||` instead of bitwise `|` when filtering inputs by MS level
 - [#113](https://github.com/nf-core/metaboigniter/issues/113) Sample intensity columns of the exported tables follow the consensusXML map order instead of a random order that changed between runs

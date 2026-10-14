@@ -1,5 +1,6 @@
 
 include { OPENMS_FILEFILTER } from '../../../modules/local/openms_filefilter/main'
+include { OPENMS_FILECONVERTER } from '../../../modules/local/openms_fileconverter/main'
 include {PYOPENMS_MSMAPPING } from '../../../modules/local/pyopenms_msmapping/main'
 include {PYOPENMS_GENERATESEARCHPARAMS } from '../../../modules/local/pyopenms_generatesearchparams/main'
 include {PYOPENMS_GENERATESEARCHPARAMSUNMAPPED } from '../../../modules/local/pyopenms_generatesearchparamsunmapped/main'
@@ -40,10 +41,24 @@ workflow IDENTIFICATION {
 
 ch_versions = Channel.empty()
 
+// The search parameter scripts read MS2 spectra with OnDiscMSExperiment,
+// which only works on indexed mzML, so add an index where it is missing (#95)
+ms2_files_by_index = mzml_files
+    .filter { meta, file -> meta.level == "MS2" || meta.level == "MS12" }
+    .branch { meta, file ->
+        indexed: isIndexedMzml(file)
+        not_indexed: true
+    }
+
+OPENMS_FILECONVERTER(ms2_files_by_index.not_indexed)
+ch_versions       = ch_versions.mix(OPENMS_FILECONVERTER.out.versions.first())
+
+ms2_files = ms2_files_by_index.indexed.mix(OPENMS_FILECONVERTER.out.mzml)
+
 
 
 // Map the MS2 to consensus
-consensusxml_data.combine(mzml_files.filter{meta,file->meta.level == "MS2" || meta.level == "MS12"}.collect{it[1]}
+consensusxml_data.combine(ms2_files.collect{it[1]}
 .map { files ->
     files.sort { a, b ->
         a.baseName <=> b.baseName
@@ -80,7 +95,7 @@ filtered_consensus = PYOPENMS_SPLITCONSENSUS.out.consensusxml.map{it[1]}.flatten
 PYOPENMS_GENERATESEARCHPARAMS(
 filtered_consensus,
 
-mzml_files.filter{ meta, file -> meta.level == "MS2" || meta.level == "MS12" }.map{tuple ->
+ms2_files.map{tuple ->
     [tuple]}.collect().map { tuples ->
         tuples.sort { a, b ->
             a[1].baseName <=> b[1].baseName
@@ -195,7 +210,7 @@ mgf_mmaped_channel = GENERAL_MERGEMGFFILE.out.mergedfile
 // run unmapped data extraction
 if(run_umapped_spectra)
 {
-mzml_files.filter{ meta, file -> meta.level == "MS2" || meta.level == "MS12" }
+ms2_files
 .map{meta,file->[[id:file.baseName],meta,file]}.join(
     csv_unmmaped_channel, by:0
 ).map{it[1,2,3]} | PYOPENMS_GENERATESEARCHPARAMSUNMAPPED
@@ -242,4 +257,10 @@ ch_versions = ch_versions.mix(MS2QUERYUNMAPPED.out.versions)
     fingerid       = output_fingerid
     ms2query = ms2query
     versions       = ch_versions
+}
+
+// An indexed mzML wraps the <mzML> element in <indexedmzML>, so the file header tells
+def isIndexedMzml(mzml_file) {
+    def header = mzml_file.withInputStream { stream -> new String(stream.readNBytes(4096), 'UTF-8') }
+    return header.contains('<indexedmzML')
 }
