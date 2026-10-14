@@ -1,7 +1,13 @@
-nf_core_version: 3.3.1
+lint:
+  files_exist:
+    - .github/workflows/linting_comment.yml
+  files_unchanged:
+    - .github/workflows/branch.yml
+    - .github/workflows/linting.yml
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
-  author: Payam Emami
+  author: Payam Emami, Axel Walter, Efi Kontou
   description: Pre-processing of mass spectrometry-based metabolomics data
   force: false
   is_nfcore: true
