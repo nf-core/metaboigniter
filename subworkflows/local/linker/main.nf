@@ -1,12 +1,12 @@
 
-include { OPENMS_FEATURELINKERUNLABELEDKD } from '../../modules/local/openms_featurelinkerunlabeledkd.nf'
-include { OPENMS_FEATURELINKERUNLABELEDKD as OPENMS_FEATURELINKERUNLABELEDKDPARTS } from '../../modules/local/openms_featurelinkerunlabeledkd.nf'
+include { OPENMS_FEATURELINKERUNLABELEDKD } from '../../../modules/local/openms_featurelinkerunlabeledkd/main'
+include { OPENMS_FEATURELINKERUNLABELEDKD as OPENMS_FEATURELINKERUNLABELEDKDPARTS } from '../../../modules/local/openms_featurelinkerunlabeledkd/main'
 
-include { PYOPENMS_EXTRACTFEATUREMZ } from '../../modules/local/pyopenms_extractfeaturemz.nf'
-include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSV_MZ } from '../../modules/local/pyopenms_conctsv.nf'
-include { PYOPENMS_CALCULATEBOUNDRIES } from '../../modules/local/pyopenms_calculateboundries.nf'
-include { PYOPENMS_SPLITFEATUREXML } from '../../modules/local/pyopenms_splitfeaturexml.nf'
-include { PYOPENMS_FILEMERGER } from '../../modules/local/pyopenms_filemerger.nf'
+include { PYOPENMS_EXTRACTFEATUREMZ } from '../../../modules/local/pyopenms_extractfeaturemz/main'
+include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSV_MZ } from '../../../modules/local/pyopenms_conctsv/main'
+include { PYOPENMS_CALCULATEBOUNDRIES } from '../../../modules/local/pyopenms_calculateboundries/main'
+include { PYOPENMS_SPLITFEATUREXML } from '../../../modules/local/pyopenms_splitfeaturexml/main'
+include { PYOPENMS_FILEMERGER } from '../../../modules/local/pyopenms_filemerger/main'
 
 
 

@@ -1,18 +1,18 @@
 
-include { OPENMS_FILEFILTER } from '../../modules/local/openms_filefilter.nf'
-include {PYOPENMS_MSMAPPING } from '../../modules/local/pyopenms_msmapping.nf'
-include {PYOPENMS_GENERATESEARCHPARAMS } from '../../modules/local/pyopenms_generatesearchparams.nf'
-include {PYOPENMS_GENERATESEARCHPARAMSUNMAPPED } from '../../modules/local/pyopenms_generatesearchparamsunmapped.nf'
-include { PYOPENMS_SPLITCONSENSUS } from '../../modules/local/pyopenms_splitconsensus.nf'
-include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSV_UNMAPPED } from '../../modules/local/pyopenms_conctsv.nf'
-include { GENERAL_MERGEFILE as GENERAL_MERGEMSFILE } from '../../modules/local/general_mergefile.nf'
-include { GENERAL_MERGEFILE as GENERAL_MERGEMGFFILE } from '../../modules/local/general_mergefile.nf'
+include { OPENMS_FILEFILTER } from '../../../modules/local/openms_filefilter/main'
+include {PYOPENMS_MSMAPPING } from '../../../modules/local/pyopenms_msmapping/main'
+include {PYOPENMS_GENERATESEARCHPARAMS } from '../../../modules/local/pyopenms_generatesearchparams/main'
+include {PYOPENMS_GENERATESEARCHPARAMSUNMAPPED } from '../../../modules/local/pyopenms_generatesearchparamsunmapped/main'
+include { PYOPENMS_SPLITCONSENSUS } from '../../../modules/local/pyopenms_splitconsensus/main'
+include { PYOPENMS_CONCTSV as PYOPENMS_CONCTSV_UNMAPPED } from '../../../modules/local/pyopenms_conctsv/main'
+include { GENERAL_MERGEFILE as GENERAL_MERGEMSFILE } from '../../../modules/local/general_mergefile/main'
+include { GENERAL_MERGEFILE as GENERAL_MERGEMGFFILE } from '../../../modules/local/general_mergefile/main'
 
-include { MS2QUERY as MS2QUERYMAPPED } from '../../subworkflows/local/ms2query.nf'
-include { MS2QUERY as MS2QUERYUNMAPPED} from '../../subworkflows/local/ms2query.nf'
+include { MS2QUERY as MS2QUERYMAPPED } from '../ms2query/main'
+include { MS2QUERY as MS2QUERYUNMAPPED} from '../ms2query/main'
 
-include { SIRIUS as SIRIUSMAPPED } from '../../subworkflows/local/sirius.nf'
-include { SIRIUS as SIRIUSUNMAPPED } from '../../subworkflows/local/sirius.nf'
+include { SIRIUS as SIRIUSMAPPED } from '../sirius/main'
+include { SIRIUS as SIRIUSUNMAPPED } from '../sirius/main'
 
 
 workflow IDENTIFICATION {

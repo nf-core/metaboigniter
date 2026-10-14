@@ -3,20 +3,20 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { REQUANTIFICATION                                  } from '../subworkflows/local/requantification.nf'
-include { QUANTIFICATION                                    } from '../subworkflows/local/quantification.nf'
-include { ANNOTATION                                        } from '../subworkflows/local/annotation.nf'
-include { ANNOTATION as ANNOTATION_REQ                      } from '../subworkflows/local/annotation.nf'
-include { LINKER                                            } from '../subworkflows/local/linker.nf'
-include { LINKER as LINKER_REQ                              } from '../subworkflows/local/linker.nf'
-include { IDENTIFICATION                                    } from '../subworkflows/local/identification.nf'
-include { PYOPENMS_EXPORT as PYOPENMS_EXPORTQUANTIFICATION  } from '../modules/local/pyopenms_export.nf'
-include { PYOPENMS_EXPORT as PYOPENMS_EXPORTIDENTIFICATION  } from '../modules/local/pyopenms_export.nf'
+include { REQUANTIFICATION                                  } from '../subworkflows/local/requantification/main'
+include { QUANTIFICATION                                    } from '../subworkflows/local/quantification/main'
+include { ANNOTATION                                        } from '../subworkflows/local/annotation/main'
+include { ANNOTATION as ANNOTATION_REQ                      } from '../subworkflows/local/annotation/main'
+include { LINKER                                            } from '../subworkflows/local/linker/main'
+include { LINKER as LINKER_REQ                              } from '../subworkflows/local/linker/main'
+include { IDENTIFICATION                                    } from '../subworkflows/local/identification/main'
+include { PYOPENMS_EXPORT as PYOPENMS_EXPORTQUANTIFICATION  } from '../modules/local/pyopenms_export/main'
+include { PYOPENMS_EXPORT as PYOPENMS_EXPORTIDENTIFICATION  } from '../modules/local/pyopenms_export/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_metaboigniter_pipeline'
+include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline/main'
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline/main'
+include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_metaboigniter_pipeline/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,9 +1,9 @@
 
-include { PYOPENMS_LIBBUILDER } from '../../modules/local/pyopenms_libbuilder.nf'
-include { PYOPENMS_RELOADMAPS } from '../../modules/local/pyopenms_reloadmaps.nf'
-include { OPENMS_FEATUREFINDERMETABOIDENT } from '../../modules/local/openms_featurefindermetaboident.nf'
-include { PYOPENMS_MERGE } from '../../modules/local/pyopenms_merge.nf'
-include { PYOPENMS_SPLIT } from '../../modules/local/pyopenms_split.nf'
+include { PYOPENMS_LIBBUILDER } from '../../../modules/local/pyopenms_libbuilder/main'
+include { PYOPENMS_RELOADMAPS } from '../../../modules/local/pyopenms_reloadmaps/main'
+include { OPENMS_FEATUREFINDERMETABOIDENT } from '../../../modules/local/openms_featurefindermetaboident/main'
+include { PYOPENMS_MERGE } from '../../../modules/local/pyopenms_merge/main'
+include { PYOPENMS_SPLIT } from '../../../modules/local/pyopenms_split/main'
 workflow REQUANTIFICATION {
     take:
     consensusxml_data
