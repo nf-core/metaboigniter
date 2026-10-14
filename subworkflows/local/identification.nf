@@ -43,7 +43,7 @@ ch_versions = Channel.empty()
 
 
 // Map the MS2 to consensus
-consensusxml_data.combine(mzml_files.filter{meta,file->meta.level == "MS2" | meta.level == "MS12"}.collect{it[1]}
+consensusxml_data.combine(mzml_files.filter{meta,file->meta.level == "MS2" || meta.level == "MS12"}.collect{it[1]}
 .map { files ->
     files.sort { a, b ->
         a.baseName <=> b.baseName

@@ -41,7 +41,7 @@ if(ms2_collection_model=="separate" && !skip_alignment)
 
 
 
-quantificaiton_data=mzml_files.filter{meta,file->meta.level == "MS1" | meta.level == "MS12"}
+quantificaiton_data=mzml_files.filter{meta,file->meta.level == "MS1" || meta.level == "MS12"}
 
 OPENMS_FEATUREFINDERMETABO(quantificaiton_data)
 
