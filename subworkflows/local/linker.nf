@@ -74,7 +74,7 @@ OPENMS_FEATURELINKERUNLABELEDKDPARTS.out.consensusxml.map{it[1]}.collect()
 PYOPENMS_FILEMERGER(to_be_merged)
 ch_versions       = ch_versions.mix(PYOPENMS_FILEMERGER.out.versions.first())
 
-consensusxml=   PYOPENMS_FILEMERGER.out.consensusxml.map{meta,consensusxml->[[id:consensusxml.baseName],consensusxml]}
+consensusxml=   PYOPENMS_FILEMERGER.out.consensusxml.map{meta,consensus_file->[[id:consensus_file.baseName],consensus_file]}
 
 }else{
 
@@ -85,7 +85,7 @@ Channel.of([id:"Linked_data"]).combine(quantification_information.collect{it[1]}
 }.toList()) | OPENMS_FEATURELINKERUNLABELEDKD
 
 
-        consensusxml=OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml.map{meta,consensusxml->[[id:consensusxml.baseName],consensusxml]}
+        consensusxml=OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml.map{meta,consensus_file->[[id:consensus_file.baseName],consensus_file]}
         ch_versions       = ch_versions.mix(OPENMS_FEATURELINKERUNLABELEDKD.out.versions.first())
 
 }
