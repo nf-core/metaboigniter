@@ -22,7 +22,9 @@ def intensity_columns_in_map_order(consensus_map):
 def cleanup(input_cmap, output_tsv):
     consensus_map = ConsensusMap()
     ConsensusXMLFile().load(input_cmap, consensus_map)
-    df = consensus_map.get_df()
+    df = consensus_map.to_df()
+    # pyopenms 3 names the retention time column "rt"; keep the "RT" header of earlier releases
+    df = df.rename(columns={"rt": "RT"})
 
     intensity_columns = intensity_columns_in_map_order(consensus_map)
     metadata_columns = [column for column in df.columns if column not in intensity_columns]

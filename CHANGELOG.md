@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- OpenMS and pyOpenMS updated from 3.0.0 / 2.9.1 to 3.6.0
+- `FeatureFinderMetaboIdent` always receives `-EMGScoring:init_mom`, because OpenMS 3.6 changed its default to `true`; the pipeline default stays `false`
 - Template update to nf-core/tools 4.1.0: `nf-validation` replaced by `nf-schema`, `check_max()`/`--max_*` replaced by `process.resourceLimits`, CI moved to nf-test, minimum Nextflow version raised to 25.10.4
 - The `arm` profile is replaced by the template's `arm64` (Wave-built arm64 containers) and `emulate_amd64` profiles
 
