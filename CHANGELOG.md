@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v2.1.0dev - [unreleased<!-- TODO nf-core: replace with date on release -->]
 
+### `Fixed`
+
+- [#113](https://github.com/nf-core/metaboigniter/issues/113) Sample intensity columns of the exported tables follow the consensusXML map order instead of a random order that changed between runs
+
 ### `Changed`
 
 - Template update to nf-core/tools 4.1.0: `nf-validation` replaced by `nf-schema`, `check_max()`/`--max_*` replaced by `process.resourceLimits`, CI moved to nf-test, minimum Nextflow version raised to 25.10.4
