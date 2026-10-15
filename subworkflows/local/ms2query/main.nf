@@ -89,8 +89,10 @@ ch_versions       = ch_versions.mix(MS2QUERY_MODELTRAIN.out.versions.first())
 }
 
 
+// all_model_files holds the file list inside a list, which MS2QUERY_MODELTRAIN's combine needs;
+// a path input needs the files themselves
 MS2QUERY_SEARCH(mgf_channel,
-all_model_files)
+all_model_files.map { model_files -> model_files.flatten() })
 
 ch_versions       = ch_versions.mix(MS2QUERY_SEARCH.out.versions.first())
 
