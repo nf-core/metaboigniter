@@ -9,8 +9,6 @@ on:
 
 permissions: {}
 
-permissions: {}
-
 jobs:
   test:
     runs-on: ubuntu-latest

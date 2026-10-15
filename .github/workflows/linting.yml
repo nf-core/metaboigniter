@@ -21,10 +21,6 @@ jobs:
 
   nf-core:
     runs-on: ubuntu-latest
-    env:
-      # Template 3.3.1 config and the pipeline scripts predate the strict
-      # syntax parser that is the default from Nextflow 26.04
-      NXF_SYNTAX_PARSER: v1
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -78,24 +74,6 @@ jobs:
             lint_log.txt
             lint_results.md
             PR_number.txt
-
-      # Build a comment for the shared pr-comment.yml poster to publish on the PR
-      - name: Prepare PR comment
-        if: ${{ always() }}
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          mkdir -p pr-comment
-          echo "$PR_NUMBER" > pr-comment/pr_number.txt
-          echo "lint" > pr-comment/header.txt
-          [ -f lint_results.md ] && cp lint_results.md pr-comment/comment.md || true
-
-      - name: Upload PR comment artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: pr-comment
-          path: pr-comment/
 
       # Build a comment for the shared pr-comment.yml poster to publish on the PR
       - name: Prepare PR comment

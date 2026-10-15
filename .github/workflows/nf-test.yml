@@ -23,9 +23,6 @@ env:
   NXF_ANSI_LOG: false
   NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
   NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
-  # Template 3.3.1 config and the pipeline scripts predate the strict
-  # syntax parser that is the default from Nextflow 26.04
-  NXF_SYNTAX_PARSER: v1
 
 jobs:
   nf-test-changes:

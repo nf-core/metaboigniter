@@ -1,33 +1,17 @@
-
-
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-//
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
-//
-
-include {REQUANTIFICATION } from '../subworkflows/local/requantification.nf'
-include {QUANTIFICATION } from '../subworkflows/local/quantification.nf'
-include {ANNOTATION as ANNOTATION} from '../subworkflows/local/annotation.nf'
-include {ANNOTATION as ANNOTATION_SEP} from '../subworkflows/local/annotation.nf'
-include {ANNOTATION as ANNOTATION_REQ_SEP} from '../subworkflows/local/annotation.nf'
-include {ANNOTATION as ANNOTATION_REQ} from '../subworkflows/local/annotation.nf'
-include {LINKER as LINKER} from '../subworkflows/local/linker.nf'
-include {LINKER as LINKER_REQ} from '../subworkflows/local/linker.nf'
-include {IDENTIFICATION } from '../subworkflows/local/identification.nf'
-include {PYOPENMS_EXPORT as PYOPENMS_EXPORTQUANTIFICATION } from '../modules/local/pyopenms_export.nf'
-include {PYOPENMS_EXPORT as PYOPENMS_EXPORTIDENTIFICATION } from '../modules/local/pyopenms_export.nf'
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT NF-CORE MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
+include { REQUANTIFICATION                                  } from '../subworkflows/local/requantification.nf'
+include { QUANTIFICATION                                    } from '../subworkflows/local/quantification.nf'
+include { ANNOTATION                                        } from '../subworkflows/local/annotation.nf'
+include { ANNOTATION as ANNOTATION_REQ                      } from '../subworkflows/local/annotation.nf'
+include { LINKER                                            } from '../subworkflows/local/linker.nf'
+include { LINKER as LINKER_REQ                              } from '../subworkflows/local/linker.nf'
+include { IDENTIFICATION                                    } from '../subworkflows/local/identification.nf'
+include { PYOPENMS_EXPORT as PYOPENMS_EXPORTQUANTIFICATION  } from '../modules/local/pyopenms_export.nf'
+include { PYOPENMS_EXPORT as PYOPENMS_EXPORTIDENTIFICATION  } from '../modules/local/pyopenms_export.nf'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -41,6 +25,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_meta
 */
 
 workflow METABOIGNITER {
+
     take:
     ch_samplesheet // channel: samplesheet read in from --input
     multiqc_config
@@ -50,30 +35,28 @@ workflow METABOIGNITER {
 
     main:
 
-    ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
+    def ch_versions = channel.empty()
+    def ch_multiqc_files = channel.empty()
 
-    mzml_files = ch_samplesheet
+    def mzml_files = ch_samplesheet
 
-    empty_id=Channel.fromPath("$projectDir/assets/emptyfile.idXML")
-
+    def empty_id = channel.fromPath("${projectDir}/assets/emptyfile.idXML")
 
     //
     // SUBWORKFLOW: First quantification + alignment
     //
     QUANTIFICATION(mzml_files,params.skip_centroiding,params.ms2_collection_model,params.skip_alignment)
-    quantified_features = QUANTIFICATION.out.quantified_features
-    quantificaiton_data = QUANTIFICATION.out.quantificaiton_data
+    def quantified_features = QUANTIFICATION.out.quantified_features
+    def quantificaiton_data = QUANTIFICATION.out.quantificaiton_data
     mzml_files = QUANTIFICATION.out.mzml_files
-    quantification_information = quantified_features.join(quantificaiton_data,by:[0])
+    def quantification_information = quantified_features.join(quantificaiton_data,by:[0])
     ch_versions = ch_versions.mix(QUANTIFICATION.out.versions)
+
     //
     // SUBWORKFLOW: If requantification is goint to be performed, skip annotation
     //
-
-
     if(!params.requantification){
-        ANNOTATION(quantification_information,empty_id,false,Channel.empty(),params.skip_adduct_detection,!params.identification)
+        ANNOTATION(quantification_information,empty_id,false,channel.empty(),params.skip_adduct_detection,!params.identification)
         quantification_information=ANNOTATION.out.quantification_information
         ch_versions = ch_versions.mix(ANNOTATION.out.versions)
     }
@@ -81,15 +64,13 @@ workflow METABOIGNITER {
     //
     // SUBWORKFLOW: Link the features across runs
     //
-
     LINKER(quantification_information,params.parallel_linking)
-    consensusxml_data=LINKER.out.consensusxml_data
+    def consensusxml_data=LINKER.out.consensusxml_data
     ch_versions = ch_versions.mix(LINKER.out.versions)
 
     //
     // SUBWORKFLOW: requantification and annotation and also linking
     //
-
     if(params.requantification){
         REQUANTIFICATION(consensusxml_data,quantified_features,quantificaiton_data)
         ch_versions = ch_versions.mix(REQUANTIFICATION.out.versions)
@@ -103,13 +84,11 @@ workflow METABOIGNITER {
         ch_versions = ch_versions.mix(LINKER_REQ.out.versions)
     }
 
-
     //
     // SUBWORKFLOW: export the entire data matrix
     //
     if(!params.identification){
         PYOPENMS_EXPORTQUANTIFICATION(consensusxml_data,[[],[]],[[],[]],[[],[]])
-        consensusxml_data_tsv = PYOPENMS_EXPORTQUANTIFICATION.out.tsv
         ch_versions = ch_versions.mix(PYOPENMS_EXPORTQUANTIFICATION.out.versions)
     }
 
@@ -139,7 +118,6 @@ workflow METABOIGNITER {
         IDENTIFICATION.out.ms2query.ifEmpty([[],[]]))
         ch_versions = ch_versions.mix(PYOPENMS_EXPORTIDENTIFICATION.out.versions)
     }
-
 
     //
     // Collate and save software versions

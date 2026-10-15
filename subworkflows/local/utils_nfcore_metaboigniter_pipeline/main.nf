@@ -109,11 +109,9 @@ workflow PIPELINE_INITIALISATION {
     //
 
     channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map{
-            meta, msfile ->
-            meta.id=msfile.baseName
-            return [ meta, msfile ]
+        .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
+        .map { meta, msfile ->
+            [ meta + [ id: msfile.baseName ], msfile ]
         }
         .set { ch_samplesheet }
 
@@ -176,55 +174,15 @@ workflow PIPELINE_COMPLETION {
 // Check and validate pipeline parameters
 //
 def validateInputParameters() {
-    //genomeExistsError()
-            if (!params.identification && (params.run_ms2query || params.run_sirius || params.sirius_runfid)) {
-            log.warn "Sirius, CSI:FingerID or MS2Query enabled, but no `--identification` flag set."
-        }
-
-        if ((params.run_sirius || params.sirius_runfid) && (!params.sirius_email || !params.sirius_password)) {
-            log.warn "No Sirius user account information found. Please enter `--sirius_email` and `sirius_password`."
-        }
-}
-
-//
-// Validate channels from input samplesheet
-//
-def validateInputSamplesheet(input) {
-    def (metas, fastqs) = input[1..2]
-
-    // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
-    def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
-    if (!endedness_ok) {
-        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
+    if (!params.identification && (params.run_ms2query || params.run_sirius || params.sirius_runfid)) {
+        log.warn "Sirius, CSI:FingerID or MS2Query enabled, but no `--identification` flag set."
     }
 
-    return [ metas[0], fastqs ]
-}
-//
-// Get attribute from genome config file e.g. fasta
-//
-def getGenomeAttribute(attribute) {
-    if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
-        if (params.genomes[ params.genome ].containsKey(attribute)) {
-            return params.genomes[ params.genome ][ attribute ]
-        }
+    if ((params.run_sirius || params.sirius_runfid) && (!params.sirius_email || !params.sirius_password)) {
+        log.warn "No Sirius user account information found. Please enter `--sirius_email` and `sirius_password`."
     }
-    return null
 }
 
-//
-// Exit pipeline if incorrect --genome key provided
-//
-def genomeExistsError() {
-    if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-            "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-            "  Currently, the available genome keys are:\n" +
-            "  ${params.genomes.keySet().join(", ")}\n" +
-            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        error(error_string)
-    }
-}
 //
 // Generate methods description for MultiQC
 //
