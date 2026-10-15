@@ -110,6 +110,8 @@ Depending on the pipeline parameters, it can contain one, and up to four differe
 
 All files are TSV (tab separate files) and have a column called "id". This ID can be used to match rows across different files.
 
+In the `output_quantification_` file, each sample has its own intensity column. A missing value is written as `0`: when a consensus feature was not detected in a sample, its intensity in that sample's column is `0`, not empty or `NA`. Treat these zeros as missing values, not as measured intensities, before imputation, normalization or statistical testing.
+
 ## Pipeline information
 
 <details markdown="1">
