@@ -4,16 +4,16 @@
 
 import argparse
 from os.path import join
-from ms2query.create_new_library.library_files_creator import LibraryFilesCreator
+
 from ms2query.clean_and_filter_spectra import (
     clean_normalize_and_split_annotated_spectra,
 )
+from ms2query.create_new_library.library_files_creator import LibraryFilesCreator
+from ms2query.ms2library import select_files_for_ms2query
 from ms2query.utils import (
     load_matchms_spectrum_objects_from_file,
     select_files_in_directory,
 )
-from ms2query.run_ms2query import download_zenodo_files
-from ms2query.ms2library import select_files_for_ms2query
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--input", help="input mgf library file")

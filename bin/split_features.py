@@ -2,9 +2,10 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import pyopenms as py
 import argparse
 import os
+
+import pyopenms as py
 
 parser = argparse.ArgumentParser(
     description="Output tsv file containing mz of all features"
@@ -38,7 +39,6 @@ py.FeatureXMLFile().load(args.input, features)
 features_output = py.FeatureMap(features)
 features_output.clear(False)
 features_output.setProteinIdentifications(features.getProteinIdentifications())
-feature_part_index = 0
 for j in range(len(partition_boundaries) - 1):
     partition_start = partition_boundaries[j]
     partition_end = partition_boundaries[j + 1]
@@ -53,9 +53,8 @@ for j in range(len(partition_boundaries) - 1):
         args.output,
         os.path.splitext(os.path.basename(args.input))[0]
         + "_part"
-        + str(feature_part_index)
+        + str(j)
         + os.path.splitext(os.path.basename(args.input))[1],
     )
     py.FeatureXMLFile().store(output_path, features_output)
     features_output.clear(False)
-    feature_part_index += 1

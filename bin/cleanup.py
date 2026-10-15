@@ -2,12 +2,10 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import pandas as pd
-import numpy as np
-from pyopenms import *
-import sys
-import csv
 import argparse
+import csv
+
+from pyopenms import *
 
 
 def cleanup(input_cmap, output_tsv):

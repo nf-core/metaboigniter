@@ -2,8 +2,9 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import pyopenms as po
 import argparse
+
+import pyopenms as po
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--input", help="input consensusXML file")

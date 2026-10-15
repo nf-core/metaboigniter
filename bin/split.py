@@ -2,9 +2,9 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-from pyopenms import *
-import glob
 import sys
+
+from pyopenms import *
 
 # Split the ConsensusMap into features that have no missing values,
 # and features that have at least one missing value;

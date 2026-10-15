@@ -2,11 +2,11 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
+import argparse
 import os
-import numpy as np
+
 import pandas as pd
 import pyopenms as py
-import argparse
 
 
 def get_tol_window(val, tol, ppm):
@@ -200,8 +200,8 @@ for ks in range(len(map_index_rm)):
         >= specs_list[ks].getNrSpectra()
     ):
         continue
-    f = open(output, "w")
-    f_mgf = open(output_mgf, "w")
+    f = open(output, "w")  # noqa: SIM115
+    f_mgf = open(output_mgf, "w")  # noqa: SIM115
 
     comb_ms2 = ""
     for i in range(specs_list[ks].getNrSpectra()):
@@ -243,7 +243,7 @@ for ks in range(len(map_index_rm)):
                 if len(iso) > 0:
                     mz_trace = iso["mz"].to_list()
                     int_trace = iso["intensity"].to_list()
-                    f_mz = list(iso["mz"])[0]
+                    f_mz = iso["mz"].iloc[0]
 
                 id_to_c = py.SpectrumLookup().extractScanNumber(
                     spec.getNativeID(),
@@ -387,4 +387,4 @@ for ks in range(len(map_index_rm)):
 
 
 if exist_one_spectra == False:
-    raise Exception("No MS2 peak were found in the data!")
+    raise Exception("No MS2 peak were found in the data!")  # noqa: TRY002

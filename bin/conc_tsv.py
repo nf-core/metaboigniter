@@ -3,9 +3,10 @@
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
 import argparse
-import pandas as pd
 import glob
 import os
+
+import pandas as pd
 
 
 def adjust_indices_and_concatenate(input_dir, output_file, in_type, output_type):

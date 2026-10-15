@@ -2,11 +2,9 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import os
-import numpy as np
-import pandas as pd
-import pyopenms as py
 import argparse
+
+import pyopenms as py
 
 
 def get_tol_window(val, tol, ppm):
@@ -141,11 +139,11 @@ for i in range(features.size()):
     elif args.polarity == "negative" and charge_f == 0:
         charge_f = -1
 
-    rt_max = max_rt_exp if (rt + args.rt) > max_rt_exp else (rt + args.rt)
-    rt_min = min_rt_exp if (rt - args.rt) < min_rt_exp else (rt - args.rt)
+    rt_max = min(rt + args.rt, max_rt_exp)
+    rt_min = max(rt - args.rt, min_rt_exp)
 
-    mz_max = max_mz_exp if (mz + args.mz) > max_mz_exp else (mz + args.mz)
-    mz_min = min_mz_exp if (mz - args.mz) < min_mz_exp else (mz - args.mz)
+    mz_max = min(mz + args.mz, max_mz_exp)
+    mz_min = max(mz - args.mz, min_mz_exp)
 
     iso = extract_precursor_isotope_pattern(
         mz, exp, args.iterations, charge_f, args.ppm, rt_min, rt_max
@@ -157,7 +155,7 @@ for i in range(features.size()):
     iso_mz = []
     iso_in = []
     if len(iso) > 0:
-        iso_mz = list([float(mz[0]) for mz in iso])
+        iso_mz = [float(mz[0]) for mz in iso]
         iso_in = [float(inte[1]) for inte in iso]
 
     peptide.setMetaValue("isotope_calcdist_mz", iso_mz)

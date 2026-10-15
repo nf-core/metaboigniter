@@ -2,9 +2,10 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-from pyopenms import *
 import glob
 import sys
+
+from pyopenms import *
 
 
 def reloadmaps(in_aligned, in_complete, out_complete):

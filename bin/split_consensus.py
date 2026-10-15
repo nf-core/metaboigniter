@@ -2,11 +2,10 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import os
-import numpy as np
-import pandas as pd
-import pyopenms as py
 import argparse
+import os
+
+import pyopenms as py
 
 parser = argparse.ArgumentParser(description="Mass Spectrometry Data Processing Tool")
 
@@ -40,7 +39,7 @@ for i in range(consensus_map.size()):
     total_counts += 1
     if (
         consensus_map.size() - total_counts
-    ) < features_per_part and not total_counts == consensus_map.size():
+    ) < features_per_part and total_counts != consensus_map.size():
         continue
     if counted_features >= features_per_part or total_counts == consensus_map.size():
         parts += 1

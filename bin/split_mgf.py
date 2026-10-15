@@ -4,7 +4,6 @@
 
 import argparse
 import os
-from pyopenms import MSExperiment, MzMLFile, MascotGenericFile
 
 
 def split_file(input_file, num_parts, output_dir, input_type):
@@ -25,8 +24,7 @@ def split_file(input_file, num_parts, output_dir, input_type):
     else:
         raise ValueError("Unsupported file format. Only .mgf and .ms are supported.")
 
-    if num_parts >= len(spectra):
-        num_parts = len(spectra)
+    num_parts = min(len(spectra), num_parts)
     spectra_per_file = len(spectra) // num_parts
 
     extension = os.path.splitext(input_file)[1]

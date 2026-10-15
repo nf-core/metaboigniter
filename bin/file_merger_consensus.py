@@ -2,9 +2,9 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import pyopenms as py
 import argparse
-import os
+
+import pyopenms as py
 
 parser = argparse.ArgumentParser(description="merge consensusXML files")
 

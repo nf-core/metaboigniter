@@ -2,11 +2,11 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
+import argparse
 import os
-import numpy as np
+
 import pandas as pd
 import pyopenms as py
-import argparse
 
 
 def get_tol_window(val, tol, ppm):
@@ -234,7 +234,7 @@ map_index_rm = {path: [] for path in outputs_unampped}
 ## there exist spectra
 exist_one_spectra = False
 ## generate consensus MGF file
-f_mgf = open(output_mgf, "w")
+f_mgf = open(output_mgf, "w")  # noqa: SIM115
 for cons_i in range(consensus_map.size()):
     feature = consensus_map[cons_i]
     feature_pepts_all = feature.getPeptideIdentifications()
@@ -281,7 +281,7 @@ for cons_i in range(consensus_map.size()):
 
     IONMODE = polarity
 
-    for p in subset_dict.keys():
+    for p in subset_dict:
         id_sel = subset_dict[p][0]
         map_index = id_sel.getMetaValue("id_file_index")
         spec_index = id_sel.getMetaValue("spectrum_index")
@@ -333,7 +333,7 @@ f_mgf.close()
 
 
 ## generate consensus MS File
-f = open(output, "w")
+f = open(output, "w")  # noqa: SIM115
 for cons_i in range(consensus_map.size()):
     feature = consensus_map[cons_i]
     feature_pepts_all = feature.getPeptideIdentifications()
@@ -416,7 +416,7 @@ for cons_i in range(consensus_map.size()):
             all_precursor_charges[pre_charge] = 1
 
         if isinstance(ms1_spec, int):
-            raise Exception(
+            raise Exception(  # noqa: TRY002, TRY004
                 "No MS1 peak where found for ID: "
                 + str(spec_index)
                 + " in map: "
@@ -451,7 +451,6 @@ for cons_i in range(consensus_map.size()):
         continue
 
     exist_one_spectra = True
-    all_precursor_charges
 
     mz_trace = 0
     int_trace = 0
@@ -562,8 +561,7 @@ for key, values in map_index_rm.items():
         file.write("index\n")
 
         # Write the values
-        for value in values:
-            file.write(str(value) + "\n")
+        file.writelines(str(value) + "\n" for value in values)
 
 #
 #

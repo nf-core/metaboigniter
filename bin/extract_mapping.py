@@ -2,9 +2,10 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import os
-import pyopenms as py
 import argparse
+import os
+
+import pyopenms as py
 
 parser = argparse.ArgumentParser(description="Maps MS2 to consensusXML including names")
 
@@ -80,10 +81,12 @@ for i in range(len(mzml_file_paths)):
         feature_pepts = feature.getPeptideIdentifications()
         mod_peptides = []
         for pept_id in feature_pepts:
-            if pept_id.metaValueExists("spectrum_index"):
-                if pept_id.metaValueExists("id_file") == False:
-                    pept_id.setMetaValue("id_file", os.path.basename(id_input))
-                    pept_id.setMetaValue("id_file_index", i)
+            if (
+                pept_id.metaValueExists("spectrum_index")
+                and pept_id.metaValueExists("id_file") == False
+            ):
+                pept_id.setMetaValue("id_file", os.path.basename(id_input))
+                pept_id.setMetaValue("id_file_index", i)
             mod_peptides.append(pept_id)
         feature.setPeptideIdentifications(mod_peptides)
         consensus_map[cons_i] = feature

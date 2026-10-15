@@ -2,13 +2,14 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
+from __future__ import annotations
+
 import argparse
-from typing import List, Optional
 
 
 # this has been copied from ms2query
 def select_files_for_ms2query(
-    file_names: List[str], files_to_select=None, tocheck="all"
+    file_names: list[str], files_to_select=None, tocheck="all"
 ):
     """Selects the files needed for MS2Library based on their file extensions."""
     if tocheck == "all":
