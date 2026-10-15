@@ -33,4 +33,3 @@ process OPENMS_METABOLITEADDUCTDECHARGER{
     END_VERSIONS
         """
 }
-

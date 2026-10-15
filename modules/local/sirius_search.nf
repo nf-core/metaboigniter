@@ -37,4 +37,3 @@ process SIRIUS_SEARCH{
     END_VERSIONS
         """
 }
-

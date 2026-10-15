@@ -27,4 +27,3 @@ workflow MS2QUERY_MODELDOWNLOADER {
     model_files
     versions = ch_versions
 }
-

@@ -589,5 +589,3 @@ for key, values in map_index_rm.items():
 #   f.close()
 #   f_mgf.close()
 #
-
-
