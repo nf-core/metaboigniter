@@ -1,7 +1,10 @@
 lint:
+  files_exist:
+    - .github/workflows/linting_comment.yml
   files_unchanged:
     # Sets NXF_SYNTAX_PARSER=v1 until the pipeline passes the strict parser
     - .github/workflows/linting.yml
+    - .github/workflows/branch.yml
     # The template logos render differently per machine
     - docs/images/nf-core-metaboigniter_logo_light.png
     - docs/images/nf-core-metaboigniter_logo_dark.png
