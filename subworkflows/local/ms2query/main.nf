@@ -62,7 +62,7 @@ PYOPENMS_SPLITMGF(mgf_channel,"mgf")
 
 ch_versions       = ch_versions.mix(PYOPENMS_SPLITMGF.out.versions.first())
 
-mgf_channel = PYOPENMS_SPLITMGF.out.mgf.flatMap{id, values -> values.collect { it -> [id, it]}}
+mgf_channel = PYOPENMS_SPLITMGF.out.mgf.flatMap{id, values -> values.collect { entry -> [id, entry]}}
 
 }
 

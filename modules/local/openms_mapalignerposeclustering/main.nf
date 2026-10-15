@@ -24,9 +24,9 @@ process OPENMS_MAPALIGNERPOSECLUSTERING {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: meta.id
-    def featurexml_input        = featurexml.collect { it -> it }.join(' ')
-    def trafoxml_output        = prefix.collect { it -> 'output/'+it+'.trafoXML' }.join(' ')
-    def featurexml_output        = prefix.collect { it -> 'output/'+it+'.featureXML' }.join(' ')
+    def featurexml_input        = featurexml.collect { input_file -> input_file }.join(' ')
+    def trafoxml_output        = prefix.collect { map_id -> 'output/'+map_id+'.trafoXML' }.join(' ')
+    def featurexml_output        = prefix.collect { map_id -> 'output/'+map_id+'.featureXML' }.join(' ')
 
         """
     mkdir output
