@@ -26,6 +26,10 @@ jobs:
 
   nf-core:
     runs-on: ubuntu-latest
+    env:
+      # Template 3.3.1 config and the pipeline scripts predate the strict
+      # syntax parser that is the default from Nextflow 26.04
+      NXF_SYNTAX_PARSER: v1
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
