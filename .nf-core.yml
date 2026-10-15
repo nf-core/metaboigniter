@@ -4,6 +4,10 @@ lint:
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config
+  files_unchanged:
+    # The template logos render differently per machine
+    - docs/images/nf-core-metaboigniter_logo_light.png
+    - docs/images/nf-core-metaboigniter_logo_dark.png
 template:
   author: Payam Emami, Axel Walter, Efi Kontou
   description: Pre-processing of mass spectrometry-based metabolomics data
