@@ -6,58 +6,80 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
-
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
+Each row in this CSV file represents a unique sample, with the details provided in the columns.
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+```csv
+sample,level,type,msfile
+CONTROL_REP1,MS1,normal,mzML_POS_Quant/X2_Rep1.mzML
+CONTROL_REP2,MS1,normal,mzML_POS_Quant/X2_Rep2.mzML
+POOL_MS2,MS2,normal,mzML_POS_ID/POOL_MS2.mzML
 ```
 
-### Full samplesheet
+| Column   | Description                                                                                                                                            |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sample` | This column should contain unique names for each sample. No two samples should share the same name in this column                                      |
+| `level ` | This can be 'MS1' for files containing only MS1 data, 'MS2' for files containing only MS2 data, and 'MS12' for files containing both MS1 and MS2 data. |
+| `type`   | This column can contain any descriptor of your choice, such as 'normal', 'disease', etc.                                                               |
+| `msfile` | This column should contain the path to the mzML file for each sample.                                                                                  |
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+## Quantification
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+The quantification part of the contains the following steps:
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
-```
+1. Optional centroiding (skipped by default)
+2. Feature detection
+3. Retention time aligmnet (can be skipped)
+4. Adduct annotation (can be skipped)
+5. feature linking or grouping
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+> 💡 Quantification is only performed on the samples with MS1 and MS12 levels. Samples with MS2 level will only be used for identification.
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+### Requantification
+
+This optional step re-quantify all features with missing values across samples resulted from the pre-processing step for more reliable statistical analysis and data exploration.
+
+> 💡 This has been adapted from [UmetaFlow](https://doi.org/10.1186/s13321-023-00724-w).
+
+In order to enable this option use `--requantification`. You may also want to adjust the requantification specific parameters.
+
+## Identification
+
+Identification can be enable using `--identification` parameter.
+
+We support both formula and structural predictions using [SIRIUS](https://bio.informatik.uni-jena.de/software/sirius/) (enable using `--run_sirius` and `--sirius_runfid`) as well as analogue search using [MS2Query](https://doi.org/10.1038/s41467-023-37446-4) (enable using `--run_ms2query`).
+
+> ⚠️ `--sirius_runfid` must be always use together with `--run_sirius`. If `sirius_runfid` is used SIRIUS username and password must be provided using `--sirius_email` and `sirius_password`
+
+Another important parameter is `--ms2_collection_model`. This can be set to either `paired` or `separate`. If the dataset contains any file with only MS2 `separate` is perfered. Otherwise `paired` moode can be used.
+
+The difference between these two modes is mainly related to how the quantification and outputting is performed. In the `separate` mode, all the samples (regardless of the MS levels) will be aligned first before performing quantification. In this mode, feature detection will not be performed on MS2 files.
+
+In contrast, in the `paired` mode, all the files will be first subjected to feature detection and alignment.
+
+> 💡 If you want to perform feature detection on MS2 files, set their level to MS12 and use the `paired` mode.
+
+## Performance specific parameters
+
+For larger datasets one can split certain calculations. We support for split feature grouping and identification.
+
+- For feature grouping, simply set `--parallel_linking` and use `--algorithm_nr_partitions_featurelinkerunlabeledkd_openms` to set the number of partitions.
+
+- For identification, one can split MS2 mapping using `--split_consensus_parts` to perform MS2-feature mapping in parallel. Also parameter `--mgf_splitmgf_pyopenms` can be used to split the mgf files into multiple chunks and each chunk will be run separately. Please note that for force SIRIUS to run separately one has to set `--sirius_split`.
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/metaboigniter --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/metaboigniter --input ./samplesheet.csv --outdir ./results  -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -89,7 +111,6 @@ with:
 ```yaml title="params.yaml"
 input: './samplesheet.csv'
 outdir: './results/'
-genome: 'GRCh37'
 <...>
 ```
 
