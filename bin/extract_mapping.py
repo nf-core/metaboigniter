@@ -193,15 +193,17 @@ def tag_existing_identifications(consensus_map, first_file_name):
     that already sat on the input map with the first mzML file; keep that."""
     for consensus_index in range(consensus_map.size()):
         consensus_feature = consensus_map[consensus_index]
-        identifications = consensus_feature.getPeptideIdentifications()
+        # pyopenms hands out copies of the identifications, so collect the edited ones and store them back
+        identifications = []
         changed = False
-        for identification in identifications:
+        for identification in consensus_feature.getPeptideIdentifications():
             if identification.metaValueExists("spectrum_index") and not identification.metaValueExists("id_file"):
                 identification.setMetaValue("id_file", first_file_name)
                 identification.setMetaValue("id_file_index", 0)
                 changed = True
+            identifications.append(identification)
         if changed:
-            consensus_feature.setPeptideIdentifications(identifications)
+            consensus_feature.setPeptideIdentifications(py.PeptideIdentificationList(identifications))
             consensus_map[consensus_index] = consensus_feature
 
 
