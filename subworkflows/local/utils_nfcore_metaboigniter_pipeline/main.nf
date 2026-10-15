@@ -181,6 +181,10 @@ def validateInputParameters() {
     if ((params.run_sirius || params.sirius_runfid) && (!params.sirius_email || !params.sirius_password)) {
         log.warn "No Sirius user account information found. Please enter `--sirius_email` and `sirius_password`."
     }
+
+    if (params.sirius_split && params.mgf_splitmgf_pyopenms <= 1) {
+        log.warn "`--sirius_split` has no effect while `--mgf_splitmgf_pyopenms` is ${params.mgf_splitmgf_pyopenms}. Set `--mgf_splitmgf_pyopenms` to the number of chunks SIRIUS should run in parallel."
+    }
 }
 
 //
