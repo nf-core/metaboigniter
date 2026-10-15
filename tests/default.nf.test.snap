@@ -1,7 +1,6 @@
 {
     "-profile test": {
         "content": [
-            13,
             {
                 "OPENMS_FEATUREFINDERMETABO": {
                     "openms": "3.0.0-pre-exported-20230720"
@@ -62,7 +61,9 @@
                 "linker/output/versions.yml",
                 "multiqc",
                 "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
                 "multiqc/multiqc_data/multiqc_citations.txt",
                 "multiqc/multiqc_data/multiqc_data.json",
                 "multiqc/multiqc_data/multiqc_software_versions.txt",
@@ -100,7 +101,7 @@
                 "versions.yml:md5,2e07522cf6908caef6f8c3f3d3a0379c"
             ]
         ],
-        "timestamp": "2026-10-15T12:05:15.217468",
+        "timestamp": "2026-10-15T12:58:34.028042",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.0"
