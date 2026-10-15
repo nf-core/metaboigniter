@@ -100,7 +100,7 @@ The pipeline consists of various steps each will produce multiple files types.
 
 ## Intermediate files
 
-With `--save_intermeds`, the outputs of the other steps are saved as well, each under `<PROCESS_NAME>/output/` (for example `PYOPENMS_MSMAPPING/output/`).
+With `--save_intermeds`, the outputs of the other steps are saved as well, each under `<PROCESS_NAME>/output/` (for example `PYOPENMS_MSMAPPING/output/`). Steps whose module writes into its own `output/` folder keep it, so their files are one level deeper, for example `PYOPENMS_C13DETECTION/output/output/`.
 
 ## Expression output
 
