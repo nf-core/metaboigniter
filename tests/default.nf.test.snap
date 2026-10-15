@@ -1,0 +1,110 @@
+{
+    "-profile test": {
+        "content": [
+            {
+                "OPENMS_FEATUREFINDERMETABO": {
+                    "openms": "3.0.0-pre-exported-20230720"
+                },
+                "OPENMS_FEATURELINKERUNLABELEDKD": {
+                    "openms": "3.0.0-pre-exported-20230720"
+                },
+                "OPENMS_MAPALIGNERPOSECLUSTERING": {
+                    "openms": "3.0.0-pre-exported-20230720"
+                },
+                "OPENMS_MAPRTTRANSFORMER": {
+                    "openms": "3.0.0-pre-exported-20230720"
+                },
+                "OPENMS_METABOLITEADDUCTDECHARGER": {
+                    "openms": "3.0.0-pre-exported-20230720"
+                },
+                "PYOPENMS_EXPORTQUANTIFICATION": {
+                    "pyopenms": "2.9.1"
+                },
+                "Workflow": {
+                    "nf-core/metaboigniter": "v2.1.0dev"
+                }
+            },
+            [
+                "TABLE_OUTPUT",
+                "TABLE_OUTPUT/output_quantification_Linked_data.tsv",
+                "TABLE_OUTPUT/versions.yml",
+                "alignment",
+                "alignment/output/X2_Rep1.featureXML",
+                "alignment/output/X2_Rep1.trafoXML",
+                "alignment/output/X3_Rep1.featureXML",
+                "alignment/output/X3_Rep1.trafoXML",
+                "alignment/output/X6_Rep1.featureXML",
+                "alignment/output/X6_Rep1.trafoXML",
+                "alignment/versions.yml",
+                "alignment_mzml",
+                "alignment_mzml/X2_Rep1",
+                "alignment_mzml/X2_Rep1/output/X2_Rep1.mzML",
+                "alignment_mzml/X2_Rep1/versions.yml",
+                "alignment_mzml/X3_Rep1",
+                "alignment_mzml/X3_Rep1/output/X3_Rep1.mzML",
+                "alignment_mzml/X3_Rep1/versions.yml",
+                "alignment_mzml/X6_Rep1",
+                "alignment_mzml/X6_Rep1/output/X6_Rep1.mzML",
+                "alignment_mzml/X6_Rep1/versions.yml",
+                "annotation",
+                "annotation/X2_Rep1",
+                "annotation/X2_Rep1/output/X2_Rep1.featureXML",
+                "annotation/X2_Rep1/versions.yml",
+                "annotation/X3_Rep1",
+                "annotation/X3_Rep1/output/X3_Rep1.featureXML",
+                "annotation/X3_Rep1/versions.yml",
+                "annotation/X6_Rep1",
+                "annotation/X6_Rep1/output/X6_Rep1.featureXML",
+                "annotation/X6_Rep1/versions.yml",
+                "linker",
+                "linker/output/Linked_data.consensusXML",
+                "linker/output/versions.yml",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_metaboigniter_software_mqc_versions.yml",
+                "quantification",
+                "quantification/X2_Rep1",
+                "quantification/X2_Rep1/output/X2_Rep1.featureXML",
+                "quantification/X2_Rep1/versions.yml",
+                "quantification/X3_Rep1",
+                "quantification/X3_Rep1/output/X3_Rep1.featureXML",
+                "quantification/X3_Rep1/versions.yml",
+                "quantification/X6_Rep1",
+                "quantification/X6_Rep1/output/X6_Rep1.featureXML",
+                "quantification/X6_Rep1/versions.yml"
+            ],
+            [
+                "versions.yml:md5,43ab10150f7e55cf87c2206db100a0da",
+                "X2_Rep1.trafoXML:md5,03dfececd9567b6d89ea331609737b90",
+                "X3_Rep1.trafoXML:md5,ce9e0f567c37a47d1fe9618f3cb74453",
+                "X6_Rep1.trafoXML:md5,c129fc3f79bd40bfdd899689599bc25d",
+                "versions.yml:md5,8276e01d4b465117bebb88622ea4b23a",
+                "versions.yml:md5,9ea461bfbc8be8021e02aec9dc0f3cd9",
+                "versions.yml:md5,9ea461bfbc8be8021e02aec9dc0f3cd9",
+                "versions.yml:md5,9ea461bfbc8be8021e02aec9dc0f3cd9",
+                "versions.yml:md5,c5600db70ed1dbf46f7c1fb1c8ad23d5",
+                "versions.yml:md5,c5600db70ed1dbf46f7c1fb1c8ad23d5",
+                "versions.yml:md5,c5600db70ed1dbf46f7c1fb1c8ad23d5",
+                "versions.yml:md5,1da580363772e1cd06fe78451787d448",
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
+                "versions.yml:md5,2e07522cf6908caef6f8c3f3d3a0379c",
+                "versions.yml:md5,2e07522cf6908caef6f8c3f3d3a0379c",
+                "versions.yml:md5,2e07522cf6908caef6f8c3f3d3a0379c"
+            ]
+        ],
+        "timestamp": "2026-10-15T12:58:34.028042",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.0"
+        }
+    }
+}
