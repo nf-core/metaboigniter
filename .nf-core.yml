@@ -8,7 +8,7 @@ lint:
     # The template logos render differently per machine
     - docs/images/nf-core-metaboigniter_logo_light.png
     - docs/images/nf-core-metaboigniter_logo_dark.png
-nf_core_version: 3.3.2
+nf_core_version: 3.4.0
 repository_type: pipeline
 template:
   author: Payam Emami
