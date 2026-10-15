@@ -21,7 +21,7 @@ process PYOPENMS_MSMAPPING{
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def mzml_input        = input_spectra.collect { it -> it }.join(' ')
+    def mzml_input        = input_spectra.collect { input_file -> input_file }.join(' ')
         """
     mkdir output
 

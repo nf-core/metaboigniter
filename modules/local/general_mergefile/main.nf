@@ -19,7 +19,7 @@ process GENERAL_MERGEFILE{
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def inputs        = input_target.collect { it -> it }.join(' ')
+    def inputs        = input_target.collect { input_file -> input_file }.join(' ')
 
 
         """

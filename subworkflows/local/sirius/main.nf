@@ -25,7 +25,7 @@ PYOPENMS_SPLITMS(ms_channel,"ms")
 
 ch_versions       = ch_versions.mix(PYOPENMS_SPLITMS.out.versions.first())
 
-ms_channel = PYOPENMS_SPLITMS.out.ms.flatMap{id, values -> values.collect { it -> [id, it]}}
+ms_channel = PYOPENMS_SPLITMS.out.ms.flatMap{id, values -> values.collect { entry -> [id, entry]}}
 
 
 }

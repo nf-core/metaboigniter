@@ -24,8 +24,8 @@ process PYOPENMS_GENERATESEARCHPARAMS{
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def map_index = meta.part ? "_part${meta.part}":''
-    def mzml_input        = input_spectra.collect { it -> it }.join(' ')
-    def csv_output        = input_spectra.collect { it -> "output/${it.baseName}${map_index}.csv" }.join(' ')
+    def mzml_input        = input_spectra.collect { input_file -> input_file }.join(' ')
+    def csv_output        = input_spectra.collect { spectrum_file -> "output/${spectrum_file.baseName}${map_index}.csv" }.join(' ')
 
 
         """

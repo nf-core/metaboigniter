@@ -22,27 +22,27 @@ workflow LINKER {
 if(parallel_linking)
 {
 
-    quantification_information.map{ it -> it[0,1]} | PYOPENMS_EXTRACTFEATUREMZ
+    quantification_information.map{ entry -> entry[0,1]} | PYOPENMS_EXTRACTFEATUREMZ
     ch_versions       = ch_versions.mix(PYOPENMS_EXTRACTFEATUREMZ.out.versions.first())
 
 
 
 
-PYOPENMS_CONCTSV_MZ(channel.of([id:"merged_mz_range"]).combine(PYOPENMS_EXTRACTFEATUREMZ.out.tsv.collect{ it -> it[1]}.toList()),"tsv","tsv")
+PYOPENMS_CONCTSV_MZ(channel.of([id:"merged_mz_range"]).combine(PYOPENMS_EXTRACTFEATUREMZ.out.tsv.collect{ entry -> entry[1]}.toList()),"tsv","tsv")
 ch_versions       = ch_versions.mix(PYOPENMS_CONCTSV_MZ.out.versions.first())
 PYOPENMS_CONCTSV_MZ.out.csv | PYOPENMS_CALCULATEBOUNDRIES
 ch_versions       = ch_versions.mix(PYOPENMS_CALCULATEBOUNDRIES.out.versions.first())
 
 
 
-PYOPENMS_SPLITFEATUREXML(quantification_information.map{ it -> it[0,1]},
-    PYOPENMS_CALCULATEBOUNDRIES.out.tsv.map{ it -> it[1]}
+PYOPENMS_SPLITFEATUREXML(quantification_information.map{ entry -> entry[0,1]},
+    PYOPENMS_CALCULATEBOUNDRIES.out.tsv.map{ entry -> entry[1]}
 )
 ch_versions       = ch_versions.mix(PYOPENMS_SPLITFEATUREXML.out.versions.first())
 
 
 
-PYOPENMS_SPLITFEATUREXML.out.featurexml.collect{ it -> it[1]}.flatten().map{file ->
+PYOPENMS_SPLITFEATUREXML.out.featurexml.collect{ entry -> entry[1]}.flatten().map{file ->
 def n1 = (file.baseName =~ /\d+/)[-1] as Integer
 [[id:"part"+n1],file]}.groupTuple(by: 0).map{meta,files->[[meta][0], files.sort { a, b ->
         a.baseName <=> b.baseName
@@ -53,7 +53,7 @@ ch_versions       = ch_versions.mix(OPENMS_FEATURELINKERUNLABELEDKDPARTS.out.ver
 
 
 to_be_merged = channel.of([id:"Linked_data"]).combine(
-OPENMS_FEATURELINKERUNLABELEDKDPARTS.out.consensusxml.map{ it -> it[1]}.collect()
+OPENMS_FEATURELINKERUNLABELEDKDPARTS.out.consensusxml.map{ entry -> entry[1]}.collect()
 .map { files ->
     files.sort { a, b ->
     def n1 = (a.baseName =~ /\d+/)[-1] as Integer
@@ -78,7 +78,7 @@ consensusxml=   PYOPENMS_FILEMERGER.out.consensusxml.map{_meta,consensus_file->[
 
 }else{
 
-channel.of([id:"Linked_data"]).combine(quantification_information.collect{ it -> it[1]}.map { files ->
+channel.of([id:"Linked_data"]).combine(quantification_information.collect{ entry -> entry[1]}.map { files ->
     files.sort { a, b ->
         a.baseName <=> b.baseName
     }

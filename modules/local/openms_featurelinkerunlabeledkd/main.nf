@@ -20,7 +20,7 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def featurexml_input        = featurexml.collect { it -> it }.join(' ')
+    def featurexml_input        = featurexml.collect { input_file -> input_file }.join(' ')
         """
 
     FeatureLinkerUnlabeledKD -in $featurexml_input -out ${prefix}.consensusXML $args
