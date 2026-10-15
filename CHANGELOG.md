@@ -3,7 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.1.0dev - [date]
+## v2.1.0dev - [unreleased<!-- TODO nf-core: replace with date on release -->]
+
+### `Changed`
+
+- Template update to nf-core/tools 4.1.0: `nf-validation` replaced by `nf-schema`, `check_max()`/`--max_*` replaced by `process.resourceLimits`, CI moved to nf-test, minimum Nextflow version raised to 25.10.4
+- The `arm` profile is replaced by the template's `arm64` (Wave-built arm64 containers) and `emulate_amd64` profiles
+
+### `Removed`
+
+- `--hook_url`, `--max_cpus`, `--max_memory`, `--max_time` and the nf-validation `--validation*` parameters (dropped by the nf-core template)
 
 ## [v2.0.1](https://github.com/nf-core/metaboigniter/releases/tag/2.0.1) - 2024-04-12
 
