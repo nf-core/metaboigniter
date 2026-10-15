@@ -8,14 +8,28 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Maps MS2 to consensusXML including names")
 
-parser.add_argument("--consensus_input", type=str, help="The path to the consensus file")
-parser.add_argument("--mzml_file_paths", type=str, nargs="+", help="The paths to the mzML files")
+parser.add_argument(
+    "--consensus_input", type=str, help="The path to the consensus file"
+)
+parser.add_argument(
+    "--mzml_file_paths", type=str, nargs="+", help="The paths to the mzML files"
+)
 parser.add_argument("--output", type=str, help="The path for output")
 parser.add_argument("--rt_tolerance", type=float, help="The retention time tolerance")
 parser.add_argument("--mz_tolerance", type=float, help="The m/z tolerance")
-parser.add_argument("--annotate_ids_with_subelements", action="store_true", help="Annotate IDs with sub-elements")
-parser.add_argument("--measure_from_subelements", action="store_true", help="Measure from sub-elements")
-parser.add_argument("--ignore_charge", action="store_true", help="For feature/consensus maps: Assign an ID independently of whether its charge state matches that of the (consensus) feature.")
+parser.add_argument(
+    "--annotate_ids_with_subelements",
+    action="store_true",
+    help="Annotate IDs with sub-elements",
+)
+parser.add_argument(
+    "--measure_from_subelements", action="store_true", help="Measure from sub-elements"
+)
+parser.add_argument(
+    "--ignore_charge",
+    action="store_true",
+    help="For feature/consensus maps: Assign an ID independently of whether its charge state matches that of the (consensus) feature.",
+)
 
 # Parse the arguments
 args = parser.parse_args()
@@ -53,7 +67,12 @@ for i in range(len(mzml_file_paths)):
     exp = py.MSExperiment()
     py.MzMLFile().load(id_input, exp)
     mapper.annotate(
-        consensus_map, peptide_ids, protein_ids, measure_from_subelements, annotate_ids_with_subelements, exp
+        consensus_map,
+        peptide_ids,
+        protein_ids,
+        measure_from_subelements,
+        annotate_ids_with_subelements,
+        exp,
     )
     id_name = os.path.basename(id_input)
     for cons_i in range(consensus_map.size()):

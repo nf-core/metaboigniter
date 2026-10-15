@@ -24,7 +24,9 @@ def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm):
     tolerance_window = get_tol_window(test_mz, tolerance, ppm)
 
     # Assume spectrum is a pandas DataFrame
-    mask = (spectrum["mz"] >= tolerance_window[0]) & (spectrum["mz"] <= tolerance_window[1])
+    mask = (spectrum["mz"] >= tolerance_window[0]) & (
+        spectrum["mz"] <= tolerance_window[1]
+    )
     peaks_in_window = spectrum[mask]
 
     if peaks_in_window.empty:
@@ -36,12 +38,16 @@ def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm):
     return max_intensity_index
 
 
-def extract_precursor_isotope_pattern(precursor_mz, precursor_spectrum, iterations, charge, tolerance=10):
+def extract_precursor_isotope_pattern(
+    precursor_mz, precursor_spectrum, iterations, charge, tolerance=10
+):
     isotopes = []
     ppm = True
     isotope_tolerance = 1
 
-    peak_index = get_highest_intensity_peak_in_mz_range(precursor_mz, precursor_spectrum, tolerance, ppm)
+    peak_index = get_highest_intensity_peak_in_mz_range(
+        precursor_mz, precursor_spectrum, tolerance, ppm
+    )
 
     if peak_index != -1:
         peak = precursor_spectrum.loc[peak_index]
@@ -103,18 +109,42 @@ parser = argparse.ArgumentParser(description="Mass Spectrometry Data Processing 
 parser.add_argument("--consensus_file_path", help="Path to consensus XML file")
 parser.add_argument("--mzml_file_paths", nargs="+", help="List of mzML file paths")
 parser.add_argument(
-    "--ion_select", choices=["all", "merge", "most_intense"], default="all", help="Ion selection method"
+    "--ion_select",
+    choices=["all", "merge", "most_intense"],
+    default="all",
+    help="Ion selection method",
 )
-parser.add_argument("--use_feature_ionization", action="store_true", help="Flag to use feature ionization")
-# parser.add_argument("--use_cons_mz", action="store_true", help="Flag to use consensus mz")
-parser.add_argument("--ms1_data_from", choices=["MS1", "best_MS1", "MS2"], default="MS2", help="Source for MS1 data")
 parser.add_argument(
-    "--feature_selection", choices=["intensity", "quality"], default="quality", help="Feature selection method"
+    "--use_feature_ionization",
+    action="store_true",
+    help="Flag to use feature ionization",
 )
-parser.add_argument("--normalized_intensity", action="store_true", help="Flag to use normalized intensity")
+# parser.add_argument("--use_cons_mz", action="store_true", help="Flag to use consensus mz")
+parser.add_argument(
+    "--ms1_data_from",
+    choices=["MS1", "best_MS1", "MS2"],
+    default="MS2",
+    help="Source for MS1 data",
+)
+parser.add_argument(
+    "--feature_selection",
+    choices=["intensity", "quality"],
+    default="quality",
+    help="Feature selection method",
+)
+parser.add_argument(
+    "--normalized_intensity",
+    action="store_true",
+    help="Flag to use normalized intensity",
+)
 parser.add_argument("--iterations", type=float, default=3, help="Number of iterations")
 parser.add_argument("--ppm_map", type=float, default=20, help="PPM for mapping")
-parser.add_argument("--polarity", choices=["positive", "negative"], default="positive", help="Polarity of the data")
+parser.add_argument(
+    "--polarity",
+    choices=["positive", "negative"],
+    default="positive",
+    help="Polarity of the data",
+)
 
 parser.add_argument("--csv_output", nargs="+", help="List of csv file paths")
 
@@ -235,7 +265,9 @@ for cons_i in range(consensus_map.size()):
     feature_charge = feature.getCharge()
 
     charge_f = (
-        "CHARGE=" + str(1 if feature_charge == 0 else abs(feature_charge)) + ("+" if polarity == "positive" else "-")
+        "CHARGE="
+        + str(1 if feature_charge == 0 else abs(feature_charge))
+        + ("+" if polarity == "positive" else "-")
     )
     mz_f = "PEPMASS=" + str(feature.getMZ())
     rt_f = "RTINSECONDS=" + str(feature.getRT())
@@ -261,7 +293,13 @@ for cons_i in range(consensus_map.size()):
         exist_one_spectra = True
         ms1_ms2_peaks = ""
         for ms_2_i in range(len(ms2_peaks[0])):
-            ms1_ms2_peaks = ms1_ms2_peaks + str(ms2_peaks[0][ms_2_i]) + " " + str(ms2_peaks[1][ms_2_i]) + "\n"
+            ms1_ms2_peaks = (
+                ms1_ms2_peaks
+                + str(ms2_peaks[0][ms_2_i])
+                + " "
+                + str(ms2_peaks[1][ms_2_i])
+                + "\n"
+            )
 
         comb_ms2 = (
             "BEGIN IONS"
@@ -347,9 +385,19 @@ for cons_i in range(consensus_map.size()):
         kk = specs_list[map_index].getSpectrum(spec_index)
         ms2_peaks = kk.get_peaks()
         id_to_c = py.SpectrumLookup().extractScanNumber(
-            kk.getNativeID(), specs_list[map_index].getMetaData().getSourceFiles()[0].getNativeIDTypeAccession()
+            kk.getNativeID(),
+            specs_list[map_index]
+            .getMetaData()
+            .getSourceFiles()[0]
+            .getNativeIDTypeAccession(),
         )
-        ms1_spec = getPrecursorSpectrum(spec_index, specs_list[map_index], use_rt=False, rt=kk.getRT(), only_rt=False)
+        ms1_spec = getPrecursorSpectrum(
+            spec_index,
+            specs_list[map_index],
+            use_rt=False,
+            rt=kk.getRT(),
+            only_rt=False,
+        )
 
         ms1_peaks = ms1_spec.get_peaks()
         map_index_rm[outputs_unampped[map_index]].append(spec_index)
@@ -369,18 +417,33 @@ for cons_i in range(consensus_map.size()):
 
         if isinstance(ms1_spec, int):
             raise Exception(
-                "No MS1 peak where found for ID: " + str(spec_index) + " in map: " + mzml_file_paths[map_index]
+                "No MS1 peak where found for ID: "
+                + str(spec_index)
+                + " in map: "
+                + mzml_file_paths[map_index]
             )
         ms1_ms2_peaks = ms1_ms2_peaks + ">ms1peaks\n"
         for ms_1_i in range(len(ms1_peaks[0])):
-            ms1_ms2_peaks = ms1_ms2_peaks + str(ms1_peaks[0][ms_1_i]) + " " + str(ms1_peaks[1][ms_1_i]) + "\n"
+            ms1_ms2_peaks = (
+                ms1_ms2_peaks
+                + str(ms1_peaks[0][ms_1_i])
+                + " "
+                + str(ms1_peaks[1][ms_1_i])
+                + "\n"
+            )
         if collision == 0.0:
             ms1_ms2_peaks = ms1_ms2_peaks + ">ms2peaks\n"
         else:
             ms1_ms2_peaks = ms1_ms2_peaks + ">collision" + " " + str(collision) + "\n"
 
         for ms_2_i in range(len(ms2_peaks[0])):
-            ms1_ms2_peaks = ms1_ms2_peaks + str(ms2_peaks[0][ms_2_i]) + " " + str(ms2_peaks[1][ms_2_i]) + "\n"
+            ms1_ms2_peaks = (
+                ms1_ms2_peaks
+                + str(ms2_peaks[0][ms_2_i])
+                + " "
+                + str(ms2_peaks[1][ms_2_i])
+                + "\n"
+            )
 
     most_common_charge = max(all_precursor_charges, key=all_precursor_charges.get)
 
@@ -403,18 +466,28 @@ for cons_i in range(consensus_map.size()):
     if feature.metaValueExists("best ion") == True and use_feature_ionization == True:
         ionization = ">ionization " + feature.getMetaValue("best ion")
 
-    charge_f = (1 if polarity == "positive" else -1) * (1 if charge_f == 0 else abs(charge_f))
+    charge_f = (1 if polarity == "positive" else -1) * (
+        1 if charge_f == 0 else abs(charge_f)
+    )
 
     # extract the top feature
-    int_of_features = [sub_feature.getIntensity() for sub_feature in feature.getFeatureList()]
+    int_of_features = [
+        sub_feature.getIntensity() for sub_feature in feature.getFeatureList()
+    ]
 
-    maps_of_features = [sub_feature.getMapIndex() for sub_feature in feature.getFeatureList()]
+    maps_of_features = [
+        sub_feature.getMapIndex() for sub_feature in feature.getFeatureList()
+    ]
 
-    ids_of_features = [sub_feature.getUniqueId() for sub_feature in feature.getFeatureList()]
+    ids_of_features = [
+        sub_feature.getUniqueId() for sub_feature in feature.getFeatureList()
+    ]
 
     index_of_the_best = ""
     if args.feature_selection == "intensity":
-        index_of_the_best = maps_of_features.index(maps_of_features[int_of_features.index(max(int_of_features))])
+        index_of_the_best = maps_of_features.index(
+            maps_of_features[int_of_features.index(max(int_of_features))]
+        )
         if normalized_intensity_flag:
             index_of_the_best = normalized_intensity.index(max(normalized_intensity))
     elif args.feature_selection == "quality":
@@ -429,7 +502,9 @@ for cons_i in range(consensus_map.size()):
         iso_int = isotope_calcdist_int[index_of_the_best]
         iso_mz = isotope_calcdist_mz[index_of_the_best]
 
-    feature_id = ids_of_features[maps_of_features.index(map_index_meta[index_of_the_best])]
+    feature_id = ids_of_features[
+        maps_of_features.index(map_index_meta[index_of_the_best])
+    ]
 
     compound_id = (
         ">compound "
@@ -452,7 +527,9 @@ for cons_i in range(consensus_map.size()):
     if len(iso_mz) > 0:
         ms1_merged = ">ms1merged\n"
         for i_iso in range(len(iso_mz)):
-            ms1_merged = ms1_merged + str(iso_mz[i_iso]) + " " + str(iso_int[i_iso]) + "\n"
+            ms1_merged = (
+                ms1_merged + str(iso_mz[i_iso]) + " " + str(iso_int[i_iso]) + "\n"
+            )
     comb_ms2 = (
         compound_id
         + "\n"

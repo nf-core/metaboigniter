@@ -5,12 +5,20 @@
 import pyopenms as py
 import argparse
 
-parser = argparse.ArgumentParser(description="Output tsv file containing mz of all features")
+parser = argparse.ArgumentParser(
+    description="Output tsv file containing mz of all features"
+)
 
 # Add the arguments
-parser.add_argument("--input", type=str, help="the path to the input directory containing the TSV files")
+parser.add_argument(
+    "--input", type=str, help="the path to the input directory containing the TSV files"
+)
 
-parser.add_argument("--output", type=str, help="the path to the input directory containing the TSV files")
+parser.add_argument(
+    "--output",
+    type=str,
+    help="the path to the input directory containing the TSV files",
+)
 
 
 args = parser.parse_args()

@@ -5,12 +5,18 @@
 import pyopenms as py
 import argparse
 
-parser = argparse.ArgumentParser(description="Output tsv file containing mz of all features")
+parser = argparse.ArgumentParser(
+    description="Output tsv file containing mz of all features"
+)
 
 # Add the arguments
-parser.add_argument("--input", type=str, help="the path to the input directory containing the TSV files")
+parser.add_argument(
+    "--input", type=str, help="the path to the input directory containing the TSV files"
+)
 
-parser.add_argument("--nr_partitions", default=100, type=int, help="number of partitions")
+parser.add_argument(
+    "--nr_partitions", default=100, type=int, help="number of partitions"
+)
 
 parser.add_argument("--mz_tol", type=float, default=10, help="mztol")
 
@@ -20,7 +26,11 @@ parser.add_argument("--mz_tol_wrap", type=float, default=5, help="mz_tol_wrap")
 parser.add_argument("--mz_unit", type=str, default="ppm", help="mz_unit")  # Da
 
 
-parser.add_argument("--output", type=str, help="the path to the input directory containing the TSV files")
+parser.add_argument(
+    "--output",
+    type=str,
+    help="the path to the input directory containing the TSV files",
+)
 
 
 massrange = []

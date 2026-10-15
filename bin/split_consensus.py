@@ -38,7 +38,9 @@ for i in range(consensus_map.size()):
     ft_map.push_back(consensus_map[i])
     counted_features += 1
     total_counts += 1
-    if (consensus_map.size() - total_counts) < features_per_part and not total_counts == consensus_map.size():
+    if (
+        consensus_map.size() - total_counts
+    ) < features_per_part and not total_counts == consensus_map.size():
         continue
     if counted_features >= features_per_part or total_counts == consensus_map.size():
         parts += 1

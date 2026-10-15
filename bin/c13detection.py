@@ -20,10 +20,14 @@ def get_tol_window(val, tol, ppm):
     return (left, right)
 
 
-def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm, rt_min, rt_max):
+def get_highest_intensity_peak_in_mz_range(
+    test_mz, spectrum, tolerance, ppm, rt_min, rt_max
+):
     tolerance_window = get_tol_window(test_mz, tolerance, ppm)
 
-    peaks_in_window = spectrum.get2DPeakDataLong(rt_min, rt_max, tolerance_window[0], tolerance_window[1])
+    peaks_in_window = spectrum.get2DPeakDataLong(
+        rt_min, rt_max, tolerance_window[0], tolerance_window[1]
+    )
 
     if len(peaks_in_window[0]) == 0:
         return []
@@ -32,12 +36,16 @@ def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm, rt
     return [peaks_in_window[1][max_element], peaks_in_window[2][max_element]]
 
 
-def extract_precursor_isotope_pattern(precursor_mz, precursor_spectrum, iterations, charge, tolerance, rt_min, rt_max):
+def extract_precursor_isotope_pattern(
+    precursor_mz, precursor_spectrum, iterations, charge, tolerance, rt_min, rt_max
+):
     isotopes = []
     ppm = True
     isotope_tolerance = 1
 
-    peak = get_highest_intensity_peak_in_mz_range(precursor_mz, precursor_spectrum, tolerance, ppm, rt_min, rt_max)
+    peak = get_highest_intensity_peak_in_mz_range(
+        precursor_mz, precursor_spectrum, tolerance, ppm, rt_min, rt_max
+    )
     if len(peak) > 0:
         isotopes.append(peak)
 
@@ -49,7 +57,12 @@ def extract_precursor_isotope_pattern(precursor_mz, precursor_spectrum, iteratio
 
     while len(peak) > 0 and iterations > 0:
         peak = get_highest_intensity_peak_in_mz_range(
-            peak[0] + massdiff, precursor_spectrum, isotope_tolerance, ppm, rt_min, rt_max
+            peak[0] + massdiff,
+            precursor_spectrum,
+            isotope_tolerance,
+            ppm,
+            rt_min,
+            rt_max,
         )
         if len(peak) > 0:
             isotopes.append(peak)
@@ -67,8 +80,15 @@ parser.add_argument("--input_mzml", help="Path to consensus XML file")
 parser.add_argument("--ppm", type=float, default=10, help="ppm for isotope detection")
 parser.add_argument("--mz", type=float, default=6.5, help="ppm for isotope detection")
 parser.add_argument("--rt", type=float, default=3, help="RT for isotope detection")
-parser.add_argument("--iterations", type=int, default=3, help="RT for isotope detection")
-parser.add_argument("--polarity", choices=["positive", "negative"], default="positive", help="Polarity of the data")
+parser.add_argument(
+    "--iterations", type=int, default=3, help="RT for isotope detection"
+)
+parser.add_argument(
+    "--polarity",
+    choices=["positive", "negative"],
+    default="positive",
+    help="Polarity of the data",
+)
 
 parser.add_argument("--output_feature", help="Path to consensus XML file")
 
@@ -127,7 +147,9 @@ for i in range(features.size()):
     mz_max = max_mz_exp if (mz + args.mz) > max_mz_exp else (mz + args.mz)
     mz_min = min_mz_exp if (mz - args.mz) < min_mz_exp else (mz - args.mz)
 
-    iso = extract_precursor_isotope_pattern(mz, exp, args.iterations, charge_f, args.ppm, rt_min, rt_max)
+    iso = extract_precursor_isotope_pattern(
+        mz, exp, args.iterations, charge_f, args.ppm, rt_min, rt_max
+    )
 
     peptide = py.PeptideIdentification()
     peptide.setRT(rt)

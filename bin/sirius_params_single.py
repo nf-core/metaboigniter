@@ -24,7 +24,9 @@ def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm):
     tolerance_window = get_tol_window(test_mz, tolerance, ppm)
 
     # Assume spectrum is a pandas DataFrame
-    mask = (spectrum["mz"] >= tolerance_window[0]) & (spectrum["mz"] <= tolerance_window[1])
+    mask = (spectrum["mz"] >= tolerance_window[0]) & (
+        spectrum["mz"] <= tolerance_window[1]
+    )
     peaks_in_window = spectrum[mask]
 
     if peaks_in_window.empty:
@@ -36,12 +38,16 @@ def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm):
     return max_intensity_index
 
 
-def extract_precursor_isotope_pattern(precursor_mz, precursor_spectrum, iterations, charge, tolerance=10):
+def extract_precursor_isotope_pattern(
+    precursor_mz, precursor_spectrum, iterations, charge, tolerance=10
+):
     isotopes = []
     ppm = True
     isotope_tolerance = 1
 
-    peak_index = get_highest_intensity_peak_in_mz_range(precursor_mz, precursor_spectrum, tolerance, ppm)
+    peak_index = get_highest_intensity_peak_in_mz_range(
+        precursor_mz, precursor_spectrum, tolerance, ppm
+    )
 
     if peak_index != -1:
         peak = precursor_spectrum.loc[peak_index]
@@ -105,7 +111,12 @@ parser.add_argument("--mzml_file_path", help="List of mzML file paths")
 parser.add_argument("--input_csv", help="List of mzML file paths")
 parser.add_argument("--iterations", type=float, default=3, help="Number of iterations")
 parser.add_argument("--ppm_map", type=float, default=20, help="PPM for mapping")
-parser.add_argument("--polarity", choices=["positive", "negative"], default="positive", help="Polarity of the data")
+parser.add_argument(
+    "--polarity",
+    choices=["positive", "negative"],
+    default="positive",
+    help="Polarity of the data",
+)
 
 parser.add_argument("--ms_output", help="Path to msfile")
 
@@ -184,7 +195,10 @@ exist_one_spectra = False
 
 
 for ks in range(len(map_index_rm)):
-    if len(set(map_index_rm[list(map_index_rm.keys())[ks]])) >= specs_list[ks].getNrSpectra():
+    if (
+        len(set(map_index_rm[list(map_index_rm.keys())[ks]]))
+        >= specs_list[ks].getNrSpectra()
+    ):
         continue
     f = open(output, "w")
     f_mgf = open(output_mgf, "w")
@@ -203,7 +217,9 @@ for ks in range(len(map_index_rm)):
             # ainfo_native_id_type = spectra.getSourceFiles()[0].getNativeIDType();
 
             if spec.getMSLevel() == 2:
-                pre_kh = getPrecursorSpectrum(i, specs_list[ks], use_rt=False, rt=spec.getRT(), only_rt=False)
+                pre_kh = getPrecursorSpectrum(
+                    i, specs_list[ks], use_rt=False, rt=spec.getRT(), only_rt=False
+                )
                 precursor_mz = spec.getPrecursors()[0].getMZ()
                 precursor_spectrum = pd.DataFrame(pre_kh.get_peaks()).T
                 precursor_spectrum.columns = ["mz", "intensity"]
@@ -213,7 +229,9 @@ for ks in range(len(map_index_rm)):
                 elif polarity == "negative" and charge_f == 0:
                     charge_f = -1
 
-                iso = extract_precursor_isotope_pattern(precursor_mz, precursor_spectrum, iterations, charge_f, ppm_map)
+                iso = extract_precursor_isotope_pattern(
+                    precursor_mz, precursor_spectrum, iterations, charge_f, ppm_map
+                )
 
                 f_rt = pre_kh.getRT()
                 f_mz = precursor_mz
@@ -228,9 +246,24 @@ for ks in range(len(map_index_rm)):
                     f_mz = list(iso["mz"])[0]
 
                 id_to_c = py.SpectrumLookup().extractScanNumber(
-                    spec.getNativeID(), specs_list[ks].getMetaData().getSourceFiles()[0].getNativeIDTypeAccession()
+                    spec.getNativeID(),
+                    specs_list[ks]
+                    .getMetaData()
+                    .getSourceFiles()[0]
+                    .getNativeIDTypeAccession(),
                 )
-                compound_id = ">compound " + "_" + str(0) + "-" + str(id_to_c) + "-" + "-" + str(ks) + "--" + "UNKOWN"
+                compound_id = (
+                    ">compound "
+                    + "_"
+                    + str(0)
+                    + "-"
+                    + str(id_to_c)
+                    + "-"
+                    + "-"
+                    + str(ks)
+                    + "--"
+                    + "UNKOWN"
+                )
                 parent_mass = ">parentmass " + str(f_mz)
                 parent_rt = ">rt " + str(f_rt)
                 comments = "##NativeID " + spec.getNativeID() + "\n"
@@ -238,7 +271,9 @@ for ks in range(len(map_index_rm)):
                 charge_cmp = ">charge " + str(charge_f)
 
                 charge_f_mgf = (
-                    "CHARGE=" + str(1 if charge_f == 0 else abs(charge_f)) + ("+" if polarity == "positive" else "-")
+                    "CHARGE="
+                    + str(1 if charge_f == 0 else abs(charge_f))
+                    + ("+" if polarity == "positive" else "-")
                 )
                 mz_f_mgf = "PEPMASS=" + str(f_mz)
                 rt_f_mgf = "RTINSECONDS=" + str(f_rt)
@@ -250,7 +285,13 @@ for ks in range(len(map_index_rm)):
                 if mz_trace != 0:
                     ms1_merged = ">ms1merged\n"
                     for i_iso in range(len(mz_trace)):
-                        ms1_merged = ms1_merged + str(mz_trace[i_iso]) + " " + str(int_trace[i_iso]) + "\n"
+                        ms1_merged = (
+                            ms1_merged
+                            + str(mz_trace[i_iso])
+                            + " "
+                            + str(int_trace[i_iso])
+                            + "\n"
+                        )
 
                 ms2_peaks = spec.get_peaks()
                 ms1_peaks = pre_kh.get_peaks()
@@ -264,16 +305,36 @@ for ks in range(len(map_index_rm)):
 
                 ms1_ms2_peaks = ">ms1peaks\n"
                 for ms_1_i in range(len(ms1_peaks[0])):
-                    ms1_ms2_peaks = ms1_ms2_peaks + str(ms1_peaks[0][ms_1_i]) + " " + str(ms1_peaks[1][ms_1_i]) + "\n"
+                    ms1_ms2_peaks = (
+                        ms1_ms2_peaks
+                        + str(ms1_peaks[0][ms_1_i])
+                        + " "
+                        + str(ms1_peaks[1][ms_1_i])
+                        + "\n"
+                    )
                 if collision == 0.0:
                     ms1_ms2_peaks = ms1_ms2_peaks + ">ms2peaks\n"
                 else:
-                    ms1_ms2_peaks = ms1_ms2_peaks + ">collision" + " " + str(collision) + "\n"
+                    ms1_ms2_peaks = (
+                        ms1_ms2_peaks + ">collision" + " " + str(collision) + "\n"
+                    )
 
                 ms2_all_peaks = ""
                 for ms_2_i in range(len(ms2_peaks[0])):
-                    ms1_ms2_peaks = ms1_ms2_peaks + str(ms2_peaks[0][ms_2_i]) + " " + str(ms2_peaks[1][ms_2_i]) + "\n"
-                    ms2_all_peaks = ms2_all_peaks + str(ms2_peaks[0][ms_2_i]) + " " + str(ms2_peaks[1][ms_2_i]) + "\n"
+                    ms1_ms2_peaks = (
+                        ms1_ms2_peaks
+                        + str(ms2_peaks[0][ms_2_i])
+                        + " "
+                        + str(ms2_peaks[1][ms_2_i])
+                        + "\n"
+                    )
+                    ms2_all_peaks = (
+                        ms2_all_peaks
+                        + str(ms2_peaks[0][ms_2_i])
+                        + " "
+                        + str(ms2_peaks[1][ms_2_i])
+                        + "\n"
+                    )
 
                 comb_ms2 = (
                     compound_id

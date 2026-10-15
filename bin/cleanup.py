@@ -18,14 +18,18 @@ def cleanup(input_cmap, output_tsv):
         if cf.metaValueExists("best ion"):
             df["adduct"] = [cf.getMetaValue("best ion") for cf in consensus_map]
             break
-    df["feature_ids"] = [[handle.getUniqueId() for handle in cf.getFeatureList()] for cf in consensus_map]
+    df["feature_ids"] = [
+        [handle.getUniqueId() for handle in cf.getFeatureList()] for cf in consensus_map
+    ]
     df = df.reset_index()
     df = df.drop(columns=["sequence"])
     df.to_csv(output_tsv, sep="\t", index=False)
     return df
 
 
-def modify_tsv_column(input_file, output_file, old_column_name, new_column_name, new_position):
+def modify_tsv_column(
+    input_file, output_file, old_column_name, new_column_name, new_position
+):
     """
     Modify a TSV file: Rename a column and change its position.
 
@@ -68,7 +72,9 @@ def modify_tsv_column(input_file, output_file, old_column_name, new_column_name,
 
 def main():
     # Create the parser
-    parser = argparse.ArgumentParser(description="Output tsv files and fix identification columns")
+    parser = argparse.ArgumentParser(
+        description="Output tsv files and fix identification columns"
+    )
 
     # Add the arguments
     parser.add_argument(
@@ -84,7 +90,9 @@ def main():
     parser.add_argument("--sirius_file", type=str, help="tsv or csv")
     parser.add_argument("--finger_file", type=str, help="tsv or csv")
     parser.add_argument("--ms2query_file", type=str, help="tsv or csv")
-    parser.add_argument("--output", type=str, help="the path to the final output TSV file")
+    parser.add_argument(
+        "--output", type=str, help="the path to the final output TSV file"
+    )
 
     # Execute the parse_args() method
     args = parser.parse_args()
