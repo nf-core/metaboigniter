@@ -72,7 +72,7 @@ For larger datasets one can split certain calculations. We support for split fea
 
 - For feature grouping, simply set `--parallel_linking` and use `--algorithm_nr_partitions_featurelinkerunlabeledkd_openms` to set the number of partitions.
 
-- For identification, one can split MS2 mapping using `--split_consensus_parts` to perform MS2-feature mapping in parallel. Also parameter `--mgf_splitmgf_pyopenms` can be used to split the mgf files into multiple chunks and each chunk will be run separately. Please note that for force SIRIUS to run separately one has to set `--sirius_split`.
+- For identification, one can split MS2 mapping using `--split_consensus_parts` to perform MS2-feature mapping in parallel. Also parameter `--mgf_splitmgf_pyopenms` can be used to split the mgf files into multiple chunks and each chunk will be run separately. It defaults to `1`, which means no splitting. MS2Query uses the chunks whenever the value is above `1`. SIRIUS uses them only when `--sirius_split` is also set, so `--sirius_split` alone runs SIRIUS as a single task; set both, for example `--sirius_split --mgf_splitmgf_pyopenms 8`.
 
 ## Running the pipeline
 

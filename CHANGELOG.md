@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#103](https://github.com/nf-core/metaboigniter/issues/103) `PYOPENMS_MSMAPPING` maps MS2 precursors through an m/z index and reads spectra without peak data; same output, about 10x faster on the six-file test set and no longer quadratic in features x spectra
 - [#112](https://github.com/nf-core/metaboigniter/issues/112) Use logical `||` instead of bitwise `|` when filtering inputs by MS level
 - [#113](https://github.com/nf-core/metaboigniter/issues/113) Sample intensity columns of the exported tables follow the consensusXML map order instead of a random order that changed between runs
+- SIRIUS and CSI:FingerID tables no longer contain a repeated header line as a data row for every compound after the first
 
 ### `Changed`
 
@@ -20,11 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FeatureFinderMetaboIdent` always receives `-EMGScoring:init_mom`, because OpenMS 3.6 changed its default to `true`; the pipeline default stays `false`
 - Template update to nf-core/tools 4.1.0: `nf-validation` replaced by `nf-schema`, `check_max()`/`--max_*` replaced by `process.resourceLimits`, CI moved to nf-test, minimum Nextflow version raised to 25.10.4
 - The `arm` profile is replaced by the template's `arm64` (Wave-built arm64 containers) and `emulate_amd64` profiles
+- `--mgf_splitmgf_pyopenms` is no longer hidden, and a warning is logged when `--sirius_split` is set without it, because `--sirius_split` alone does not split SIRIUS
 - Parameter validation is stricter: OpenMS parameters reject values outside the ranges the OpenMS tools accept, tolerances and timeouts reject negative values, candidate, iteration and split counts must be at least 1, and `msfile` in the samplesheet must end in `.mzML` ([#109](https://github.com/nf-core/metaboigniter/issues/109))
 
-### `Fixed`
-
-- SIRIUS and CSI:FingerID tables no longer contain a repeated header line as a data row for every compound after the first
 
 ### `Removed`
 
