@@ -29,14 +29,35 @@ MZ_WINDOW_SAFETY_FACTOR = 1.0 + 1e-6
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Maps MS2 to consensusXML including names")
-    parser.add_argument("--consensus_input", type=str, help="The path to the consensus file")
-    parser.add_argument("--mzml_file_paths", type=str, nargs="+", help="The paths to the mzML files")
+    parser = argparse.ArgumentParser(
+        description="Maps MS2 to consensusXML including names"
+    )
+    parser.add_argument(
+        "--consensus_input", type=str, help="The path to the consensus file"
+    )
+    parser.add_argument(
+        "--mzml_file_paths", type=str, nargs="+", help="The paths to the mzML files"
+    )
     parser.add_argument("--output", type=str, help="The path for output")
-    parser.add_argument("--rt_tolerance", type=float, default=5.0, help="The retention time tolerance (seconds)")
-    parser.add_argument("--mz_tolerance", type=float, default=20.0, help="The m/z tolerance (ppm)")
-    parser.add_argument("--annotate_ids_with_subelements", action="store_true", help="Annotate IDs with sub-elements")
-    parser.add_argument("--measure_from_subelements", action="store_true", help="Measure from sub-elements")
+    parser.add_argument(
+        "--rt_tolerance",
+        type=float,
+        default=5.0,
+        help="The retention time tolerance (seconds)",
+    )
+    parser.add_argument(
+        "--mz_tolerance", type=float, default=20.0, help="The m/z tolerance (ppm)"
+    )
+    parser.add_argument(
+        "--annotate_ids_with_subelements",
+        action="store_true",
+        help="Annotate IDs with sub-elements",
+    )
+    parser.add_argument(
+        "--measure_from_subelements",
+        action="store_true",
+        help="Measure from sub-elements",
+    )
     parser.add_argument(
         "--ignore_charge",
         action="store_true",
@@ -62,7 +83,9 @@ class MappingTargets:
 
         for consensus_index, consensus_feature in enumerate(consensus_map):
             if measure_from_subelements:
-                for handle_position, handle in enumerate(consensus_feature.getFeatureList()):
+                for handle_position, handle in enumerate(
+                    consensus_feature.getFeatureList()
+                ):
                     consensus_indices.append(consensus_index)
                     handle_positions.append(handle_position)
                     retention_times.append(handle.getRT())
@@ -85,7 +108,15 @@ class MappingTargets:
         self.charges = np.asarray(charges, dtype=np.int64)[mz_order]
         self.map_indices = np.asarray(map_indices, dtype=np.int64)[mz_order]
 
-    def find_matches(self, precursor_rt, precursor_mz, precursor_charge, rt_tolerance, mz_tolerance_ppm, ignore_charge):
+    def find_matches(
+        self,
+        precursor_rt,
+        precursor_mz,
+        precursor_charge,
+        rt_tolerance,
+        mz_tolerance_ppm,
+        ignore_charge,
+    ):
         """Return the target rows that IDMapper would accept for one precursor."""
         mz_window = abs(precursor_mz) * mz_tolerance_ppm / 1e6 * MZ_WINDOW_SAFETY_FACTOR
         first = np.searchsorted(self.mz_values, precursor_mz - mz_window, side="left")
@@ -93,13 +124,17 @@ class MappingTargets:
         candidates = np.arange(first, last)
 
         # Same arithmetic as IDMapper::isMatch_ with Math::getPPMAbs(observed, theoretical)
-        ppm_error = np.abs((self.mz_values[candidates] - precursor_mz) / precursor_mz * 1e6)
+        ppm_error = np.abs(
+            (self.mz_values[candidates] - precursor_mz) / precursor_mz * 1e6
+        )
         rt_error = np.abs(precursor_rt - self.retention_times[candidates])
         accepted = (ppm_error <= mz_tolerance_ppm) & (rt_error <= rt_tolerance)
 
         if not ignore_charge:
             candidate_charges = self.charges[candidates]
-            accepted &= (candidate_charges == precursor_charge) | (candidate_charges == 0)
+            accepted &= (candidate_charges == precursor_charge) | (
+                candidate_charges == 0
+            )
 
         return candidates[accepted]
 
@@ -153,7 +188,9 @@ def resolve_search_identifier(consensus_map):
     return UNKNOWN_SEARCH_RUN_IDENTIFIER
 
 
-def build_precursor_identification(precursor, search_identifier, map_index, file_name, file_index):
+def build_precursor_identification(
+    precursor, search_identifier, map_index, file_name, file_index
+):
     identification = py.PeptideIdentification()
     identification.setRT(precursor["rt"])
     identification.setMZ(precursor["mz"])
@@ -170,7 +207,9 @@ def build_precursor_identification(precursor, search_identifier, map_index, file
 
 def map_file_precursors(targets, precursors, arguments):
     """Return (consensus_index, sort_key, precursor, map_index) for every match of one file."""
-    record_map_index = arguments.measure_from_subelements and arguments.annotate_ids_with_subelements
+    record_map_index = (
+        arguments.measure_from_subelements and arguments.annotate_ids_with_subelements
+    )
     matches = []
     for precursor in precursors:
         matched_rows = targets.find_matches(
@@ -183,8 +222,14 @@ def map_file_precursors(targets, precursors, arguments):
         )
         for row in matched_rows:
             map_index = int(targets.map_indices[row]) if record_map_index else None
-            sort_key = (precursor["spectrum_index"], precursor["precursor_index"], int(targets.handle_positions[row]))
-            matches.append((int(targets.consensus_indices[row]), sort_key, precursor, map_index))
+            sort_key = (
+                precursor["spectrum_index"],
+                precursor["precursor_index"],
+                int(targets.handle_positions[row]),
+            )
+            matches.append(
+                (int(targets.consensus_indices[row]), sort_key, precursor, map_index)
+            )
     return matches
 
 
@@ -197,13 +242,17 @@ def tag_existing_identifications(consensus_map, first_file_name):
         identifications = []
         changed = False
         for identification in consensus_feature.getPeptideIdentifications():
-            if identification.metaValueExists("spectrum_index") and not identification.metaValueExists("id_file"):
+            if identification.metaValueExists(
+                "spectrum_index"
+            ) and not identification.metaValueExists("id_file"):
                 identification.setMetaValue("id_file", first_file_name)
                 identification.setMetaValue("id_file_index", 0)
                 changed = True
             identifications.append(identification)
         if changed:
-            consensus_feature.setPeptideIdentifications(py.PeptideIdentificationList(identifications))
+            consensus_feature.setPeptideIdentifications(
+                py.PeptideIdentificationList(identifications)
+            )
             consensus_map[consensus_index] = consensus_feature
 
 
@@ -214,7 +263,9 @@ def main():
     consensus_map = py.ConsensusMap()
     consensus_file.load(arguments.consensus_input, consensus_map)
 
-    tag_existing_identifications(consensus_map, os.path.basename(arguments.mzml_file_paths[0]))
+    tag_existing_identifications(
+        consensus_map, os.path.basename(arguments.mzml_file_paths[0])
+    )
 
     targets = MappingTargets(consensus_map, arguments.measure_from_subelements)
     new_identifications = {}

@@ -2,12 +2,9 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-from pyopenms import *
-import os
-import glob
-import sys
-
 import argparse
+
+from pyopenms import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputc", help="input complete featureXML file")
