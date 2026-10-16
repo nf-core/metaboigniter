@@ -29,7 +29,7 @@
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.mzML",
+                "pattern": "^\\S+\\.mzML$",
                 "errorMessage": "mzML file must be provided (msfile), cannot contain spaces and must have extension '.mzML'"
             }
         },

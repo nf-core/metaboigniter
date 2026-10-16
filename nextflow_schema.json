@@ -66,6 +66,7 @@
                 },
                 "models_dir_ms2query": {
                     "type": "string",
+                    "format": "directory-path",
                     "default": "models",
                     "hidden": true,
                     "description": "If running offline, this directory has to contain all the files necessary for running MS2Query"
@@ -77,23 +78,27 @@
                 },
                 "library_path_ms2query": {
                     "type": "string",
+                    "format": "file-path",
                     "hidden": true,
                     "description": "path to ms2query library"
                 },
                 "mgf_splitmgf_pyopenms": {
                     "type": "integer",
                     "default": 1,
+                    "minimum": 1,
                     "hidden": true,
                     "description": "If higher than one, parameter files will be split into the selected number. The result of the identification will be perform on each part separately"
                 },
                 "mz_tolerance_pyopenms": {
                     "type": "number",
                     "default": 20,
+                    "minimum": 0,
                     "description": "mz tolerance (ppm) for finding C13"
                 },
                 "rt_tolerance_pyopenms": {
                     "type": "number",
                     "default": 5,
+                    "minimum": 0,
                     "description": "rt tolerance for finding C13"
                 },
                 "annotate_ids_with_subelements_pyopenms": {
@@ -134,12 +139,14 @@
                 "ms2_iterations": {
                     "type": "integer",
                     "default": 3,
+                    "minimum": 1,
                     "hidden": true,
                     "description": "Number of iterations that should be performed to extract the C13 isotope pattern. If no peak is found (C13 distance) the function will abort. Be careful with noisy data - since this can lead to wrong isotope patterns"
                 },
                 "ms2_ppm_map": {
                     "type": "number",
                     "default": 10,
+                    "minimum": 0,
                     "hidden": true,
                     "description": "PPM for detecting MS C13"
                 },
@@ -164,22 +171,26 @@
                 "sirius_sirius_ppm_max": {
                     "type": "number",
                     "default": 10,
+                    "minimum": 0,
                     "description": "Maximum allowed mass deviation in ppm for decomposing  masses (ppm)"
                 },
                 "sirius_sirius_ppm_max_ms2": {
                     "type": "number",
                     "default": 10,
+                    "minimum": 0,
                     "description": "Maximum allowed mass deviation in ppm for decomposing masses in MS2 (ppm).If not specified, the same value as for the MS1 is used."
                 },
                 "sirius_sirius_tree_timeout": {
                     "type": "number",
                     "default": 100,
+                    "minimum": 0,
                     "hidden": true,
                     "description": "Time out in seconds per fragmentation tree computations. 0 for an infinite amount of time"
                 },
                 "sirius_sirius_compound_timeout": {
                     "type": "number",
                     "default": 100,
+                    "minimum": 0,
                     "hidden": true,
                     "description": "Time out in seconds per fragmentation tree computations. 0 for an infinite amount of time"
                 },
@@ -206,11 +217,13 @@
                 "sirius_sirius_candidates": {
                     "type": "integer",
                     "default": 10,
+                    "minimum": 1,
                     "description": "The number of formula candidates in the SIRIUS output"
                 },
                 "sirius_sirius_candidates_per_ion": {
                     "type": "integer",
                     "default": 1,
+                    "minimum": 1,
                     "description": "Minimum number of candidates in the output for each ionization. Set to force output of results for each possible ionization, even if not part of highest ranked results."
                 },
                 "sirius_sirius_elements_considered": {
@@ -273,6 +286,7 @@
                 "split_consensus_parts": {
                     "type": "integer",
                     "default": 20,
+                    "minimum": 1,
                     "description": "For running MS2 mapping in parallel set this higher than 1"
                 },
                 "run_ms2query": {
@@ -316,7 +330,8 @@
                     "type": "integer",
                     "hidden": false,
                     "description": "Maximal range of charges for a single analyte, i.e. observing q1=[5,6,7] implies span=3. Setting this to 1 will only find adduct variants of the same charge",
-                    "default": 1
+                    "default": 1,
+                    "minimum": 1
                 },
                 "algorithm_metabolitefeaturedeconvolution_q_try_metaboliteadductdecharger_openms": {
                     "type": "string",
@@ -341,7 +356,8 @@
                     "type": "number",
                     "hidden": false,
                     "description": "Maximum allowed mass tolerance per feature. Defines a symmetric tolerance window around the feature. When looking at possible feature pairs, the allowed feature-wise errors are combined for consideration of possible adduct shifts. For ppm tolerances, each window is based on the respective observed feature mz (instead of putative experimental mzs causing the observed one)!",
-                    "default": 5
+                    "default": 5,
+                    "minimum": 0.0
                 },
                 "algorithm_metabolitefeaturedeconvolution_unit_metaboliteadductdecharger_openms": {
                     "type": "string",
@@ -366,13 +382,16 @@
                     "type": "integer",
                     "hidden": false,
                     "description": "Limits allowed adduct compositions and changes between compositions in the underlying graph optimization problem by introducing a probability-based threshold: the minority bound sets the maximum count of the least probable adduct (according to 'potential_adducts' param) within a charge variant with maximum charge only containing the most likely adduct otherwise. E.g., for 'charge_max' 4 and 'max_minority_bound' 2 with most probable adduct being H+ and least probable adduct being Na+, this will allow adduct compositions of '2(H+),2(Na+)' but not of '1(H+),3(Na+)'. Further, adduct compositions/changes less likely than '2(H+),2(Na+)' will be discarded as well.",
-                    "default": 1
+                    "default": 1,
+                    "minimum": 0
                 },
                 "algorithm_metabolitefeaturedeconvolution_min_rt_overlap_metaboliteadductdecharger_openms": {
                     "type": "number",
                     "hidden": false,
                     "description": "Minimum overlap of the convex hull' RT intersection measured against the union from two features (if CHs are given)",
-                    "default": 0.66
+                    "default": 0.66,
+                    "minimum": 0.0,
+                    "maximum": 1.0
                 },
                 "algorithm_metabolitefeaturedeconvolution_intensity_filter_metaboliteadductdecharger_openms": {
                     "type": "boolean",
@@ -407,44 +426,53 @@
                     "type": "integer",
                     "hidden": false,
                     "description": "The maximal number of peaks/features to be considered per map. To use all, set to '-1'.",
-                    "default": 1000
+                    "default": 1000,
+                    "minimum": -1
                 },
                 "algorithm_superimposer_mz_pair_max_distance_mapalignerposeclustering_openms": {
                     "type": "number",
                     "hidden": false,
                     "description": "Maximum of m/z deviation of corresponding elements in different maps.  This condition applies to the pairs considered in hashing.",
-                    "default": 0.5
+                    "default": 0.5,
+                    "minimum": 0.0
                 },
                 "algorithm_superimposer_rt_pair_distance_fraction_mapalignerposeclustering_openms": {
                     "type": "number",
                     "hidden": true,
                     "description": "Within each of the two maps, the pairs considered for pose clustering must be separated by at least this fraction of the total elution time interval (i.e., max - min).  ",
-                    "default": 0.1
+                    "default": 0.1,
+                    "minimum": 0.0,
+                    "maximum": 1.0
                 },
                 "algorithm_superimposer_num_used_points_mapalignerposeclustering_openms": {
                     "type": "integer",
                     "hidden": false,
                     "description": "Maximum number of elements considered in each map (selected by intensity).  Use this to reduce the running time and to disregard weak signals during alignment.  For using all points, set this to -1.",
-                    "default": 2000
+                    "default": 2000,
+                    "minimum": -1
                 },
                 "algorithm_superimposer_scaling_bucket_size_mapalignerposeclustering_openms": {
                     "type": "number",
                     "hidden": true,
                     "description": "The scaling of the retention time interval is being hashed into buckets of this size during pose clustering.  A good choice for this would be a bit smaller than the error you would expect from repeated runs.",
-                    "default": 0.005
+                    "default": 0.005,
+                    "minimum": 0.0
                 },
                 "algorithm_superimposer_shift_bucket_size_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "The shift at the lower (respectively, higher) end of the retention time interval is being hashed into buckets of this size during pose clustering.  A good choice for this would be about the time between consecutive MS scans."
                 },
                 "algorithm_superimposer_max_shift_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Maximal shift which is considered during histogramming (in seconds).  This applies for both directions."
                 },
                 "algorithm_superimposer_max_scaling_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 1.0,
                     "hidden": true,
                     "description": "Maximal scaling which is considered during histogramming.  The minimal scaling is the reciprocal of this."
                 },
@@ -460,6 +488,7 @@
                 },
                 "algorithm_pairfinder_second_nearest_gap_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 1.0,
                     "hidden": true,
                     "description": "Only link features whose distance to the second nearest neighbors (for both sides) is larger by 'second_nearest_gap' than the distance between the matched pair itself."
                 },
@@ -483,15 +512,18 @@
                     "type": "number",
                     "hidden": false,
                     "description": "Never pair features with a larger RT distance (in seconds).",
-                    "default": 100.0
+                    "default": 100.0,
+                    "minimum": 0.0
                 },
                 "algorithm_pairfinder_distance_rt_exponent_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Normalized RT differences ([0-1], relative to 'max_difference') are raised to this power (using 1 or 2 will be fast, everything else is REALLY slow)"
                 },
                 "algorithm_pairfinder_distance_rt_weight_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Final RT distances are weighted by this factor"
                 },
@@ -499,7 +531,8 @@
                     "type": "number",
                     "hidden": false,
                     "description": "Never pair features with larger m/z distance (unit defined by 'unit')",
-                    "default": 0.3
+                    "default": 0.3,
+                    "minimum": 0.0
                 },
                 "algorithm_pairfinder_distance_mz_unit_mapalignerposeclustering_openms": {
                     "type": "string",
@@ -510,21 +543,25 @@
                 },
                 "algorithm_pairfinder_distance_mz_exponent_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Normalized ([0-1], relative to 'max_difference') m/z differences are raised to this power (using 1 or 2 will be fast, everything else is REALLY slow)"
                 },
                 "algorithm_pairfinder_distance_mz_weight_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Final m/z distances are weighted by this factor"
                 },
                 "algorithm_pairfinder_distance_intensity_exponent_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Differences in relative intensity ([0-1]) are raised to this power (using 1 or 2 will be fast, everything else is REALLY slow)"
                 },
                 "algorithm_pairfinder_distance_intensity_weight_mapalignerposeclustering_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Final intensity distances are weighted by this factor"
                 },
@@ -546,7 +583,8 @@
                     "type": "integer",
                     "hidden": false,
                     "description": "Number of partitions in m/z space",
-                    "default": 100
+                    "default": 100,
+                    "minimum": 1
                 },
                 "algorithm_warp_enabled_featurelinkerunlabeledkd_openms": {
                     "type": "boolean",
@@ -558,13 +596,15 @@
                     "type": "number",
                     "hidden": false,
                     "description": "Width of RT tolerance window (sec)",
-                    "default": 100.0
+                    "default": 100.0,
+                    "minimum": 0.0
                 },
                 "algorithm_warp_mz_tol_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": false,
                     "description": "m/z tolerance (in ppm or Da)",
-                    "default": 5.0
+                    "default": 5.0,
+                    "minimum": 0.0
                 },
                 "algorithm_warp_max_pairwise_log_fc_featurelinkerunlabeledkd_openms": {
                     "type": "number",
@@ -576,25 +616,30 @@
                     "type": "number",
                     "hidden": true,
                     "description": "Only connected components containing compatible features from at least max(2, (warp_min_occur * number_of_input_maps)) input maps are considered for computing the warping function",
-                    "default": 0.5
+                    "default": 0.5,
+                    "minimum": 0.0,
+                    "maximum": 1.0
                 },
                 "algorithm_warp_max_nr_conflicts_featurelinkerunlabeledkd_openms": {
                     "type": "integer",
                     "hidden": true,
                     "description": "Allow up to this many conflicts (features from the same map) per connected component to be used for alignment (-1 means allow any number of conflicts)",
-                    "default": 0
+                    "default": 0,
+                    "minimum": -1
                 },
                 "algorithm_link_rt_tol_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": false,
                     "description": "Width of RT tolerance window (sec)",
-                    "default": 30
+                    "default": 30,
+                    "minimum": 0.0
                 },
                 "algorithm_link_mz_tol_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": false,
                     "description": "m/z tolerance (in ppm or Da)",
-                    "default": 10
+                    "default": 10,
+                    "minimum": 0.0
                 },
                 "algorithm_link_charge_merging_featurelinkerunlabeledkd_openms": {
                     "type": "string",
@@ -614,37 +659,43 @@
                     "type": "number",
                     "hidden": true,
                     "description": "Normalized RT differences ([0-1], relative to 'max_difference') are raised to this power (using 1 or 2 will be fast, everything else is REALLY slow)",
-                    "default": 1
+                    "default": 1,
+                    "minimum": 0.0
                 },
                 "algorithm_distance_rt_weight_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": true,
                     "description": "Final RT distances are weighted by this factor",
-                    "default": 1
+                    "default": 1,
+                    "minimum": 0.0
                 },
                 "algorithm_distance_mz_exponent_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": true,
                     "description": "Normalized ([0-1], relative to 'max_difference') m/z differences are raised to this power (using 1 or 2 will be fast, everything else is REALLY slow)",
-                    "default": 2
+                    "default": 2,
+                    "minimum": 0.0
                 },
                 "algorithm_distance_mz_weight_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": true,
                     "description": "Final m/z distances are weighted by this factor",
-                    "default": 1
+                    "default": 1,
+                    "minimum": 0.0
                 },
                 "algorithm_distance_intensity_exponent_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": true,
                     "description": "Differences in relative intensity ([0-1]) are raised to this power (using 1 or 2 will be fast, everything else is REALLY slow)",
-                    "default": 1
+                    "default": 1,
+                    "minimum": 0.0
                 },
                 "algorithm_distance_intensity_weight_featurelinkerunlabeledkd_openms": {
                     "type": "number",
                     "hidden": true,
                     "description": "Final intensity distances are weighted by this factor",
-                    "default": 1
+                    "default": 1,
+                    "minimum": 0.0
                 },
                 "algorithm_distance_intensity_log_transform_featurelinkerunlabeledkd_openms": {
                     "type": "string",
@@ -657,13 +708,16 @@
                     "type": "number",
                     "hidden": true,
                     "description": "Fraction of datapoints (f) to use for each local regression (determines the amount of smoothing). Choosing this parameter in the range .2 to .8 usually results in a good fit.",
-                    "default": 0.666666666666667
+                    "default": 0.666666666666667,
+                    "minimum": 0.0,
+                    "maximum": 1.0
                 },
                 "algorithm_lowess_num_iterations_featurelinkerunlabeledkd_openms": {
                     "type": "integer",
                     "hidden": true,
                     "description": "Number of robustifying iterations for lowess fitting.",
-                    "default": 3
+                    "default": 3,
+                    "minimum": 0
                 },
                 "algorithm_lowess_delta_featurelinkerunlabeledkd_openms": {
                     "type": "number",
@@ -752,11 +806,13 @@
                 },
                 "model_b_spline_wavelength_maprttransformer_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Determines the amount of smoothing by setting the number of nodes for the B-spline. The number is chosen so that the spline approximates a low-pass filter with this cutoff wavelength. The wavelength is given in the same units as the data; a higher value means more smoothing. '0' sets the number of nodes to twice the number of input points."
                 },
                 "model_b_spline_num_nodes_maprttransformer_openms": {
                     "type": "integer",
+                    "minimum": 0,
                     "hidden": true,
                     "description": "Number of nodes for B-spline fitting. Overrides 'wavelength' if set (to two or greater). A lower value means more smoothing."
                 },
@@ -769,16 +825,21 @@
                 },
                 "model_b_spline_boundary_condition_maprttransformer_openms": {
                     "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2,
                     "hidden": true,
                     "description": "Boundary condition at B-spline endpoints: 0 (value zero), 1 (first derivative zero) or 2 (second derivative zero)"
                 },
                 "model_lowess_span_maprttransformer_openms": {
                     "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
                     "hidden": true,
                     "description": "Fraction of datapoints (f) to use for each local regression (determines the amount of smoothing). Choosing this parameter in the range .2 to .8 usually results in a good fit."
                 },
                 "model_lowess_num_iterations_maprttransformer_openms": {
                     "type": "integer",
+                    "minimum": 0,
                     "hidden": true,
                     "description": "Number of robustifying iterations for lowess fitting."
                 },
@@ -826,36 +887,44 @@
             "properties": {
                 "extract_mz_window_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": false,
                     "description": "m/z window size for chromatogram extraction (unit: ppm if 1 or greater, else Da/Th)"
                 },
                 "extract_rt_window_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "RT window size (in sec.) for chromatogram extraction. If set, this parameter takes precedence over 'extract:rt_quantile'."
                 },
                 "extract_n_isotopes_featurefindermetaboident_openms": {
                     "type": "integer",
+                    "minimum": 2,
                     "hidden": false,
                     "description": "Number of isotopes to include in each peptide assay."
                 },
                 "extract_isotope_pmin_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
                     "hidden": true,
                     "description": "Minimum probability for an isotope to be included in the assay for a peptide. If set, this parameter takes precedence over 'extract:n_isotopes'."
                 },
                 "detect_peak_width_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": false,
                     "description": "Expected elution peak width in seconds, for smoothing (Gauss filter). Also determines the RT extration window, unless set explicitly via 'extract:rt_window'."
                 },
                 "detect_min_peak_width_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Minimum elution peak width. Absolute value in seconds if 1 or greater, else relative to 'peak_width'."
                 },
                 "detect_signal_to_noise_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.1,
                     "hidden": true,
                     "description": "Signal-to-noise threshold for OpenSWATH feature detection"
                 },
@@ -868,6 +937,7 @@
                 },
                 "model_add_zeros_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Add zero-intensity points outside the feature range to constrain the model fit. This parameter sets the weight given to these points during model fitting; '0' to disable."
                 },
@@ -888,26 +958,32 @@
                 },
                 "model_check_min_area_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Lower bound for the area under the curve of a valid elution model"
                 },
                 "model_check_boundaries_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
                     "hidden": true,
                     "description": "Time points corresponding to this fraction of the elution model height have to be within the data region used for model fitting"
                 },
                 "model_check_width_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Upper limit for acceptable widths of elution models (Gaussian or EGH), expressed in terms of modified (median-based) z-scores. '0' to disable. Not applied to individual mass traces (parameter 'each_trace')."
                 },
                 "model_check_asymmetry_featurefindermetaboident_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Upper limit for acceptable asymmetry of elution models (EGH only), expressed in terms of modified (median-based) z-scores. '0' to disable. Not applied to individual mass traces (parameter 'each_trace')."
                 },
                 "emgscoring_max_iteration_featurefindermetaboident_openms": {
                     "type": "integer",
+                    "minimum": 1,
                     "hidden": false,
                     "description": "Maximum number of iterations for EMG fitting."
                 },
@@ -926,21 +1002,25 @@
             "properties": {
                 "algorithm_signal_to_noise_peakpickerhires_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": false,
                     "description": "Minimal signal-to-noise ratio for a peak to be picked (0.0 disables SNT estimation!)"
                 },
                 "algorithm_spacing_difference_gap_peakpickerhires_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "The extension of a peak is stopped if the spacing between two subsequent data points exceeds 'spacing_difference_gap * min_spacing'. 'min_spacing' is the smaller of the two spacings from the peak apex to its two neighboring points. '0' to disable the constraint. Not applicable to chromatograms."
                 },
                 "algorithm_spacing_difference_peakpickerhires_openms": {
                     "type": "number",
+                    "minimum": 0.0,
                     "hidden": true,
                     "description": "Maximum allowed difference between points during peak extension, in multiples of the minimal difference between the peak apex and its two neighboring points. If this difference is exceeded a missing point is assumed (see parameter 'missing'). A higher value implies a less stringent peak definition, since individual signals within the peak are allowed to be further apart. '0' to disable the constraint. Not applicable to chromatograms."
                 },
                 "algorithm_missing_peakpickerhires_openms": {
                     "type": "integer",
+                    "minimum": 0,
                     "hidden": true,
                     "description": "Maximum number of missing points allowed when extending a peak to the left or to the right. A missing data point occurs if the spacing between two subsequent data points exceeds 'spacing_difference * min_spacing'. 'min_spacing' is the smaller of the two spacings from the peak apex to its two neighboring points. Not applicable to chromatograms."
                 },
@@ -958,36 +1038,46 @@
                 },
                 "algorithm_signaltonoise_max_intensity_peakpickerhires_openms": {
                     "type": "integer",
+                    "minimum": -1,
                     "hidden": true,
                     "description": "maximal intensity considered for histogram construction. By default, it will be calculated automatically (see auto_mode). Only provide this parameter if you know what you are doing (and change 'auto_mode' to '-1')! All intensities EQUAL/ABOVE 'max_intensity' will be added to the LAST histogram bin. If you choose 'max_intensity' too small, the noise estimate might be too small as well.  If chosen too big, the bins become quite large (which you could counter by increasing 'bin_count', which increases runtime). In general, the Median-S/N estimator is more robust to a manual max_intensity than the MeanIterative-S/N."
                 },
                 "algorithm_signaltonoise_auto_max_stdev_factor_peakpickerhires_openms": {
                     "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 999.0,
                     "hidden": true,
                     "description": "parameter for 'max_intensity' estimation (if 'auto_mode' == 0): mean + 'auto_max_stdev_factor' * stdev"
                 },
                 "algorithm_signaltonoise_auto_max_percentile_peakpickerhires_openms": {
                     "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
                     "hidden": true,
                     "description": "parameter for 'max_intensity' estimation (if 'auto_mode' == 1): auto_max_percentile th percentile"
                 },
                 "algorithm_signaltonoise_auto_mode_peakpickerhires_openms": {
                     "type": "integer",
+                    "minimum": -1,
+                    "maximum": 1,
                     "hidden": true,
                     "description": "method to use to determine maximal intensity: -1 --> use 'max_intensity'; 0 --> 'auto_max_stdev_factor' method (default); 1 --> 'auto_max_percentile' method"
                 },
                 "algorithm_signaltonoise_win_len_peakpickerhires_openms": {
                     "type": "number",
+                    "minimum": 1.0,
                     "hidden": true,
                     "description": "window length in Thomson"
                 },
                 "algorithm_signaltonoise_bin_count_peakpickerhires_openms": {
                     "type": "integer",
+                    "minimum": 3,
                     "hidden": true,
                     "description": "number of bins for intensity values"
                 },
                 "algorithm_signaltonoise_min_required_elements_peakpickerhires_openms": {
                     "type": "integer",
+                    "minimum": 1,
                     "hidden": true,
                     "description": "minimum number of elements required in a window (otherwise it is considered sparse)"
                 },
