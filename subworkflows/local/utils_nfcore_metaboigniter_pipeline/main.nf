@@ -182,6 +182,9 @@ def validateInputParameters() {
         log.warn "No Sirius user account information found. Please enter `--sirius_email` and `sirius_password`."
     }
 
+    if (params.sirius_split && params.mgf_splitmgf_pyopenms <= 1) {
+        log.warn "`--sirius_split` has no effect while `--mgf_splitmgf_pyopenms` is ${params.mgf_splitmgf_pyopenms}. Set `--mgf_splitmgf_pyopenms` to the number of chunks SIRIUS should run in parallel."
+        }
     if (params.run_ms2query && params.train_library_ms2query && !params.library_path_ms2query) {
         error("`--train_library_ms2query` needs a spectral library to train on. Please set `--library_path_ms2query` to an MGF file.")
     }

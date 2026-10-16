@@ -87,7 +87,7 @@
                     "default": 1,
                     "minimum": 1,
                     "hidden": true,
-                    "description": "If higher than one, parameter files will be split into the selected number. The result of the identification will be perform on each part separately"
+                    "description": "Number of chunks to split the MS2 spectra into for identification. Above 1, MS2Query always runs on each chunk separately, and SIRIUS does too when `--sirius_split` is set."
                 },
                 "mz_tolerance_pyopenms": {
                     "type": "number",
@@ -281,7 +281,7 @@
                 },
                 "sirius_split": {
                     "type": "boolean",
-                    "description": "If set, SIRIUS will be run in parallel. See mgf_splitmgf_pyopenms parameter for segmentation"
+                    "description": "Run SIRIUS on each chunk in parallel. Has no effect unless `--mgf_splitmgf_pyopenms` is above 1, which sets the number of chunks."
                 },
                 "split_consensus_parts": {
                     "type": "integer",
