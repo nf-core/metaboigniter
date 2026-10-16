@@ -31,7 +31,7 @@ quantificaiton_data.combine(PYOPENMS_LIBBUILDER.out.tsv.map{it[1]}) | OPENMS_FEA
 
 ch_versions       = ch_versions.mix(OPENMS_FEATUREFINDERMETABOIDENT.out.versions.first())
 
-quantified_features_complete.join(OPENMS_FEATUREFINDERMETABOIDENT.out.featurexml,by:[0]) | PYOPENMS_MERGE
+quantified_features.join(OPENMS_FEATUREFINDERMETABOIDENT.out.featurexml,by:[0]) | PYOPENMS_MERGE
 
 ch_versions       = ch_versions.mix(PYOPENMS_MERGE.out.versions.first())
 
