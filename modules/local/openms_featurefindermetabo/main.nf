@@ -2,10 +2,10 @@ process OPENMS_FEATUREFINDERMETABO {
     tag "$meta.id"
     label 'process_medium'
 
-    conda  "bioconda::openms=3.0.0"
+    conda  "bioconda::openms=3.6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:3.0.0--h8964181_0' :
-        'biocontainers/openms:3.0.0--h8964181_0' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.6.0--hc52dbad_0' :
+        'biocontainers/openms:3.6.0--hc52dbad_0' }"
 
     input:
     tuple val(meta), path(mzml)
@@ -28,7 +28,7 @@ process OPENMS_FEATUREFINDERMETABO {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        openms: \$(OpenMSInfo | awk '/OpenMS Version/{getline; getline; print \$3}')
+        openms: \$(OpenMSInfo | awk '/^Version/{print \$3; exit}')
     END_VERSIONS
         """
 }

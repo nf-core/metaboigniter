@@ -29,10 +29,12 @@ for i in range(len(inputs)):
     py.ConsensusXMLFile().load(inputs[i], cns_map_tmp)
     for x in range(cns_map_tmp.size()):
         cnf_feature = cns_map_tmp[x]
-        peptides = cnf_feature.getPeptideIdentifications()
-        for j in range(len(peptides)):
-            peptides[j].setIdentifier(empty_protein_id.getIdentifier())
-        cnf_feature.setPeptideIdentifications(peptides)
+        # pyopenms 3 hands out copies of the identifications, so collect the edited ones and store them back
+        peptides = []
+        for peptide in cnf_feature.getPeptideIdentifications():
+            peptide.setIdentifier(empty_protein_id.getIdentifier())
+            peptides.append(peptide)
+        cnf_feature.setPeptideIdentifications(py.PeptideIdentificationList(peptides))
         cns_map.push_back(cnf_feature)
 
 

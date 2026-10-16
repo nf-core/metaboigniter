@@ -40,7 +40,6 @@ workflow METABOIGNITER {
 
     def mzml_files = ch_samplesheet
 
-    def empty_id = channel.fromPath("${projectDir}/assets/emptyfile.idXML")
 
     //
     // SUBWORKFLOW: First quantification + alignment
@@ -56,7 +55,7 @@ workflow METABOIGNITER {
     // SUBWORKFLOW: If requantification is goint to be performed, skip annotation
     //
     if(!params.requantification){
-        ANNOTATION(quantification_information,empty_id,false,channel.empty(),params.skip_adduct_detection,!params.identification)
+        ANNOTATION(quantification_information,params.skip_adduct_detection,!params.identification)
         quantification_information=ANNOTATION.out.quantification_information
         ch_versions = ch_versions.mix(ANNOTATION.out.versions)
     }
@@ -76,7 +75,7 @@ workflow METABOIGNITER {
         ch_versions = ch_versions.mix(REQUANTIFICATION.out.versions)
 
         quantification_information = REQUANTIFICATION.out.quantified_features.join(quantificaiton_data,by:[0])
-        ANNOTATION_REQ(quantification_information,empty_id,false,channel.empty(),params.skip_adduct_detection,!params.identification)
+        ANNOTATION_REQ(quantification_information,params.skip_adduct_detection,!params.identification)
         ch_versions = ch_versions.mix(ANNOTATION_REQ.out.versions)
 
         LINKER_REQ(ANNOTATION_REQ.out.quantification_information,params.parallel_linking)
@@ -98,7 +97,6 @@ workflow METABOIGNITER {
     if(params.identification){
         IDENTIFICATION(consensusxml_data,
         mzml_files,
-        quantification_information,
         params.offline_model_ms2query,
         params.models_dir_ms2query,
         params.train_library_ms2query,

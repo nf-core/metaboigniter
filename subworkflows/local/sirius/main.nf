@@ -16,7 +16,7 @@ workflow SIRIUS {
 
     main:
 
-ch_versions = Channel.empty()
+ch_versions = channel.empty()
 
 
 if(mgf_splitmgf_pyopenms>1 && sirius_split)
@@ -25,7 +25,7 @@ PYOPENMS_SPLITMS(ms_channel,"ms")
 
 ch_versions       = ch_versions.mix(PYOPENMS_SPLITMS.out.versions.first())
 
-ms_channel = PYOPENMS_SPLITMS.out.ms.flatMap{id, values -> values.collect { [id, it]}}
+ms_channel = PYOPENMS_SPLITMS.out.ms.flatMap{id, values -> values.collect { entry -> [id, entry]}}
 
 
 }

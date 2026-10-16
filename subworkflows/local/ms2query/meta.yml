@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "MS2QUERY"
+description: Prepares MS2Query models (download, local or trained) and searches MGF spectra with MS2Query
+keywords:
+  - metabolomics
+  - identification
+  - ms2query
+components:
+  - ms2query_modeldownloader
+  - ms2query/checkmodelfiles
+  - ms2query/modeltrain
+  - ms2query/search
+  - pyopenms/splitmgf
+  - pyopenms/conctsv
+input:
+  - mgf_channel:
+      type: channel
+      description: |
+        [ meta, mgf ] spectra to search
+  - offline_model_ms2query:
+      type: boolean
+      description: |
+        Use models from models_dir_ms2query instead of downloading them
+  - models_dir_ms2query:
+      type: string
+      description: |
+        Directory with MS2Query model files
+  - train_library_ms2query:
+      type: boolean
+      description: |
+        Train models on library_path_ms2query
+  - library_path_ms2query:
+      type: string
+      description: |
+        MGF spectral library for training
+  - polarity:
+      type: string
+      description: |
+        Ionisation mode, positive or negative
+  - mgf_splitmgf_pyopenms:
+      type: integer
+      description: |
+        Number of chunks the MGF file is split into
+output:
+  - ms2query:
+      type: channel
+      description: |
+        [ meta, csv ] MS2Query results
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"
