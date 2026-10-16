@@ -1,4 +1,3 @@
-
 process OPENMS_MAPALIGNERPOSECLUSTERING {
     tag "Multiple files"
     label 'process_high'

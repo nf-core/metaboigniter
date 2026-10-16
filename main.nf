@@ -46,7 +46,7 @@ workflow NFCORE_METABOIGNITER {
     )
 
     emit:
-    multiqc_report = METABOIGNITER.out.multiqc_report // channel: /path/to/multiqc_report.html
+    METABOIGNITER.out.multiqc_report
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
