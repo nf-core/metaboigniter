@@ -3,6 +3,33 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.1.0dev](https://github.com/nf-core/metaboigniter/releases/tag/2.1.0dev) - 2026-10-16
+
+### `Fixed`
+
+- Intermediate outputs of `PYOPENMS_C13DETECTION`, `PYOPENMS_EXTRACTFEATUREMZ`, `PYOPENMS_SPLITFEATUREXML` and `PYOPENMS_GENERATESEARCHPARAMSUNMAPPED` are only published with `--save_intermeds`; identification runs no longer copy every input mzML into `pyopenms/`
+- Intermediate results are published with `--publish_dir_mode` (default `copy`) instead of as symlinks into the work directory, and without the per-task `versions.yml` files
+- [#95](https://github.com/nf-core/metaboigniter/issues/95) MS2 input files without an mzML index are indexed with OpenMS `FileConverter` before identification instead of failing in `PYOPENMS_GENERATESEARCHPARAMS`
+- [#103](https://github.com/nf-core/metaboigniter/issues/103) `PYOPENMS_MSMAPPING` maps MS2 precursors through an m/z index and reads spectra without peak data; same output, about 10x faster on the six-file test set and no longer quadratic in features x spectra
+- [#112](https://github.com/nf-core/metaboigniter/issues/112) Use logical `||` instead of bitwise `|` when filtering inputs by MS level
+- [#113](https://github.com/nf-core/metaboigniter/issues/113) Sample intensity columns of the exported tables follow the consensusXML map order instead of a random order that changed between runs
+- [#127](https://github.com/nf-core/metaboigniter/pull/127) SIRIUS and CSI:FingerID tables no longer contain a repeated header line as a data row for every compound after the first
+
+### `Changed`
+
+- OpenMS and pyOpenMS updated from 3.0.0 / 2.9.1 to 3.6.0. Results change slightly because of upstream fixes in feature finding and linking (OpenMS [#10157](https://github.com/OpenMS/OpenMS/pull/10157), [#10225](https://github.com/OpenMS/OpenMS/pull/10225)). On the test data with identification and parallel linking, 99.5 % of consensus features are unchanged with identical intensities, consensus features with an `[M+H]+` adduct annotation go from 7,821 to 9,654, and requantified intensities move by a median of 0.4 %.
+- `FeatureFinderMetaboIdent` always receives `-EMGScoring:init_mom`, because OpenMS 3.6 changed its default to `true`; the pipeline default stays `false`
+- Template update to nf-core/tools 4.1.0: `nf-validation` replaced by `nf-schema`, `check_max()`/`--max_*` replaced by `process.resourceLimits`, CI moved to nf-test, minimum Nextflow version raised to 25.10.4
+- The `arm` profile is replaced by the template's `arm64` (Wave-built arm64 containers) and `emulate_amd64` profiles
+- `--mgf_splitmgf_pyopenms` is no longer hidden, and a warning is logged when `--sirius_split` is set without it, because `--sirius_split` alone does not split SIRIUS
+- Parameter validation is stricter: OpenMS parameters reject values outside the ranges the OpenMS tools accept, tolerances and timeouts reject negative values, candidate, iteration and split counts must be at least 1, and `msfile` in the samplesheet must end in `.mzML` ([#109](https://github.com/nf-core/metaboigniter/issues/109))
+
+### `Removed`
+
+- Unused nf-core `fastqc` module; FastQC is declared as a skipped template feature
+- Unused local modules (`MS2QUERY_EXPORT`, `MS2QUERY_MODELFULLTRAIN`, `OPENMS_GNPSEXPORT`, `OPENMS_IDMAPPER`, `OPENMS_IDMAPPERCONSENSUS`, `OPENMS_SIRIUSPARAMS`, `PYOPENMS_EXTRACTMAPPING`, `PYOPENMS_ISOMAPPING`, `PYOPENMS_REMOVEDUP`) and the `bin/` scripts only they used
+- `--hook_url`, `--max_cpus`, `--max_memory`, `--max_time` and the nf-validation `--validation*` parameters (dropped by the nf-core template)
+
 ## [v2.0.1](https://github.com/nf-core/metaboigniter/releases/tag/2.0.1) - 2024-04-12
 
 - Problems with missing output data after peak picking have been resolved

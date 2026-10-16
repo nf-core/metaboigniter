@@ -32,7 +32,7 @@ The pipeline consists of various steps each will produce multiple files types.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `centroided/`
+- `centroided/<sample>/output/`
   - `*.mzML`: Centroided `mzML` files.
 
 </details>
@@ -44,7 +44,7 @@ The pipeline consists of various steps each will produce multiple files types.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `quantification/`
+- `quantification/<sample>/output/`
   - `*.featureXML`: Mass traces in `featureXML` format.
 
 </details>
@@ -54,10 +54,10 @@ The pipeline consists of various steps each will produce multiple files types.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `requantification/`
+- `requantification/output/output/`
   - `*.featureXML`: Mass traces in `featureXML` format.
-- `requantification_merged/`
-  - `*.featureXML`: Mass traces in `featureXML` format. This is a merged version of quantification and requantification based features.
+- `requantification_merged/output/`
+  - `*merged.featureXML`: Mass traces in `featureXML` format. This is a merged version of quantification and requantification based features.
 
 </details>
 
@@ -66,7 +66,7 @@ The pipeline consists of various steps each will produce multiple files types.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `annotation/`
+- `annotation/<sample>/output/`
   - `*.featureXML`: Mass traces in `featureXML` format including adduct information.
 
 </details>
@@ -78,9 +78,12 @@ The pipeline consists of various steps each will produce multiple files types.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `alignment/`
+- `alignment/output/` (`--ms2_collection_model paired`)
   - `*.featureXML`: Time aligned mass traces in `featureXML` format.
-- `alignment_mzml/`
+  - `*.trafoXML`: Retention time transformations of the alignment.
+- `alignment_mzml/output/` (`--ms2_collection_model separate`)
+  - `*.mzML`, `*.trafoXML`: Time aligned `mzML` files of all inputs and their transformations.
+- `alignment_mzml/<sample>/output/` (`--ms2_collection_model paired`)
   - `*.mzML`: Time aligned `mzML` files.
 
 </details>
@@ -90,10 +93,14 @@ The pipeline consists of various steps each will produce multiple files types.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `linking/`
+- `linker/output/`
   - `*.consensusXML`: Linked consensus traces in `consensusXML` format.
 
 </details>
+
+## Intermediate files
+
+With `--save_intermeds`, the outputs of the other steps are saved as well, each under `<PROCESS_NAME>/output/` (for example `PYOPENMS_MSMAPPING/output/`). Steps whose module writes into its own `output/` folder keep it, so their files are one level deeper, for example `PYOPENMS_C13DETECTION/output/output/`.
 
 ## Expression output
 
@@ -110,6 +117,8 @@ Depending on the pipeline parameters, it can contain one, and up to four differe
 
 All files are TSV (tab separate files) and have a column called "id". This ID can be used to match rows across different files.
 
+In the `output_quantification_` file, each sample has its own intensity column. A missing value is written as `0`: when a consensus feature was not detected in a sample, its intensity in that sample's column is `0`, not empty or `NA`. Treat these zeros as missing values, not as measured intensities, before imputation, normalization or statistical testing.
+
 ## Pipeline information
 
 <details markdown="1">
@@ -122,4 +131,4 @@ All files are TSV (tab separate files) and have a column called "id". This ID ca
 
 </details>
 
-[Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
+[Nextflow](https://docs.seqera.io/platform-cloud/reports/overview) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
