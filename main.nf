@@ -15,7 +15,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { METABOIGNITER  } from './workflows/metaboigniter'
+include { METABOIGNITER           } from './workflows/metaboigniter'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_metaboigniter_pipeline/main'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_metaboigniter_pipeline/main'
 
@@ -29,7 +29,6 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_meta
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
 workflow NFCORE_METABOIGNITER {
-
     take:
     samplesheet // channel: samplesheet read in from --input
 
@@ -38,15 +37,16 @@ workflow NFCORE_METABOIGNITER {
     //
     // WORKFLOW: Run pipeline
     //
-    METABOIGNITER (
+    METABOIGNITER(
         samplesheet,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,
         params.outdir,
     )
+
     emit:
-    multiqc_report = METABOIGNITER.out.multiqc_report // channel: /path/to/multiqc_report.html
+    METABOIGNITER.out.multiqc_report
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,12 +55,10 @@ workflow NFCORE_METABOIGNITER {
 */
 
 workflow {
-
-    main:
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
-    PIPELINE_INITIALISATION (
+    PIPELINE_INITIALISATION(
         params.version,
         params.validate_params,
         params.monochrome_logs,
@@ -69,30 +67,24 @@ workflow {
         params.input,
         params.help,
         params.help_full,
-        params.show_hidden
+        params.show_hidden,
     )
 
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_METABOIGNITER (
+    NFCORE_METABOIGNITER(
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
     // SUBWORKFLOW: Run completion tasks
     //
-    PIPELINE_COMPLETION (
+    PIPELINE_COMPLETION(
         params.email,
         params.email_on_fail,
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        NFCORE_METABOIGNITER.out.multiqc_report
+        NFCORE_METABOIGNITER.out.multiqc_report,
     )
 }
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    THE END
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
