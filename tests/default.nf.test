@@ -17,6 +17,9 @@ nextflow_pipeline {
             def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_content: All files in ${params.outdir}/ with stable content
             def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // OpenMS assigns random feature IDs, so the table rows have no stable order or content hash;
+            // its header (sample columns in consensusXML map order, #113) and row count are stable
+            def quantification_table = path("$outputDir/TABLE_OUTPUT/output_quantification_Linked_data.tsv").readLines()
             assert workflow.success
             assertAll(
                 { assert snapshot(
@@ -25,7 +28,37 @@ nextflow_pipeline {
                     // All stable path name, with a relative path
                     stable_path,
                     // All files with stable contents
-                    stable_content
+                    stable_content,
+                    // Header and number of rows of the quantification table
+                    quantification_table[0],
+                    quantification_table.size()
+                ).match() }
+            )
+        }
+    }
+
+    test("-profile test --identification") {
+
+        when {
+            params {
+                outdir               = "$outputDir"
+                identification       = true
+                ms2_collection_model = "separate"
+            }
+        }
+
+        then {
+            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            def identification_table = path("$outputDir/TABLE_OUTPUT/output_quantification_Linked_data.tsv").readLines()
+            assert workflow.success
+            assertAll(
+                { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_metaboigniter_software_mqc_versions.yml"),
+                    stable_path,
+                    stable_content,
+                    identification_table[0],
+                    identification_table.size()
                 ).match() }
             )
         }

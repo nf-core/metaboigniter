@@ -23,7 +23,7 @@ workflow MS2QUERY {
 
     main:
 
-ch_versions = Channel.empty()
+ch_versions = channel.empty()
 
 
 
@@ -37,7 +37,7 @@ MS2QUERY_MODELDOWNLOADER.out.model_files.collect() |  MS2QUERY_CHECKMODELFILES
 ch_versions       = ch_versions.mix(MS2QUERY_CHECKMODELFILES.out.versions.first())
 }else{
 
-Channel
+channel
     .fromPath(models_dir_ms2query+"/*")
     .collect() | MS2QUERY_CHECKMODELFILES
 
@@ -62,7 +62,7 @@ PYOPENMS_SPLITMGF(mgf_channel,"mgf")
 
 ch_versions       = ch_versions.mix(PYOPENMS_SPLITMGF.out.versions.first())
 
-mgf_channel = PYOPENMS_SPLITMGF.out.mgf.flatMap{id, values -> values.collect { [id, it]}}
+mgf_channel = PYOPENMS_SPLITMGF.out.mgf.flatMap{id, values -> values.collect { entry -> [id, entry]}}
 
 }
 
@@ -70,7 +70,7 @@ mgf_channel = PYOPENMS_SPLITMGF.out.mgf.flatMap{id, values -> values.collect { [
 if(train_library_ms2query)
 {
 
-    Channel
+    channel
     .fromPath(library_path_ms2query)
     .map{it->[[id:it.baseName],it]}.combine(all_model_files) | MS2QUERY_MODELTRAIN
 

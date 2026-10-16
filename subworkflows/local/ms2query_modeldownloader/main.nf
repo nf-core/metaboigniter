@@ -5,17 +5,17 @@ workflow MS2QUERY_MODELDOWNLOADER {
     polarity
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     if(polarity=="positive")
     {
-    Channel
+    channel
     .fromPath("$projectDir/assets/m2query_model_positive.csv") |  MS2QUERY_DOWNLOADMODEL
 
     model_files = MS2QUERY_DOWNLOADMODEL.out.model_files
     }else if(polarity=="negative")
     {
-    Channel
+    channel
     .fromPath("$projectDir/assets/m2query_model_negative.csv") |  MS2QUERY_DOWNLOADMODEL
 
     model_files = MS2QUERY_DOWNLOADMODEL.out.model_files

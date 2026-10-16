@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "ANNOTATION"
+description: Annotates detected features with adducts (OpenMS MetaboliteAdductDecharger) and 13C isotope information
+keywords:
+  - metabolomics
+  - adducts
+  - isotopes
+  - openms
+components:
+  - openms/metaboliteadductdecharger
+  - pyopenms/c13detection
+input:
+  - quantification_information:
+      type: channel
+      description: |
+        [ meta, featureXML, mzML ] per sample
+  - skip_adduct_detection:
+      type: boolean
+      description: |
+        Skip adduct detection
+  - skip_c13_detection:
+      type: boolean
+      description: |
+        Skip 13C isotope detection
+output:
+  - quantification_information:
+      type: channel
+      description: |
+        [ meta, featureXML, mzML ] per sample with annotated features
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"
