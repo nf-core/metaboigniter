@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template update to nf-core/tools 4.1.0: `nf-validation` replaced by `nf-schema`, `check_max()`/`--max_*` replaced by `process.resourceLimits`, CI moved to nf-test, minimum Nextflow version raised to 25.10.4
 - The `arm` profile is replaced by the template's `arm64` (Wave-built arm64 containers) and `emulate_amd64` profiles
 
+### `Fixed`
+
+- SIRIUS and CSI:FingerID tables no longer contain a repeated header line as a data row for every compound after the first
+
 ### `Removed`
 
 - Unused nf-core `fastqc` module; FastQC is declared as a skipped template feature
