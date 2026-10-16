@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#113](https://github.com/nf-core/metaboigniter/issues/113) Sample intensity columns of the exported tables follow the consensusXML map order instead of a random order that changed between runs
 - [#127](https://github.com/nf-core/metaboigniter/pull/127) SIRIUS and CSI:FingerID tables no longer contain a repeated header line as a data row for every compound after the first
 
-
 ### `Changed`
 
 - OpenMS and pyOpenMS updated from 3.0.0 / 2.9.1 to 3.6.0. Results change slightly because of upstream fixes in feature finding and linking (OpenMS [#10157](https://github.com/OpenMS/OpenMS/pull/10157), [#10225](https://github.com/OpenMS/OpenMS/pull/10225)). On the test data with identification and parallel linking, 99.5 % of consensus features are unchanged with identical intensities, consensus features with an `[M+H]+` adduct annotation go from 7,821 to 9,654, and requantified intensities move by a median of 0.4 %.
