@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.1.0dev - [unreleased<!-- TODO nf-core: replace with date on release -->]
+## [v2.1.0dev](https://github.com/nf-core/metaboigniter/releases/tag/2.1.0dev) - 2026-10-16
 
 ### `Fixed`
 
@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#103](https://github.com/nf-core/metaboigniter/issues/103) `PYOPENMS_MSMAPPING` maps MS2 precursors through an m/z index and reads spectra without peak data; same output, about 10x faster on the six-file test set and no longer quadratic in features x spectra
 - [#112](https://github.com/nf-core/metaboigniter/issues/112) Use logical `||` instead of bitwise `|` when filtering inputs by MS level
 - [#113](https://github.com/nf-core/metaboigniter/issues/113) Sample intensity columns of the exported tables follow the consensusXML map order instead of a random order that changed between runs
-- SIRIUS and CSI:FingerID tables no longer contain a repeated header line as a data row for every compound after the first
+- [#127](https://github.com/nf-core/metaboigniter/pull/127) SIRIUS and CSI:FingerID tables no longer contain a repeated header line as a data row for every compound after the first
 
 ### `Changed`
 
@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `arm` profile is replaced by the template's `arm64` (Wave-built arm64 containers) and `emulate_amd64` profiles
 - `--mgf_splitmgf_pyopenms` is no longer hidden, and a warning is logged when `--sirius_split` is set without it, because `--sirius_split` alone does not split SIRIUS
 - Parameter validation is stricter: OpenMS parameters reject values outside the ranges the OpenMS tools accept, tolerances and timeouts reject negative values, candidate, iteration and split counts must be at least 1, and `msfile` in the samplesheet must end in `.mzML` ([#109](https://github.com/nf-core/metaboigniter/issues/109))
-
 
 ### `Removed`
 

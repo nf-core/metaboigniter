@@ -21,7 +21,7 @@
                     "pyopenms": "3.6.0"
                 },
                 "Workflow": {
-                    "nf-core/metaboigniter": "v2.1.0dev"
+                    "nf-core/metaboigniter": "v2.1.0"
                 }
             },
             [
@@ -125,7 +125,7 @@
                     "pyopenms": "3.6.0"
                 },
                 "Workflow": {
-                    "nf-core/metaboigniter": "v2.1.0dev"
+                    "nf-core/metaboigniter": "v2.1.0"
                 }
             },
             [

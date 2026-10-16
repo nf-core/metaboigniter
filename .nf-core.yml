@@ -16,7 +16,7 @@ template:
   name: metaboigniter
   org: nf-core
   outdir: .
-  version: 2.1.0dev
+  version: 2.1.0
   skip_features:
     - igenomes
     - fastqc
