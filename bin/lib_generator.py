@@ -38,7 +38,7 @@ def mz_to_mass(mz, charge, polarity):
     if charge == 0:
         charge = 1
 
-    mass = (mz * charge) - (charge * polarity * 1.007825)
+    mass = (mz * charge) - (charge * polarity * 1.007276)
     return mass
 
 
