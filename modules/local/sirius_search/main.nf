@@ -21,7 +21,6 @@ process SIRIUS_SEARCH{
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
         """
     if [ "$workflow.containerEngine" = "singularity" ] || [ "$workflow.containerEngine" = "apptainer" ]; then
         export CONDA_PREFIX="/usr/local"

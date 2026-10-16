@@ -2,10 +2,10 @@ process PYOPENMS_SPLITMGF{
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::pyopenms=2.9.1"
+    conda "bioconda::pyopenms=3.6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:2.9.1--py311h9b8898c_3' :
-        'biocontainers/pyopenms:2.9.1--py311h9b8898c_3' }"
+        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0' :
+        'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0' }"
 
 
     input:
@@ -23,7 +23,6 @@ process PYOPENMS_SPLITMGF{
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
 
         """
     mkdir output
@@ -33,7 +32,7 @@ process PYOPENMS_SPLITMGF{
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyopenms: \$(python -c "import pyopenms; print(pyopenms.__version__)" 2>&1 | grep -v "Warning:")
+        pyopenms: \$(python -c "import pyopenms; print(pyopenms.__version__)" 2>/dev/null)
     END_VERSIONS
         """
 }

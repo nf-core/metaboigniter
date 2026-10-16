@@ -27,7 +27,6 @@ process MS2QUERY_MODELTRAIN {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
         """
     mkdir output
     train_ms2query.py --input $mgf --output output/  --model model/  $args

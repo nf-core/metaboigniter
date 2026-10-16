@@ -1,0 +1,52 @@
+nextflow_function {
+
+    name "Test Functions"
+    script "../main.nf"
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "identification"
+
+    test("isIndexedMzml - indexed mzML") {
+
+        function "isIndexedMzml"
+
+        when {
+            function {
+                """
+                def indexed_mzml = file("${outputDir}/indexed.mzML")
+                indexed_mzml.text = '<?xml version="1.0" encoding="utf-8"?>\\n<indexedmzML xmlns="http://psi.hupo.org/ms/mzml">\\n  <mzML/>\\n</indexedmzML>\\n'
+                input[0] = indexed_mzml
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == true }
+            )
+        }
+    }
+
+    test("isIndexedMzml - mzML without index") {
+
+        function "isIndexedMzml"
+
+        when {
+            function {
+                """
+                def plain_mzml = file("${outputDir}/plain.mzML")
+                plain_mzml.text = '<?xml version="1.0" encoding="utf-8"?>\\n<mzML xmlns="http://psi.hupo.org/ms/mzml">\\n  <run/>\\n</mzML>\\n'
+                input[0] = plain_mzml
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert function.success },
+                { assert function.result == false }
+            )
+        }
+    }
+}

@@ -6,21 +6,17 @@ include { PYOPENMS_C13DETECTION } from '../../../modules/local/pyopenms_c13detec
 workflow ANNOTATION {
     take:
         quantification_information
-        empty_id
-        separate
-        mzml_files
         skip_adduct_detection
         skip_c13_detection
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
         if(!skip_adduct_detection)
         {
-        OPENMS_METABOLITEADDUCTDECHARGER(quantification_information.map{it[0,1]})
-        quantified_features=OPENMS_METABOLITEADDUCTDECHARGER.out.featurexml
+        OPENMS_METABOLITEADDUCTDECHARGER(quantification_information.map{ entry -> entry[0,1]})
         quantification_information = OPENMS_METABOLITEADDUCTDECHARGER.out.featurexml
-        .join(quantification_information.map{it[0,2]},by:[0])
+        .join(quantification_information.map{ entry -> entry[0,2]},by:[0])
 
         ch_versions       = ch_versions.mix(OPENMS_METABOLITEADDUCTDECHARGER.out.versions.first())
         }
