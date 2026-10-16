@@ -1,21 +1,18 @@
-
 process PYOPENMS_FILEMERGER {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_high'
 
     conda "bioconda::pyopenms=3.6.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0' :
-        'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0' }"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0'
+        : 'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0'}"
 
     input:
     tuple val(meta), path(consensusxml_input)
 
     output:
     tuple val(meta), path("output/*.consensusXML"), emit: consensusxml
-    path  "versions.yml"                      , emit: versions
-
-
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,11 +20,11 @@ process PYOPENMS_FILEMERGER {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: meta.id
-    def inputs        = consensusxml_input.collect { input_file -> input_file }.join(' ')
+    def inputs = consensusxml_input.collect { input_file -> input_file }.join(' ')
 
-        """
+    """
         mkdir output
-        file_merger_consensus.py --input $inputs --output output/${prefix}.consensusXML $args
+        file_merger_consensus.py --input ${inputs} --output output/${prefix}.consensusXML ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

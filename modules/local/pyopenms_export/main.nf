@@ -1,13 +1,11 @@
 process PYOPENMS_EXPORT {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_medium'
 
     conda "bioconda::pyopenms=3.6.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0' :
-        'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0' }"
-
-
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0'
+        : 'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0'}"
 
     input:
     tuple val(meta), path(consensusxml)
@@ -16,8 +14,8 @@ process PYOPENMS_EXPORT {
     tuple val(meta_ms2qurry), path(ms2qurry)
 
     output:
-    tuple val(meta), path("output_*.tsv")     , emit: tsv
-    path  "versions.yml"               , emit: versions
+    tuple val(meta), path("output_*.tsv"), emit: tsv
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,16 +23,16 @@ process PYOPENMS_EXPORT {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def sirius_id = sirius ? "output_${meta_sirius.id}.tsv": '""'
-    def finger_id = fingerid ? "output_${meta_fingerid.id}.tsv": '""'
-    def ms2query_id = ms2qurry ? "output_${meta_ms2qurry.id}.tsv": '""'
-    def sirius_file = sirius ? sirius: '""'
-    def finger_file = fingerid ? fingerid: '""'
-    def ms2query_file = ms2qurry ? ms2qurry: '""'
+    def sirius_id = sirius ? "output_${meta_sirius.id}.tsv" : '""'
+    def finger_id = fingerid ? "output_${meta_fingerid.id}.tsv" : '""'
+    def ms2query_id = ms2qurry ? "output_${meta_ms2qurry.id}.tsv" : '""'
+    def sirius_file = sirius ? sirius : '""'
+    def finger_file = fingerid ? fingerid : '""'
+    def ms2query_file = ms2qurry ? ms2qurry : '""'
 
-        """
+    """
 
-        cleanup.py --input_consensus $consensusxml --output output_quantification_${prefix}.tsv --sirius_id $sirius_id --finger_id $finger_id --ms2query_id $ms2query_id --sirius_file $sirius_file --finger_file $finger_file --ms2query_file $ms2query_file  $args
+        cleanup.py --input_consensus ${consensusxml} --output output_quantification_${prefix}.tsv --sirius_id ${sirius_id} --finger_id ${finger_id} --ms2query_id ${ms2query_id} --sirius_file ${sirius_file} --finger_file ${finger_file} --ms2query_file ${ms2query_file}  ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

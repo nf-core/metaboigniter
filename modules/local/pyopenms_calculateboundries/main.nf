@@ -1,19 +1,18 @@
 process PYOPENMS_CALCULATEBOUNDRIES {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_medium'
 
     conda "bioconda::pyopenms=3.6.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0' :
-        'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0' }"
-
-
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0'
+        : 'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0'}"
 
     input:
-    tuple val(meta),path(tsv)
+    tuple val(meta), path(tsv)
+
     output:
-    tuple val(meta) ,path("output/*.boundries.tsv"), emit: tsv
-    path  "versions.yml"               , emit: versions
+    tuple val(meta), path("output/*.boundries.tsv"), emit: tsv
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,9 +21,9 @@ process PYOPENMS_CALCULATEBOUNDRIES {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
 
-        """
+    """
         mkdir output
-        calc_feature_boundries.py --input $tsv --output output/${prefix}.boundries.tsv $args
+        calc_feature_boundries.py --input ${tsv} --output output/${prefix}.boundries.tsv ${args}
 
 
 

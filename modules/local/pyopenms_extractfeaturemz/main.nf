@@ -1,19 +1,18 @@
-process PYOPENMS_EXTRACTFEATUREMZ{
-    tag "$meta.id"
+process PYOPENMS_EXTRACTFEATUREMZ {
+    tag "${meta.id}"
     label 'process_medium'
 
     conda "bioconda::pyopenms=3.6.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0' :
-        'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0' }"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0'
+        : 'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0'}"
 
     input:
-    tuple val(meta),path(input_spectra)
-
+    tuple val(meta), path(input_spectra)
 
     output:
-    tuple val(meta),path("output/*.tsv"), emit: tsv
-    path  "versions.yml"                      , emit: versions
+    tuple val(meta), path("output/*.tsv"), emit: tsv
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,10 +21,10 @@ process PYOPENMS_EXTRACTFEATUREMZ{
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
 
-        """
+    """
     mkdir output
     extract_feature_mz.py \\
-        --input $input_spectra --output output/${prefix}.tsv $args
+        --input ${input_spectra} --output output/${prefix}.tsv ${args}
 
 
     cat <<-END_VERSIONS > versions.yml

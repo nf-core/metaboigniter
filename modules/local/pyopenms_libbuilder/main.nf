@@ -1,19 +1,18 @@
-
-process PYOPENMS_LIBBUILDER{
-    tag "$meta.id"
+process PYOPENMS_LIBBUILDER {
+    tag "${meta.id}"
     label 'process_medium'
 
     conda "bioconda::pyopenms=3.6.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0' :
-        'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0' }"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0'
+        : 'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0'}"
 
     input:
     tuple val(meta), path(consensusxml)
 
     output:
-    tuple val(meta),path("*tsv"), emit: tsv
-    path  "versions.yml"                      , emit: versions
+    tuple val(meta), path("*tsv"), emit: tsv
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,10 +21,10 @@ process PYOPENMS_LIBBUILDER{
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
 
-        """
+    """
 
     lib_generator.py \\
-    --input $consensusxml  --output ${prefix}.tsv $args
+    --input ${consensusxml}  --output ${prefix}.tsv ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -1,22 +1,20 @@
-process PYOPENMS_SPLITMGF{
-    tag "$meta.id"
+process PYOPENMS_SPLITMGF {
+    tag "${meta.id}"
     label 'process_medium'
 
     conda "bioconda::pyopenms=3.6.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0' :
-        'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0' }"
-
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0'
+        : 'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0'}"
 
     input:
-    tuple val(meta),path(mgf)
+    tuple val(meta), path(mgf)
     val file_type
 
-
     output:
-    tuple val(meta),path("output/*.mgf"), emit: mgf, optional: true
-    tuple val(meta),path("output/*.ms"), emit: ms, optional: true
-    path  "versions.yml"                      , emit: versions
+    tuple val(meta), path("output/*.mgf"), emit: mgf, optional: true
+    tuple val(meta), path("output/*.ms"), emit: ms, optional: true
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,9 +22,9 @@ process PYOPENMS_SPLITMGF{
     script:
     def args = task.ext.args ?: ''
 
-        """
+    """
     mkdir output
-    split_mgf.py --mgf_file $mgf --file_type $file_type  $args --output output/
+    split_mgf.py --mgf_file ${mgf} --file_type ${file_type}  ${args} --output output/
 
 
 

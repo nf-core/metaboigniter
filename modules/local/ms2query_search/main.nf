@@ -1,20 +1,19 @@
 process MS2QUERY_SEARCH {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_long'
 
     conda "bioconda::ms2query=1.2.3"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ms2query:1.2.3--pyhdfd78af_0' :
-        'biocontainers/ms2query:1.2.3--pyhdfd78af_0' }"
-
-
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/ms2query:1.2.3--pyhdfd78af_0'
+        : 'biocontainers/ms2query:1.2.3--pyhdfd78af_0'}"
 
     input:
     tuple val(meta), path(msms)
-    path(modelfiles, stageAs: "model/*")
+    path modelfiles, stageAs: "model/*"
+
     output:
     tuple val(meta), path("output/*.csv"), emit: csv
-    path  "versions.yml"               , emit: versions
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,10 +22,10 @@ process MS2QUERY_SEARCH {
     def args = task.ext.args ?: ''
 
 
-        """
+    """
 
         mkdir output
-        ms2query --spectra $msms --library model/ $args --results output/
+        ms2query --spectra ${msms} --library model/ ${args} --results output/
 
 
 

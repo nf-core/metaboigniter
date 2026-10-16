@@ -1,19 +1,18 @@
-process PYOPENMS_MERGE{
-    tag "$meta.id"
+process PYOPENMS_MERGE {
+    tag "${meta.id}"
     label 'process_medium'
 
     conda "bioconda::pyopenms=3.6.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0' :
-        'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0' }"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py311hbf5b9ba_0'
+        : 'biocontainers/pyopenms:3.6.0--py311hbf5b9ba_0'}"
 
     input:
-    tuple val(meta),path(featurexmlcomplete),path(featurexmlreq)
-
+    tuple val(meta), path(featurexmlcomplete), path(featurexmlreq)
 
     output:
-    tuple val(meta),path("*merged.featureXML"), emit: featurexml
-    path  "versions.yml"                      , emit: versions
+    tuple val(meta), path("*merged.featureXML"), emit: featurexml
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,10 +21,10 @@ process PYOPENMS_MERGE{
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
 
-        """
+    """
 
     merge.py \\
-        --inputc $featurexmlcomplete --inputr $featurexmlreq --output ${prefix}.merged.featureXML $args
+        --inputc ${featurexmlcomplete} --inputr ${featurexmlreq} --output ${prefix}.merged.featureXML ${args}
 
 
     cat <<-END_VERSIONS > versions.yml
