@@ -2,9 +2,10 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-from pyopenms import *
 import glob
 import sys
+
+from pyopenms import *
 
 
 def reloadmaps(in_aligned, in_complete, out_complete):
@@ -20,7 +21,10 @@ def reloadmaps(in_aligned, in_complete, out_complete):
     ConsensusXMLFile().load(in_complete, consensus_map)
     to_keep_ids = [
         item
-        for sublist in [[feature.getUniqueId() for feature in cf.getFeatureList()] for cf in consensus_map]
+        for sublist in [
+            [feature.getUniqueId() for feature in cf.getFeatureList()]
+            for cf in consensus_map
+        ]
         for item in sublist
     ]
 

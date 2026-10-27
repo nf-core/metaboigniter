@@ -1,7 +1,22 @@
+nf_core_version: 4.2.1
 repository_type: pipeline
 lint:
   files_exist:
-    - .github/workflows/linting_comment.yml
+    - conf/igenomes.config
+    - conf/igenomes_ignored.config
   files_unchanged:
-    - .github/workflows/branch.yml
-    - .github/workflows/linting.yml
+    # The template logos render differently per machine
+    - docs/images/nf-core-metaboigniter_logo_light.png
+    - docs/images/nf-core-metaboigniter_logo_dark.png
+template:
+  author: Payam Emami, Axel Walter, Efi Kontou
+  description: Pre-processing of mass spectrometry-based metabolomics data
+  force: false
+  is_nfcore: true
+  name: metaboigniter
+  org: nf-core
+  outdir: .
+  version: 2.1.0
+  skip_features:
+    - igenomes
+    - fastqc
