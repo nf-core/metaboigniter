@@ -8,3 +8,12 @@ multiqc/multiqc_data/llms-full.txt
 multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 pipeline_info/*.{html,json,txt,yml}
+TABLE_OUTPUT/*.tsv
+alignment/**
+alignment_mzml/**
+annotation/**
+centroided/**
+linker/**
+quantification/**
+requantification/**
+requantification_merged/**

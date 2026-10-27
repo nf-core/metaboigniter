@@ -1,3 +1,6 @@
-sample,fastq_1,fastq_2
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
-SAMPLE_SINGLE_END,/path/to/fastq/files/AEG588A4_S4_L003_R1_001.fastq.gz,
+sample,level,type,msfile
+test1,MS1,normal,https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/mzML_POS_Quant/X2_Rep1.mzML
+test2,MS1,normal,https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/mzML_POS_Quant/X3_Rep1.mzML
+test3,MS1,normal,https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/mzML_POS_Quant/X6_Rep1.mzML
+ID1,MS2,normal,https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/mzML_POS_ID/Pilot_MS_Control_2_peakpicked.mzML
+ID2,MS2,normal,https://raw.githubusercontent.com/nf-core/test-datasets/metaboigniter/mzML_POS_ID/Pilot_MS_Pool_2_peakpicked.mzML
