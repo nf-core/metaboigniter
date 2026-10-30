@@ -31,7 +31,6 @@ workflow UTILS_NFSCHEMA_PLUGIN {
 
     if(help || help_full) {
         help_options = [
-            parameter: (help instanceof String && help != "true") ? help : null,
             beforeText: before_text,
             afterText: after_text,
             command: command,
@@ -42,7 +41,10 @@ workflow UTILS_NFSCHEMA_PLUGIN {
             help_options << [parameters_schema: parameters_schema]
         }
 
-        log.info paramsHelp(help_options)
+        log.info paramsHelp(
+            help_options,
+            (help instanceof String && help != "true") ? help : "",
+        )
         exit 0
     }
 
@@ -56,7 +58,7 @@ workflow UTILS_NFSCHEMA_PLUGIN {
         summary_options << [parameters_schema: parameters_schema]
     }
     log.info before_text
-    log.info paramsSummaryLog(summary_options)
+    log.info paramsSummaryLog(summary_options, input_workflow)
     log.info after_text
 
     //
