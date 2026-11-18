@@ -14,9 +14,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#112](https://github.com/nf-core/metaboigniter/issues/112) Use logical `||` instead of bitwise `|` when filtering inputs by MS level
 - [#113](https://github.com/nf-core/metaboigniter/issues/113) Sample intensity columns of the exported tables follow the consensusXML map order instead of a random order that changed between runs
 - [#127](https://github.com/nf-core/metaboigniter/pull/127) SIRIUS and CSI:FingerID tables no longer contain a repeated header line as a data row for every compound after the first
+- [#130](https://github.com/nf-core/metaboigniter/issues/130) Requantification libraries use the proton mass rather than the hydrogen-atom mass when converting m/z to neutral mass
+- [#131](https://github.com/nf-core/metaboigniter/issues/131) Every requantification target gets an explicit RT window, centred on the midpoint of the RT range of the consensus feature's handles and `span + 2 x --requantification_rt_margin` wide, instead of FeatureFinderMetaboIdent's fixed default window
+- [#133](https://github.com/nf-core/metaboigniter/issues/133) Requantification no longer relinks the samples. Targets are the consensus features without a handle from a sample (matched by feature ID), and every accepted fill is inserted into exactly the consensus feature that requested it, so original detections, consensus IDs, positions, intensities and annotations are unchanged
+- Requantification no longer fails when FeatureFinderMetaboIdent finds no candidate at all for a sample's targets after a valid extraction. FeatureFinderMetaboIdent 3.6.0 reports this with exit status 8, which it also uses for other errors, so exit status 8 becomes an empty result only when the log shows exactly this zero-candidate outcome; exit status 8 with `Could not find any points for chromatogram` and every other error still stop the pipeline, so that extraction or configuration failures do not become silent missing values
+- Requantification no longer stops when a sample has no detected features. Its consensus column is identified by the feature map's unique ID and the MS run path recorded by the linker, and every consensus feature becomes a target for it. Like any sample, it still stops the pipeline at FeatureFinderMetaboIdent when the extraction itself fails (for example when its MS1 spectra are empty; see [Requantification](docs/usage.md#requantification))
+
+### `Added`
+
+- Hard quality control of requantified values: candidates are rejected when their metadata are malformed, an original feature of the same sample covers the signal, there is no MS1 peak at the apex, the elution model is not valid, too few scans around the apex have signal, or the signal is shared with another candidate. Rejected targets stay missing
+- `output_quantification_Linked_data_gapfilled.tsv` (gap-filled matrix), `requantification/Linked_data_gapfilled.consensusXML`, and the requantification mask, provenance (one row per requested sample and target) and summary tables in `TABLE_OUTPUT/`
+- `--requantification_rt_margin` (default 30 s) and `--requantification_min_apex_signal_fraction` (default 0.3; calibrated on the positive-mode nf-core test data only, see the known limitations in the usage documentation)
 
 ### `Changed`
 
+- With `--requantification`, adduct and isotope annotation now run before linking, as without requantification, and `output_quantification_Linked_data.tsv` is the observed matrix without fills; the gap-filled values are in `output_quantification_Linked_data_gapfilled.tsv`. Identification uses the observed consensus map, so MS2 spectra are never mapped onto fills
+- `--model_no_imputation_featurefindermetaboident_openms` now defaults to `true`: failed elution-model fits get intensity 0 instead of a regression estimate. These values were never used, and the imputation regression can fail on degenerate inputs
+- Requantification intermediates (libraries, FeatureFinderMetaboIdent output of about 160 MB per sample, candidate tables) are only published with `--save_intermeds`
+- The default `--detect_peak_width_featurefindermetaboident_openms 60` is unchanged. On the test data it leaves about 28 % of truly present features without a candidate; retuning is deferred
 - OpenMS and pyOpenMS updated from 3.0.0 / 2.9.1 to 3.6.0. Results change slightly because of upstream fixes in feature finding and linking (OpenMS [#10157](https://github.com/OpenMS/OpenMS/pull/10157), [#10225](https://github.com/OpenMS/OpenMS/pull/10225)). On the test data with identification and parallel linking, 99.5 % of consensus features are unchanged with identical intensities, consensus features with an `[M+H]+` adduct annotation go from 7,821 to 9,654, and requantified intensities move by a median of 0.4 %.
 - `FeatureFinderMetaboIdent` always receives `-EMGScoring:init_mom`, because OpenMS 3.6 changed its default to `true`; the pipeline default stays `false`
 - Template update to nf-core/tools 4.1.0: `nf-validation` replaced by `nf-schema`, `check_max()`/`--max_*` replaced by `process.resourceLimits`, CI moved to nf-test, minimum Nextflow version raised to 25.10.4
@@ -26,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Removed`
 
+- Requantification relinking (`PYOPENMS_SPLIT`, `PYOPENMS_RELOADMAPS`, `PYOPENMS_MERGE` and the second annotation and linking passes) with the `split.py`, `reloadmaps.py` and `merge.py` scripts
+- `requantification/output/` and `requantification_merged/` output folders
 - Unused nf-core `fastqc` module; FastQC is declared as a skipped template feature
 - Unused local modules (`MS2QUERY_EXPORT`, `MS2QUERY_MODELFULLTRAIN`, `OPENMS_GNPSEXPORT`, `OPENMS_IDMAPPER`, `OPENMS_IDMAPPERCONSENSUS`, `OPENMS_SIRIUSPARAMS`, `PYOPENMS_EXTRACTMAPPING`, `PYOPENMS_ISOMAPPING`, `PYOPENMS_REMOVEDUP`) and the `bin/` scripts only they used
 - `--hook_url`, `--max_cpus`, `--max_memory`, `--max_time` and the nf-validation `--validation*` parameters (dropped by the nf-core template)
