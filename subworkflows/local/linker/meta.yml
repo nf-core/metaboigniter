@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "LINKER"
+description: Links features across samples into a consensus map, optionally in parallel m/z ranges
+keywords:
+  - metabolomics
+  - linking
+  - consensus
+  - openms
+components:
+  - openms/featurelinkerunlabeledkd
+  - pyopenms/extractfeaturemz
+  - pyopenms/conctsv
+  - pyopenms/calculateboundries
+  - pyopenms/splitfeaturexml
+  - pyopenms/filemerger
+input:
+  - quantification_information:
+      type: channel
+      description: |
+        [ meta, featureXML, mzML ] per sample
+  - parallel_linking:
+      type: boolean
+      description: |
+        Split features into m/z ranges and link each range separately
+output:
+  - consensusxml_data:
+      type: channel
+      description: |
+        [ meta, consensusXML ] of linked features
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"

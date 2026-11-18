@@ -182,4 +182,6 @@ If you update images or graphics, follow the nf-core [style guidelines](https://
 
 ## Pipeline specific contribution guidelines
 
-<!-- TODO nf-core: Add any pipeline specific contribution guidelines here, such as coding styles, procedures, checklists etc. -->
+- Tool options are exposed as pipeline parameters named `<option>_<tool>_<package>`, for example `algorithm_common_noise_threshold_int_featurefindermetabo_openms`, and are passed to the tool through `ext.args` in `conf/modules.config`. Add new options to `nextflow.config`, `nextflow_schema.json` and `conf/modules.config` together.
+- Helper scripts in `bin/` run inside the module's pyOpenMS container, so they may only use packages that container provides.
+- When a change affects results, compare the output tables of `-profile test` before and after the change. Row order of the consensus tables is not stable between runs, because OpenMS assigns random feature IDs.

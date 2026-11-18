@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "QUANTIFICATION"
+description: Centroids spectra, detects features with OpenMS FeatureFinderMetabo and aligns retention times across samples
+keywords:
+  - metabolomics
+  - quantification
+  - feature detection
+  - alignment
+  - openms
+components:
+  - openms/peakpickerhires
+  - openms/featurefindermetabo
+  - openms/mapalignerposeclustering
+  - openms/mapalignerposeclusteringmzml
+  - openms/maprttransformer
+input:
+  - mzml_files:
+      type: channel
+      description: |
+        [ meta, mzML ] for all samples
+  - skip_centroiding:
+      type: boolean
+      description: |
+        Skip centroiding with PeakPickerHiRes
+  - ms2_collection_model:
+      type: string
+      description: |
+        separate when MS2 spectra come from separate files, paired when MS1 and MS2 are in the same files
+  - skip_alignment:
+      type: boolean
+      description: |
+        Skip retention time alignment
+output:
+  - quantified_features:
+      type: channel
+      description: |
+        [ meta, featureXML ] per MS1 sample
+  - quantificaiton_data:
+      type: channel
+      description: |
+        [ meta, mzML ] per MS1 sample, aligned when alignment runs
+  - mzml_files:
+      type: channel
+      description: |
+        [ meta, mzML ] for all samples, centroided and aligned when those steps run
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"

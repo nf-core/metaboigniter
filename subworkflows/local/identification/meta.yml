@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "IDENTIFICATION"
+description: Maps MS2 spectra to consensus features, writes SIRIUS and MS2Query inputs and runs the selected identification tools
+keywords:
+  - metabolomics
+  - identification
+  - ms2
+  - sirius
+  - ms2query
+components:
+  - openms/fileconverter
+  - pyopenms/msmapping
+  - openms/filefilter
+  - pyopenms/splitconsensus
+  - pyopenms/generatesearchparams
+  - pyopenms/generatesearchparamsunmapped
+  - pyopenms/conctsv
+  - general/mergefile
+  - ms2query
+  - sirius
+input:
+  - consensusxml_data:
+      type: channel
+      description: |
+        [ meta, consensusXML ] of linked features
+  - mzml_files:
+      type: channel
+      description: |
+        [ meta, mzML ] for all samples; MS2 and MS12 files are used, and indexed first if needed
+  - offline_model_ms2query:
+      type: boolean
+      description: |
+        Use MS2Query models from models_dir_ms2query instead of downloading them
+  - models_dir_ms2query:
+      type: string
+      description: |
+        Directory with MS2Query model files
+  - train_library_ms2query:
+      type: boolean
+      description: |
+        Train MS2Query models on library_path_ms2query
+  - library_path_ms2query:
+      type: string
+      description: |
+        MGF spectral library for MS2Query training
+  - polarity:
+      type: string
+      description: |
+        Ionisation mode, positive or negative
+  - split_consensus_parts:
+      type: integer
+      description: |
+        Number of parts the consensus map is split into for parallel processing
+  - run_umapped_spectra:
+      type: boolean
+      description: |
+        Also search MS2 spectra that did not map to a feature
+  - mgf_splitmgf_pyopenms:
+      type: integer
+      description: |
+        Number of chunks the MGF/MS files are split into
+  - sirius_split:
+      type: boolean
+      description: |
+        Run SIRIUS on each chunk separately
+  - run_ms2query:
+      type: boolean
+      description: |
+        Run MS2Query
+  - run_sirius:
+      type: boolean
+      description: |
+        Run SIRIUS
+output:
+  - sirius:
+      type: channel
+      description: |
+        [ meta, tsv ] SIRIUS results
+  - fingerid:
+      type: channel
+      description: |
+        [ meta, tsv ] CSI:FingerID results
+  - ms2query:
+      type: channel
+      description: |
+        [ meta, csv ] MS2Query results
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"

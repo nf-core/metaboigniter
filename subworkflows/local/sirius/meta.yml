@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "SIRIUS"
+description: Runs SIRIUS and optionally CSI:FingerID on SIRIUS .ms input files
+keywords:
+  - metabolomics
+  - identification
+  - sirius
+  - csi:fingerid
+components:
+  - sirius/search
+  - pyopenms/splitmgf
+  - pyopenms/conctsv
+input:
+  - ms_channel:
+      type: channel
+      description: |
+        [ meta, ms ] SIRIUS input files
+  - mgf_splitmgf_pyopenms:
+      type: integer
+      description: |
+        Number of chunks the .ms file is split into
+  - sirius_split:
+      type: boolean
+      description: |
+        Run SIRIUS on each chunk separately
+output:
+  - output_sirius:
+      type: channel
+      description: |
+        [ meta, tsv ] SIRIUS results
+  - output_fingerid:
+      type: channel
+      description: |
+        [ meta, tsv ] CSI:FingerID results
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"
