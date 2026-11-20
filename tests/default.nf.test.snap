@@ -1,0 +1,186 @@
+{
+    "-profile test": {
+        "content": [
+            {
+                "OPENMS_FEATUREFINDERMETABO": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_FEATURELINKERUNLABELEDKD": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_MAPALIGNERPOSECLUSTERING": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_MAPRTTRANSFORMER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_METABOLITEADDUCTDECHARGER": {
+                    "openms": "3.6.0"
+                },
+                "PYOPENMS_EXPORTQUANTIFICATION": {
+                    "pyopenms": "3.6.0"
+                },
+                "Workflow": {
+                    "nf-core/metaboigniter": "v2.1.0"
+                }
+            },
+            [
+                "TABLE_OUTPUT",
+                "TABLE_OUTPUT/output_quantification_Linked_data.tsv",
+                "alignment",
+                "alignment/output/X2_Rep1.featureXML",
+                "alignment/output/X2_Rep1.trafoXML",
+                "alignment/output/X3_Rep1.featureXML",
+                "alignment/output/X3_Rep1.trafoXML",
+                "alignment/output/X6_Rep1.featureXML",
+                "alignment/output/X6_Rep1.trafoXML",
+                "alignment_mzml",
+                "alignment_mzml/X2_Rep1",
+                "alignment_mzml/X2_Rep1/output/X2_Rep1.mzML",
+                "alignment_mzml/X3_Rep1",
+                "alignment_mzml/X3_Rep1/output/X3_Rep1.mzML",
+                "alignment_mzml/X6_Rep1",
+                "alignment_mzml/X6_Rep1/output/X6_Rep1.mzML",
+                "annotation",
+                "annotation/X2_Rep1",
+                "annotation/X2_Rep1/output/X2_Rep1.featureXML",
+                "annotation/X3_Rep1",
+                "annotation/X3_Rep1/output/X3_Rep1.featureXML",
+                "annotation/X6_Rep1",
+                "annotation/X6_Rep1/output/X6_Rep1.featureXML",
+                "linker",
+                "linker/output/Linked_data.consensusXML",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_metaboigniter_software_mqc_versions.yml",
+                "quantification",
+                "quantification/X2_Rep1",
+                "quantification/X2_Rep1/output/X2_Rep1.featureXML",
+                "quantification/X3_Rep1",
+                "quantification/X3_Rep1/output/X3_Rep1.featureXML",
+                "quantification/X6_Rep1",
+                "quantification/X6_Rep1/output/X6_Rep1.featureXML"
+            ],
+            [
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ],
+            "id\tcharge\tRT\tmz\tquality\tX2_Rep1.mzML\tX3_Rep1.mzML\tX6_Rep1.mzML\tadduct\tfeature_ids",
+            57377
+        ],
+        "timestamp": "2026-10-15T06:15:27.236664",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.0"
+        }
+    },
+    "-profile test --identification": {
+        "content": [
+            {
+                "GENERAL_MERGEMGFFILE": {
+                    "pyopenms": "3.6.0"
+                },
+                "GENERAL_MERGEMSFILE": {
+                    "pyopenms": "3.6.0"
+                },
+                "OPENMS_FEATUREFINDERMETABO": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_FEATURELINKERUNLABELEDKD": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_FILEFILTER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_MAPALIGNERPOSECLUSTERINGMZML": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_METABOLITEADDUCTDECHARGER": {
+                    "openms": "3.6.0"
+                },
+                "PYOPENMS_C13DETECTION": {
+                    "pyopenms": "3.6.0"
+                },
+                "PYOPENMS_CONCTSV_UNMAPPED": {
+                    "pyopenms": "3.6.0"
+                },
+                "PYOPENMS_EXPORTIDENTIFICATION": {
+                    "pyopenms": "3.6.0"
+                },
+                "PYOPENMS_GENERATESEARCHPARAMS": {
+                    "pyopenms": "3.6.0"
+                },
+                "PYOPENMS_MSMAPPING": {
+                    "pyopenms": "3.6.0"
+                },
+                "PYOPENMS_SPLITCONSENSUS": {
+                    "pyopenms": "3.6.0"
+                },
+                "Workflow": {
+                    "nf-core/metaboigniter": "v2.1.0"
+                }
+            },
+            [
+                "TABLE_OUTPUT",
+                "TABLE_OUTPUT/output_quantification_Linked_data.tsv",
+                "alignment_mzml",
+                "alignment_mzml/output/Pilot_MS_Control_2_peakpicked.mzML",
+                "alignment_mzml/output/Pilot_MS_Control_2_peakpicked.trafoXML",
+                "alignment_mzml/output/Pilot_MS_Pool_2_peakpicked.mzML",
+                "alignment_mzml/output/Pilot_MS_Pool_2_peakpicked.trafoXML",
+                "alignment_mzml/output/X2_Rep1.mzML",
+                "alignment_mzml/output/X2_Rep1.trafoXML",
+                "alignment_mzml/output/X3_Rep1.mzML",
+                "alignment_mzml/output/X3_Rep1.trafoXML",
+                "alignment_mzml/output/X6_Rep1.mzML",
+                "alignment_mzml/output/X6_Rep1.trafoXML",
+                "annotation",
+                "annotation/X2_Rep1",
+                "annotation/X2_Rep1/output/X2_Rep1.featureXML",
+                "annotation/X3_Rep1",
+                "annotation/X3_Rep1/output/X3_Rep1.featureXML",
+                "annotation/X6_Rep1",
+                "annotation/X6_Rep1/output/X6_Rep1.featureXML",
+                "linker",
+                "linker/output/Linked_data.consensusXML",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_metaboigniter_software_mqc_versions.yml",
+                "quantification",
+                "quantification/X2_Rep1",
+                "quantification/X2_Rep1/output/X2_Rep1.featureXML",
+                "quantification/X3_Rep1",
+                "quantification/X3_Rep1/output/X3_Rep1.featureXML",
+                "quantification/X6_Rep1",
+                "quantification/X6_Rep1/output/X6_Rep1.featureXML"
+            ],
+            [
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ],
+            "id\tcharge\tRT\tmz\tquality\tX2_Rep1.mzML\tX3_Rep1.mzML\tX6_Rep1.mzML\tadduct\tfeature_ids",
+            57405
+        ],
+        "timestamp": "2026-10-15T06:35:50.61366",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.0"
+        }
+    }
+}

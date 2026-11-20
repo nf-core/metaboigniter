@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "REQUANTIFICATION"
+description: |
+  Fills missing values of the authoritative consensus map by targeted extraction with OpenMS
+  FeatureFinderMetaboIdent. Candidates pass hard quality checks, and every accepted fill is
+  inserted into exactly the consensus feature that requested it; the consensus map is never relinked.
+keywords:
+  - metabolomics
+  - requantification
+  - gap filling
+  - missing values
+  - openms
+components:
+  - pyopenms/libbuilder
+  - openms/featurefindermetaboident
+  - pyopenms/requantqc
+  - pyopenms/gapfillconsensus
+input:
+  - consensusxml_data:
+      type: channel
+      description: |
+        [ meta, consensusXML ] authoritative consensus map produced by the linker (one item)
+  - quantification_information:
+      type: channel
+      description: |
+        [ meta, featureXML, mzML ] per sample: the (annotated) feature map that was linked and the
+        (aligned) mzML file it was detected in
+output:
+  - consensusxml:
+      type: channel
+      description: |
+        [ meta, consensusXML ] gap-filled copy of the consensus map
+  - mask:
+      type: channel
+      description: |
+        [ meta, TSV ] per consensus feature and sample: observed, requantified or the reason the value is missing
+  - provenance:
+      type: channel
+      description: |
+        [ meta, TSV ] one row per requested sample and target with the outcome and the FeatureFinderMetaboIdent evidence
+  - summary:
+      type: channel
+      description: |
+        [ meta, TSV ] per-sample counts of targets, accepted fills and rejection reasons
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"

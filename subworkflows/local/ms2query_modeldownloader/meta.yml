@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "MS2QUERY_MODELDOWNLOADER"
+description: Downloads the MS2Query model files for the given polarity
+keywords:
+  - metabolomics
+  - ms2query
+  - download
+components:
+  - ms2query/downloadmodel
+input:
+  - polarity:
+      type: string
+      description: |
+        Ionisation mode, positive or negative
+output:
+  - model_files:
+      type: channel
+      description: |
+        MS2Query model files
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"

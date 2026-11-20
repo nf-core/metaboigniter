@@ -2,11 +2,9 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import os
-import numpy as np
-import pandas as pd
-import pyopenms as py
 import argparse
+
+import pyopenms as py
 
 
 def get_tol_window(val, tol, ppm):
@@ -20,10 +18,14 @@ def get_tol_window(val, tol, ppm):
     return (left, right)
 
 
-def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm, rt_min, rt_max):
+def get_highest_intensity_peak_in_mz_range(
+    test_mz, spectrum, tolerance, ppm, rt_min, rt_max
+):
     tolerance_window = get_tol_window(test_mz, tolerance, ppm)
 
-    peaks_in_window = spectrum.get2DPeakDataLong(rt_min, rt_max, tolerance_window[0], tolerance_window[1])
+    peaks_in_window = spectrum.get2DPeakDataLong(
+        rt_min, rt_max, tolerance_window[0], tolerance_window[1], 1
+    )
 
     if len(peaks_in_window[0]) == 0:
         return []
@@ -32,12 +34,16 @@ def get_highest_intensity_peak_in_mz_range(test_mz, spectrum, tolerance, ppm, rt
     return [peaks_in_window[1][max_element], peaks_in_window[2][max_element]]
 
 
-def extract_precursor_isotope_pattern(precursor_mz, precursor_spectrum, iterations, charge, tolerance, rt_min, rt_max):
+def extract_precursor_isotope_pattern(
+    precursor_mz, precursor_spectrum, iterations, charge, tolerance, rt_min, rt_max
+):
     isotopes = []
     ppm = True
     isotope_tolerance = 1
 
-    peak = get_highest_intensity_peak_in_mz_range(precursor_mz, precursor_spectrum, tolerance, ppm, rt_min, rt_max)
+    peak = get_highest_intensity_peak_in_mz_range(
+        precursor_mz, precursor_spectrum, tolerance, ppm, rt_min, rt_max
+    )
     if len(peak) > 0:
         isotopes.append(peak)
 
@@ -49,7 +55,12 @@ def extract_precursor_isotope_pattern(precursor_mz, precursor_spectrum, iteratio
 
     while len(peak) > 0 and iterations > 0:
         peak = get_highest_intensity_peak_in_mz_range(
-            peak[0] + massdiff, precursor_spectrum, isotope_tolerance, ppm, rt_min, rt_max
+            peak[0] + massdiff,
+            precursor_spectrum,
+            isotope_tolerance,
+            ppm,
+            rt_min,
+            rt_max,
         )
         if len(peak) > 0:
             isotopes.append(peak)
@@ -67,8 +78,15 @@ parser.add_argument("--input_mzml", help="Path to consensus XML file")
 parser.add_argument("--ppm", type=float, default=10, help="ppm for isotope detection")
 parser.add_argument("--mz", type=float, default=6.5, help="ppm for isotope detection")
 parser.add_argument("--rt", type=float, default=3, help="RT for isotope detection")
-parser.add_argument("--iterations", type=int, default=3, help="RT for isotope detection")
-parser.add_argument("--polarity", choices=["positive", "negative"], default="positive", help="Polarity of the data")
+parser.add_argument(
+    "--iterations", type=int, default=3, help="RT for isotope detection"
+)
+parser.add_argument(
+    "--polarity",
+    choices=["positive", "negative"],
+    default="positive",
+    help="Polarity of the data",
+)
 
 parser.add_argument("--output_feature", help="Path to consensus XML file")
 
@@ -85,12 +103,14 @@ py.FeatureXMLFile().load(args.input_feature, features)
 exp = py.MSExperiment()
 py.MzMLFile().load(args.input_mzml, exp)
 
-exp.updateRanges(1)
-max_rt_exp = exp.getMaxRT()
-min_rt_exp = exp.getMinRT()
+# pyopenms 3 dropped updateRanges(ms_level); the per-level ranges come from the range manager
+exp.updateRanges()
+ms1_ranges = exp.spectrumRanges().byMSLevel(1)
+max_rt_exp = ms1_ranges.getMaxRT()
+min_rt_exp = ms1_ranges.getMinRT()
 
-max_mz_exp = exp.getMaxMZ()
-min_mz_exp = exp.getMinMZ()
+max_mz_exp = ms1_ranges.getMaxMZ()
+min_mz_exp = ms1_ranges.getMinMZ()
 
 
 empty_protein_id = py.ProteinIdentification()
@@ -121,13 +141,15 @@ for i in range(features.size()):
     elif args.polarity == "negative" and charge_f == 0:
         charge_f = -1
 
-    rt_max = max_rt_exp if (rt + args.rt) > max_rt_exp else (rt + args.rt)
-    rt_min = min_rt_exp if (rt - args.rt) < min_rt_exp else (rt - args.rt)
+    rt_max = min(rt + args.rt, max_rt_exp)
+    rt_min = max(rt - args.rt, min_rt_exp)
 
-    mz_max = max_mz_exp if (mz + args.mz) > max_mz_exp else (mz + args.mz)
-    mz_min = min_mz_exp if (mz - args.mz) < min_mz_exp else (mz - args.mz)
+    mz_max = min(mz + args.mz, max_mz_exp)
+    mz_min = max(mz - args.mz, min_mz_exp)
 
-    iso = extract_precursor_isotope_pattern(mz, exp, args.iterations, charge_f, args.ppm, rt_min, rt_max)
+    iso = extract_precursor_isotope_pattern(
+        mz, exp, args.iterations, charge_f, args.ppm, rt_min, rt_max
+    )
 
     peptide = py.PeptideIdentification()
     peptide.setRT(rt)
@@ -135,7 +157,7 @@ for i in range(features.size()):
     iso_mz = []
     iso_in = []
     if len(iso) > 0:
-        iso_mz = list([float(mz[0]) for mz in iso])
+        iso_mz = [float(mz[0]) for mz in iso]
         iso_in = [float(inte[1]) for inte in iso]
 
     peptide.setMetaValue("isotope_calcdist_mz", iso_mz)
@@ -155,7 +177,7 @@ for i in range(features.size()):
 
     peptide.setIdentifier(empty_protein_id.getIdentifier())
 
-    sl_feature.setPeptideIdentifications([peptide])
+    sl_feature.setPeptideIdentifications(py.PeptideIdentificationList([peptide]))
     features[i] = sl_feature
 
 py.FeatureXMLFile().store(args.output_feature, features)
