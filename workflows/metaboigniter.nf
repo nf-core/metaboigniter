@@ -6,12 +6,11 @@
 include { REQUANTIFICATION                                  } from '../subworkflows/local/requantification/main'
 include { QUANTIFICATION                                    } from '../subworkflows/local/quantification/main'
 include { ANNOTATION                                        } from '../subworkflows/local/annotation/main'
-include { ANNOTATION as ANNOTATION_REQ                      } from '../subworkflows/local/annotation/main'
 include { LINKER                                            } from '../subworkflows/local/linker/main'
-include { LINKER as LINKER_REQ                              } from '../subworkflows/local/linker/main'
 include { IDENTIFICATION                                    } from '../subworkflows/local/identification/main'
 include { PYOPENMS_EXPORT as PYOPENMS_EXPORTQUANTIFICATION  } from '../modules/local/pyopenms_export/main'
 include { PYOPENMS_EXPORT as PYOPENMS_EXPORTIDENTIFICATION  } from '../modules/local/pyopenms_export/main'
+include { PYOPENMS_EXPORT as PYOPENMS_EXPORTGAPFILLED       } from '../modules/local/pyopenms_export/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline/main'
@@ -48,39 +47,33 @@ workflow METABOIGNITER {
     def quantified_features = QUANTIFICATION.out.quantified_features
     def quantificaiton_data = QUANTIFICATION.out.quantificaiton_data
     mzml_files = QUANTIFICATION.out.mzml_files
-    def quantification_information = quantified_features.join(quantificaiton_data,by:[0])
+    def quantification_information = quantified_features.join(quantificaiton_data,by:[0],failOnMismatch:true,failOnDuplicate:true)
     ch_versions = ch_versions.mix(QUANTIFICATION.out.versions)
 
     //
-    // SUBWORKFLOW: If requantification is goint to be performed, skip annotation
+    // SUBWORKFLOW: Annotate adducts (and C13 isotopes for identification) before linking
     //
-    if(!params.requantification){
-        ANNOTATION(quantification_information,params.skip_adduct_detection,!params.identification)
-        quantification_information=ANNOTATION.out.quantification_information
-        ch_versions = ch_versions.mix(ANNOTATION.out.versions)
-    }
+    ANNOTATION(quantification_information,params.skip_adduct_detection,!params.identification)
+    quantification_information=ANNOTATION.out.quantification_information
+    ch_versions = ch_versions.mix(ANNOTATION.out.versions)
 
     //
-    // SUBWORKFLOW: Link the features across runs
+    // SUBWORKFLOW: Link the features across runs. This consensus map is authoritative:
+    // requantification never relinks it and only adds gap fills to a separate copy.
     //
     LINKER(quantification_information,params.parallel_linking)
     def consensusxml_data=LINKER.out.consensusxml_data
     ch_versions = ch_versions.mix(LINKER.out.versions)
 
     //
-    // SUBWORKFLOW: requantification and annotation and also linking
+    // SUBWORKFLOW: Targeted gap filling of missing values in the authoritative consensus map
     //
     if(params.requantification){
-        REQUANTIFICATION(consensusxml_data,quantified_features,quantificaiton_data)
+        REQUANTIFICATION(consensusxml_data,quantification_information)
         ch_versions = ch_versions.mix(REQUANTIFICATION.out.versions)
 
-        quantification_information = REQUANTIFICATION.out.quantified_features.join(quantificaiton_data,by:[0])
-        ANNOTATION_REQ(quantification_information,params.skip_adduct_detection,!params.identification)
-        ch_versions = ch_versions.mix(ANNOTATION_REQ.out.versions)
-
-        LINKER_REQ(ANNOTATION_REQ.out.quantification_information,params.parallel_linking)
-        consensusxml_data=LINKER_REQ.out.consensusxml_data
-        ch_versions = ch_versions.mix(LINKER_REQ.out.versions)
+        PYOPENMS_EXPORTGAPFILLED(REQUANTIFICATION.out.consensusxml,[[],[]],[[],[]],[[],[]])
+        ch_versions = ch_versions.mix(PYOPENMS_EXPORTGAPFILLED.out.versions)
     }
 
     //

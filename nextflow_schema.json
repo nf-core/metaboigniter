@@ -885,6 +885,23 @@
             "description": "",
             "default": "",
             "properties": {
+                "requantification_rt_margin": {
+                    "type": "number",
+                    "default": 30.0,
+                    "exclusiveMinimum": 0,
+                    "hidden": false,
+                    "description": "Seconds added on each side of the retention-time span of a consensus feature's linked samples to form its requantification target window.",
+                    "help_text": "Each requantification target is extracted in the window centred on the midpoint of the minimum and maximum retention time of the consensus feature's handles, with width span + 2 x margin. The default equals the linker's `link:rt_tol` (30 s). The value must be greater than zero."
+                },
+                "requantification_min_apex_signal_fraction": {
+                    "type": "number",
+                    "default": 0.3,
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "hidden": false,
+                    "description": "Minimum fraction of MS1 scans within 3 s of a requantified peak apex that must contain signal for the fill to be accepted.",
+                    "help_text": "The default 0.3 was calibrated on one positive-ionisation, three-sample dataset (the nf-core test data, about 3.7 Hz MS1 scan rate), where it kept 99.6% of true fills and removed 56% of decoy fills. The 97.6% precision of accepted fills is an internal leave-one-out/decoy control estimate on that dataset, not an independent validation. Scan rate, chromatography and instrument may change the appropriate threshold. No real negative-mode data were used for calibration; the synthetic negative-mode tests only validate code paths and charge handling."
+                },
                 "extract_mz_window_featurefindermetaboident_openms": {
                     "type": "number",
                     "minimum": 0.0,
@@ -895,7 +912,7 @@
                     "type": "number",
                     "minimum": 0.0,
                     "hidden": true,
-                    "description": "RT window size (in sec.) for chromatogram extraction. If set, this parameter takes precedence over 'extract:rt_quantile'."
+                    "description": "RT window size (in sec.) that FeatureFinderMetaboIdent uses for targets without an explicit RT range and as the limit when choosing the best candidate per target; 0 means 4 x 'detect:peak_width'. Requantification targets always carry an explicit RT range (see 'requantification_rt_margin')."
                 },
                 "extract_n_isotopes_featurefindermetaboident_openms": {
                     "type": "integer",
@@ -948,6 +965,7 @@
                 },
                 "model_no_imputation_featurefindermetaboident_openms": {
                     "type": "boolean",
+                    "default": true,
                     "hidden": true,
                     "description": "If fitting the elution model fails for a feature, set its intensity to zero instead of imputing a value from the initial intensity estimate"
                 },
