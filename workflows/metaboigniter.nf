@@ -46,7 +46,7 @@ workflow METABOIGNITER {
     QUANTIFICATION(mzml_files,params.skip_centroiding,params.ms2_collection_model,params.skip_alignment)
     def quantified_features = QUANTIFICATION.out.quantified_features
     def quantificaiton_data = QUANTIFICATION.out.quantificaiton_data
-    mzml_files = QUANTIFICATION.out.mzml_files
+    def identification_mzml = QUANTIFICATION.out.identification_mzml
     def quantification_information = quantified_features.join(quantificaiton_data,by:[0],failOnMismatch:true,failOnDuplicate:true)
     ch_versions = ch_versions.mix(QUANTIFICATION.out.versions)
 
@@ -89,7 +89,7 @@ workflow METABOIGNITER {
     //
     if(params.identification){
         IDENTIFICATION(consensusxml_data,
-        mzml_files,
+        identification_mzml,
         params.offline_model_ms2query,
         params.models_dir_ms2query,
         params.train_library_ms2query,

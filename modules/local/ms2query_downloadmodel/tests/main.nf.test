@@ -1,0 +1,36 @@
+// MS2QUERY_DOWNLOADMODEL under the pipeline's noclobber shell, without network access:
+// the model list has a header and no URLs, and nextflow.config supplies a placeholder model file.
+nextflow_process {
+
+    name "Test Process MS2QUERY_DOWNLOADMODEL"
+    script "../main.nf"
+    process "MS2QUERY_DOWNLOADMODEL"
+    config "./nextflow.config"
+    tag "modules"
+    tag "modules_local"
+    tag "ms2query_downloadmodel"
+
+    test("no URLs, noclobber shell - versions.yml written once with the wget version") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of('url').collectFile(name: 'no_models.csv', newLine: true)
+                """
+            }
+        }
+
+        then {
+            def versions_file = path(process.out.versions[0])
+            def versions = versions_file.yaml
+            assertAll(
+                { assert process.success },
+                { assert process.out.model_files.size() == 1 },
+                { assert file(process.out.model_files[0]).name == 'offline_placeholder.txt' },
+                { assert versions.keySet() == ['MS2QUERY_DOWNLOADMODEL'] as Set },
+                { assert versions.MS2QUERY_DOWNLOADMODEL.keySet() == ['wget'] as Set },
+                { assert versions_file.readLines().count { l -> l ==~ /\s+wget: \d+(\.\d+)+/ } == 1 }
+            )
+        }
+    }
+}

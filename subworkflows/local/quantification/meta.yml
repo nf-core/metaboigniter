@@ -42,7 +42,16 @@ output:
   - mzml_files:
       type: channel
       description: |
-        [ meta, mzML ] for all samples, centroided and aligned when those steps run
+        [ meta, mzML ] for all samples, centroided when centroiding runs and aligned
+        when separate-mode alignment runs. Not RT-transformed in paired mode
+  - identification_mzml:
+      type: channel
+      description: |
+        [ meta, mzML ] for MS2 and MS12 samples, used for MS2 mapping. Centroided when
+        centroiding runs. MS12 files are in the retention time frame of quantified_features.
+        Separate mode with alignment: the aligned files. Paired mode with alignment:
+        MS12 files RT-transformed by MapRTTransformer, MS2 files unchanged.
+        Without alignment: the unaligned files
   - versions:
       type: file
       description: |
