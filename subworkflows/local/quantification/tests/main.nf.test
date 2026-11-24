@@ -1,0 +1,96 @@
+// In paired mode with alignment, MS2 spectra must be mapped in the aligned retention time
+// frame of the features, so identification has to receive the MapRTTransformer output of the
+// MS12 files, not the centroided files before alignment. level=MS2 identification files pass through unchanged.
+// The X2/X3 test files contain only MS1 spectra: labelled MS12 here, they check the routing of files.
+nextflow_workflow {
+
+    name "Test Subworkflow QUANTIFICATION"
+    script "../main.nf"
+    workflow "QUANTIFICATION"
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "quantification"
+
+    test("paired, alignment - identification_mzml holds the RT-transformed MS12 files") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                def base = params.pipelines_testdata_base_path + 'metaboigniter/'
+                input[0] = channel.of(
+                    [ [ id: 'X2_Rep1', sample_name: 'test1', level: 'MS12', type: 'normal' ],
+                      file(base + 'mzML_POS_Quant/X2_Rep1.mzML', checkIfExists: true) ],
+                    [ [ id: 'X3_Rep1', sample_name: 'test2', level: 'MS12', type: 'normal' ],
+                      file(base + 'mzML_POS_Quant/X3_Rep1.mzML', checkIfExists: true) ],
+                    [ [ id: 'Pilot_MS_Control_2_peakpicked', sample_name: 'ID1', level: 'MS2', type: 'normal' ],
+                      file(base + 'mzML_POS_ID/Pilot_MS_Control_2_peakpicked.mzML', checkIfExists: true) ]
+                )
+                input[1] = false     // skip_centroiding
+                input[2] = 'paired'  // ms2_collection_model
+                input[3] = false     // skip_alignment
+                """
+            }
+        }
+
+        then {
+            def md5ById = { entries -> entries.collectEntries { e -> [ (e[0].id): path(e[1]).md5 ] } }
+            def identification = workflow.out.identification_mzml
+            def ms12 = identification.findAll { e -> e[0].level == 'MS12' }
+            def ms2 = identification.findAll { e -> e[0].level == 'MS2' }
+            def transformed = md5ById(workflow.out.quantificaiton_data)
+            def untransformed = md5ById(workflow.out.mzml_files)
+            assertAll(
+                { assert workflow.success },
+                { assert identification.size() == 3 },
+                { assert identification.collect { e -> e[0].id }.toSet().size() == 3 },
+                { assert ms12.collect { e -> e[0].id }.toSet() == [ 'X2_Rep1', 'X3_Rep1' ] as Set },
+                { assert ms2.collect { e -> e[0].id } == [ 'Pilot_MS_Control_2_peakpicked' ] },
+                // MS12: the RT-transformed files that quantification uses, not the files before alignment
+                { assert ms12.every { e -> path(e[1]).md5 == transformed[e[0].id] } },
+                { assert ms12.every { e -> path(e[1]).md5 != untransformed[e[0].id] } },
+                // level=MS2 identification file: no transformation exists, so it passes through unchanged
+                { assert ms2.every { e -> path(e[1]).md5 == untransformed[e[0].id] } }
+            )
+        }
+    }
+
+    test("paired, skip_alignment - identification_mzml holds the unaligned files") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                def base = params.pipelines_testdata_base_path + 'metaboigniter/'
+                input[0] = channel.of(
+                    [ [ id: 'X2_Rep1', sample_name: 'test1', level: 'MS12', type: 'normal' ],
+                      file(base + 'mzML_POS_Quant/X2_Rep1.mzML', checkIfExists: true) ],
+                    [ [ id: 'X3_Rep1', sample_name: 'test2', level: 'MS1', type: 'normal' ],
+                      file(base + 'mzML_POS_Quant/X3_Rep1.mzML', checkIfExists: true) ],
+                    [ [ id: 'Pilot_MS_Control_2_peakpicked', sample_name: 'ID1', level: 'MS2', type: 'normal' ],
+                      file(base + 'mzML_POS_ID/Pilot_MS_Control_2_peakpicked.mzML', checkIfExists: true) ]
+                )
+                input[1] = true      // skip_centroiding
+                input[2] = 'paired'  // ms2_collection_model
+                input[3] = true      // skip_alignment
+                """
+            }
+        }
+
+        then {
+            def nameById = { entries -> entries.collectEntries { e -> [ (e[0].id): file(e[1]).toString() ] } }
+            def identification = nameById(workflow.out.identification_mzml)
+            def untransformed = nameById(workflow.out.mzml_files)
+            assertAll(
+                { assert workflow.success },
+                // MS2 and MS12 files only, exactly the files that went in (no centroiding, no alignment)
+                { assert identification.keySet() == [ 'X2_Rep1', 'Pilot_MS_Control_2_peakpicked' ] as Set },
+                { assert identification.every { id, f -> f == untransformed[id] } }
+            )
+        }
+    }
+}

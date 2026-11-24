@@ -43,6 +43,10 @@ if(ms2_collection_model=="separate" && !skip_alignment)
 
 quantificaiton_data=mzml_files.filter{meta,_file->meta.level == "MS1" || meta.level == "MS12"}
 
+// MS2 spectra must be mapped in the same retention time frame as the features.
+// Without paired-mode alignment these are the files above (aligned in separate mode).
+identification_mzml=mzml_files.filter{meta,_file->meta.level == "MS2" || meta.level == "MS12"}
+
 OPENMS_FEATUREFINDERMETABO(quantificaiton_data)
 
 quantified_features=OPENMS_FEATUREFINDERMETABO.out.featurexml
@@ -71,6 +75,11 @@ tuple(mzml.baseName, mzml)}).map{ entry -> entry[1..4]}
     quantificaiton_data=OPENMS_MAPRTTRANSFORMER.out.mzml
     quantified_features=combined_data.map{ entry -> entry[0,1]}
 
+    // Paired mode aligns the features, so identification must use the RT-transformed
+    // MS12 files. level=MS2 identification files have no transformation and pass through unchanged.
+    identification_mzml=mzml_files.filter{meta,_file->meta.level == "MS2"}
+        .mix(OPENMS_MAPRTTRANSFORMER.out.mzml.filter{meta,_file->meta.level == "MS12"})
+
 
 
 }
@@ -80,6 +89,7 @@ tuple(mzml.baseName, mzml)}).map{ entry -> entry[1..4]}
     quantified_features = quantified_features
     quantificaiton_data = quantificaiton_data
     mzml_files = mzml_files
+    identification_mzml = identification_mzml
     versions       = ch_versions
 
 }
