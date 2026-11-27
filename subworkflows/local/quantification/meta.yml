@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "QUANTIFICATION"
+description: Centroids spectra, detects features with OpenMS FeatureFinderMetabo and aligns retention times across samples
+keywords:
+  - metabolomics
+  - quantification
+  - feature detection
+  - alignment
+  - openms
+components:
+  - openms/peakpickerhires
+  - openms/featurefindermetabo
+  - openms/mapalignerposeclustering
+  - openms/mapalignerposeclusteringmzml
+  - openms/maprttransformer
+input:
+  - mzml_files:
+      type: channel
+      description: |
+        [ meta, mzML ] for all samples
+  - skip_centroiding:
+      type: boolean
+      description: |
+        Skip centroiding with PeakPickerHiRes
+  - ms2_collection_model:
+      type: string
+      description: |
+        separate when MS2 spectra come from separate files, paired when MS1 and MS2 are in the same files
+  - skip_alignment:
+      type: boolean
+      description: |
+        Skip retention time alignment
+output:
+  - quantified_features:
+      type: channel
+      description: |
+        [ meta, featureXML ] per MS1 sample
+  - quantificaiton_data:
+      type: channel
+      description: |
+        [ meta, mzML ] per MS1 sample, aligned when alignment runs
+  - mzml_files:
+      type: channel
+      description: |
+        [ meta, mzML ] for all samples, centroided when centroiding runs and aligned
+        when separate-mode alignment runs. Not RT-transformed in paired mode
+  - identification_mzml:
+      type: channel
+      description: |
+        [ meta, mzML ] for MS2 and MS12 samples, used for MS2 mapping. Centroided when
+        centroiding runs. MS12 files are in the retention time frame of quantified_features.
+        Separate mode with alignment: the aligned files. Paired mode with alignment:
+        MS12 files RT-transformed by MapRTTransformer, MS2 files unchanged.
+        Without alignment: the unaligned files
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+authors:
+  - "@PayamEmami"
+maintainers:
+  - "@PayamEmami"

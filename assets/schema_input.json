@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/metaboigniter/master/assets/schema_input.json",
     "title": "nf-core/metaboigniter pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
@@ -10,7 +10,6 @@
             "sample": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "unique": true,
                 "errorMessage": "sample name must be provided and cannot contain spaces",
                 "meta": ["sample_name"]
             },
@@ -21,19 +20,20 @@
                 "meta": ["type"]
             },
             "level": {
-                "errorMessage": "level must be one of MS1,MS2 or MS12",
+                "type": "string",
                 "enum": ["MS1", "MS2", "MS12"],
+                "errorMessage": "level must be one of MS1,MS2 or MS12",
                 "meta": ["level"]
             },
             "msfile": {
                 "type": "string",
-                "pattern": "^\\S+\\.mzML",
-                "unique": true,
                 "format": "file-path",
                 "exists": true,
+                "pattern": "^\\S+\\.mzML$",
                 "errorMessage": "mzML file must be provided (msfile), cannot contain spaces and must have extension '.mzML'"
             }
         },
         "required": ["sample", "type", "level", "msfile"]
-    }
+    },
+    "allOf": [{ "uniqueEntries": ["sample"] }, { "uniqueEntries": ["msfile"] }]
 }

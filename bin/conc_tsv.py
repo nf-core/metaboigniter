@@ -3,9 +3,10 @@
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
 import argparse
-import pandas as pd
 import glob
 import os
+
+import pandas as pd
 
 
 def adjust_indices_and_concatenate(input_dir, output_file, in_type, output_type):
@@ -45,22 +46,34 @@ def adjust_indices_and_concatenate(input_dir, output_file, in_type, output_type)
 
 def main():
     # Create the parser
-    parser = argparse.ArgumentParser(description="Adjust indices in TSV files and concatenate them.")
+    parser = argparse.ArgumentParser(
+        description="Adjust indices in TSV files and concatenate them."
+    )
 
     # Add the arguments
     parser.add_argument(
-        "--input_dir", metavar="input_dir", type=str, help="the path to the input directory containing the TSV files"
+        "--input_dir",
+        metavar="input_dir",
+        type=str,
+        help="the path to the input directory containing the TSV files",
     )
 
     parser.add_argument("--input_type", type=str, help="tsv or csv")
     parser.add_argument("--output_type", type=str, help="tsv or csv")
 
-    parser.add_argument("--output_file", metavar="output_file", type=str, help="the path to the final output TSV file")
+    parser.add_argument(
+        "--output_file",
+        metavar="output_file",
+        type=str,
+        help="the path to the final output TSV file",
+    )
 
     # Execute the parse_args() method
     args = parser.parse_args()
 
-    adjust_indices_and_concatenate(args.input_dir, args.output_file, args.input_type, args.output_type)
+    adjust_indices_and_concatenate(
+        args.input_dir, args.output_file, args.input_type, args.output_type
+    )
 
 
 if __name__ == "__main__":

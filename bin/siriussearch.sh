@@ -232,11 +232,17 @@ tab=$(printf '\t')
         local ext_n_id=$(echo $spc_info | cut -d ' ' -f 3)
 
         if [ -f "$full_path" ]; then
+            # Every candidates file starts with its own header line; keep
+            # only the first one so the others are not written as data rows
+            local is_first_line=true
             while IFS= read -r line || [ -n "$line" ]; do
-                if [ "$header_set" = false ]; then
-                    header="Feature_ID${tab}Scan_Index${tab}Scan_ID${tab}Spectra_RT${tab}Spectra_mz${tab}Best_Feature_ID${tab}$line"
-                    all_lines+=("$header")
-                    header_set=true
+                if [ "$is_first_line" = true ]; then
+                    is_first_line=false
+                    if [ "$header_set" = false ]; then
+                        header="Feature_ID${tab}Scan_Index${tab}Scan_ID${tab}Spectra_RT${tab}Spectra_mz${tab}Best_Feature_ID${tab}$line"
+                        all_lines+=("$header")
+                        header_set=true
+                    fi
                 else
                     new_line="$feature_id${tab}$scan_index${tab}$scan_id${tab}$ext_rt${tab}$ext_mz${tab}$ext_n_id${tab}$line"
                     all_lines+=("$new_line")

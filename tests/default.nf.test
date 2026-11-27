@@ -1,0 +1,139 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+
+    test("-profile test") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            // stable_path: All files + folders in ${params.outdir}/ with a stable path (including file name)
+            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_content: All files in ${params.outdir}/ with stable content
+            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // OpenMS assigns random feature IDs, so the table rows have no stable order or content hash;
+            // its header (sample columns in consensusXML map order, #113) and row count are stable
+            def quantification_table = path("$outputDir/TABLE_OUTPUT/output_quantification_Linked_data.tsv").readLines()
+            assert workflow.success
+            assertAll(
+                { assert snapshot(
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_metaboigniter_software_mqc_versions.yml"),
+                    // All stable path name, with a relative path
+                    stable_path,
+                    // All files with stable contents
+                    stable_content,
+                    // Header and number of rows of the quantification table
+                    quantification_table[0],
+                    quantification_table.size()
+                ).match() },
+                // Content without the random-UID columns, shared with the requantification tests below
+                { assert RequantTestUtils.stableMd5(quantification_table) == RequantTestUtils.REAL_OBSERVED_MD5 }
+            )
+        }
+    }
+
+    test("-profile test --identification") {
+
+        when {
+            params {
+                outdir               = "$outputDir"
+                identification       = true
+                ms2_collection_model = "separate"
+            }
+        }
+
+        then {
+            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            def identification_table = path("$outputDir/TABLE_OUTPUT/output_quantification_Linked_data.tsv").readLines()
+            assert workflow.success
+            assertAll(
+                { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_metaboigniter_software_mqc_versions.yml"),
+                    stable_path,
+                    stable_content,
+                    identification_table[0],
+                    identification_table.size()
+                ).match() },
+                { assert RequantTestUtils.stableMd5(identification_table) == RequantTestUtils.REAL_IDENTIFICATION_MD5 }
+            )
+        }
+    }
+
+    test("-profile test --requantification --parallel_linking") {
+
+        when {
+            params {
+                outdir           = "$outputDir"
+                requantification = true
+                parallel_linking = true
+            }
+        }
+
+        then {
+            def observed  = path("$outputDir/${RequantTestUtils.OBSERVED}").readLines()
+            def gapfilled = path("$outputDir/${RequantTestUtils.GAPFILLED}").readLines()
+            def mask      = path("$outputDir/${RequantTestUtils.MASK}").readLines()
+            def summary   = RequantTestUtils.tsv(path("$outputDir/${RequantTestUtils.SUMMARY}").readLines())
+            def check     = RequantTestUtils.crossCheck(observed, gapfilled, mask)
+            def samples   = ['X2_Rep1', 'X3_Rep1', 'X6_Rep1']
+            assertAll(
+                { assert workflow.success },
+                // observed matrix == the matrix of a run without requantification (parallel linking)
+                { assert RequantTestUtils.stableMd5(observed) == RequantTestUtils.REAL_OBSERVED_PARALLEL_MD5 },
+                { assert RequantTestUtils.header(mask) == ['consensus_index', 'consensus_uid', 'X2_Rep1.mzML', 'X3_Rep1.mzML', 'X6_Rep1.mzML'] },
+                { assert mask.size() == observed.size() },
+                // every mask state agrees with the observed and gap-filled matrices
+                { assert check[0] == [] },
+                { assert check[1]['requantified'] > 0 },
+                { assert summary.collect { it.sample } == samples + ['all'] },
+                // per sample: every row is observed, filled or still missing; the "all" row sums the samples
+                { assert summary.findAll { it.sample != 'all' }.every { r -> (r.observed as int) + (r.accepted as int) + (r.missing_after as int) == (r.consensus_rows as int) } },
+                { assert summary.find { it.sample == 'all' }.with { (it.observed as int) + (it.accepted as int) + (it.missing_after as int) } == samples.size() * (observed.size() - 1) },
+                { assert summary.every { r -> (r.accepted as int) + (r.rejected as int) + (r.no_candidate as int) == (r.targets_requested as int) } },
+                { assert summary.find { it.sample == 'all' }.accepted as int == check[1]['requantified'] },
+                { assert summary.find { it.sample == 'all' }.observed as int == check[1]['observed'] },
+                { assert path("$outputDir/requantification/Linked_data_gapfilled.consensusXML").exists() },
+                // fills pinned: counts per rejection reason and the gap-filled matrix content
+                { assert RequantTestUtils.summaryAll(path("$outputDir/${RequantTestUtils.SUMMARY}").readLines()) == RequantTestUtils.REAL_SUMMARY_ALL_PARALLEL },
+                { assert RequantTestUtils.stableMd5(gapfilled) == RequantTestUtils.REAL_GAPFILLED_PARALLEL_MD5 }
+            )
+        }
+    }
+
+    test("-profile test --requantification --identification") {
+
+        when {
+            params {
+                outdir               = "$outputDir"
+                requantification     = true
+                identification       = true
+                ms2_collection_model = "separate"
+            }
+        }
+
+        then {
+            def observed  = path("$outputDir/${RequantTestUtils.OBSERVED}").readLines()
+            def gapfilled = path("$outputDir/${RequantTestUtils.GAPFILLED}").readLines()
+            def mask      = path("$outputDir/${RequantTestUtils.MASK}").readLines()
+            def check     = RequantTestUtils.crossCheck(observed, gapfilled, mask)
+            assertAll(
+                { assert workflow.success },
+                // identification runs on the authoritative consensus: the identification table
+                // is the one of "-profile test --identification"
+                { assert RequantTestUtils.stableMd5(observed) == RequantTestUtils.REAL_IDENTIFICATION_MD5 },
+                { assert check[0] == [] },
+                { assert check[1]['requantified'] > 0 },
+                { assert RequantTestUtils.summaryAll(path("$outputDir/${RequantTestUtils.SUMMARY}").readLines()) == RequantTestUtils.REAL_SUMMARY_ALL_IDENTIFICATION },
+                { assert RequantTestUtils.stableMd5(gapfilled) == RequantTestUtils.REAL_GAPFILLED_IDENTIFICATION_MD5 }
+            )
+        }
+    }
+}

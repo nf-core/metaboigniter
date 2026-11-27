@@ -2,30 +2,52 @@
 
 # Written by Payam Emami and Axel Walter and released under the MIT license.
 
-import pandas as pd
-import numpy as np
-from pyopenms import *
-import sys
-import csv
 import argparse
+import csv
+
+from pyopenms import *
+
+
+def intensity_columns_in_map_order(consensus_map):
+    """pyopenms names the intensity columns after the map file names but
+    orders them through a set, so the order changes from run to run. The
+    consensusXML map index is the order users expect (#113)."""
+    column_headers = consensus_map.getColumnHeaders()
+    file_names = [
+        column_headers[map_index].filename for map_index in sorted(column_headers)
+    ]
+    return list(dict.fromkeys(file_names))
 
 
 def cleanup(input_cmap, output_tsv):
     consensus_map = ConsensusMap()
     ConsensusXMLFile().load(input_cmap, consensus_map)
-    df = consensus_map.get_df()
+    df = consensus_map.to_df()
+    # pyopenms 3 names the retention time column "rt"; keep the "RT" header of earlier releases
+    df = df.rename(columns={"rt": "RT"})
+
+    intensity_columns = intensity_columns_in_map_order(consensus_map)
+    metadata_columns = [
+        column for column in df.columns if column not in intensity_columns
+    ]
+    df = df[metadata_columns + intensity_columns]
+
     for cf in consensus_map:
         if cf.metaValueExists("best ion"):
             df["adduct"] = [cf.getMetaValue("best ion") for cf in consensus_map]
             break
-    df["feature_ids"] = [[handle.getUniqueId() for handle in cf.getFeatureList()] for cf in consensus_map]
+    df["feature_ids"] = [
+        [handle.getUniqueId() for handle in cf.getFeatureList()] for cf in consensus_map
+    ]
     df = df.reset_index()
     df = df.drop(columns=["sequence"])
     df.to_csv(output_tsv, sep="\t", index=False)
     return df
 
 
-def modify_tsv_column(input_file, output_file, old_column_name, new_column_name, new_position):
+def modify_tsv_column(
+    input_file, output_file, old_column_name, new_column_name, new_position
+):
     """
     Modify a TSV file: Rename a column and change its position.
 
@@ -68,7 +90,9 @@ def modify_tsv_column(input_file, output_file, old_column_name, new_column_name,
 
 def main():
     # Create the parser
-    parser = argparse.ArgumentParser(description="Output tsv files and fix identification columns")
+    parser = argparse.ArgumentParser(
+        description="Output tsv files and fix identification columns"
+    )
 
     # Add the arguments
     parser.add_argument(
@@ -84,7 +108,9 @@ def main():
     parser.add_argument("--sirius_file", type=str, help="tsv or csv")
     parser.add_argument("--finger_file", type=str, help="tsv or csv")
     parser.add_argument("--ms2query_file", type=str, help="tsv or csv")
-    parser.add_argument("--output", type=str, help="the path to the final output TSV file")
+    parser.add_argument(
+        "--output", type=str, help="the path to the final output TSV file"
+    )
 
     # Execute the parse_args() method
     args = parser.parse_args()
