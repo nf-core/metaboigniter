@@ -1,5 +1,4 @@
-// MS2QUERY_DOWNLOADMODEL under the pipeline's noclobber shell, without network access:
-// the model list has a header and no URLs, and nextflow.config supplies a placeholder model file.
+// MS2QUERY_DOWNLOADMODEL under the pipeline's noclobber shell, without network access.
 nextflow_process {
 
     name "Test Process MS2QUERY_DOWNLOADMODEL"
@@ -10,12 +9,14 @@ nextflow_process {
     tag "modules_local"
     tag "ms2query_downloadmodel"
 
-    test("no URLs, noclobber shell - versions.yml written once with the wget version") {
+    test("download with matching checksum and size") {
 
         when {
             process {
                 """
-                input[0] = channel.of('url').collectFile(name: 'no_models.csv', newLine: true)
+                input[0] = channel.of(
+                    'url,md5,size\\nhttps://example.invalid/valid.bin,3e068f30faba000ef8a8c729174d5822,20\\n'
+                ).collectFile(name: 'valid_models.csv', newLine: false)
                 """
             }
         }
@@ -26,10 +27,75 @@ nextflow_process {
             assertAll(
                 { assert process.success },
                 { assert process.out.model_files.size() == 1 },
-                { assert file(process.out.model_files[0]).name == 'offline_placeholder.txt' },
+                { assert file(process.out.model_files[0]).name == 'valid.bin' },
+                { assert path(process.out.model_files[0]).md5 == '3e068f30faba000ef8a8c729174d5822' },
                 { assert versions.keySet() == ['MS2QUERY_DOWNLOADMODEL'] as Set },
                 { assert versions.MS2QUERY_DOWNLOADMODEL.keySet() == ['wget'] as Set },
                 { assert versions_file.readLines().count { l -> l ==~ /\s+wget: \d+(\.\d+)+/ } == 1 }
+            )
+        }
+    }
+
+    test("retry after a corrupt download") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(
+                    'url,md5,size\\nhttps://example.invalid/retry.bin,3e068f30faba000ef8a8c729174d5822,20\\n'
+                ).collectFile(name: 'retry_models.csv', newLine: false)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.model_files.size() == 1 },
+                { assert file(process.out.model_files[0]).name == 'retry.bin' },
+                { assert path(process.out.model_files[0]).md5 == '3e068f30faba000ef8a8c729174d5822' }
+            )
+        }
+    }
+
+    test("retry after a transport failure") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(
+                    'url,md5,size\\nhttps://example.invalid/transport-retry.bin,3e068f30faba000ef8a8c729174d5822,20\\n'
+                ).collectFile(name: 'transport_retry_models.csv', newLine: false)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.model_files.size() == 1 },
+                { assert file(process.out.model_files[0]).name == 'transport-retry.bin' },
+                { assert path(process.out.model_files[0]).md5 == '3e068f30faba000ef8a8c729174d5822' }
+            )
+        }
+    }
+
+    test("fail after repeated checksum mismatches") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(
+                    'url,md5,size\\nhttps://example.invalid/always-corrupt.bin,3e068f30faba000ef8a8c729174d5822,20\\n'
+                ).collectFile(name: 'corrupt_models.csv', newLine: false)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.failed },
+                { assert process.errorReport.contains('Failed to download and verify always-corrupt.bin after 3 attempts') }
             )
         }
     }
